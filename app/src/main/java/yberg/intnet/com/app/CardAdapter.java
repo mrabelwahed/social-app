@@ -103,8 +103,8 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.ViewHolder> {
 
         Post post = mPosts.get(position);
 
-        holder.mUsername.setText(post.getUsername());
-        holder.mName.setText(post.getName());
+        holder.mUsername.setText(post.getUser().getUsername());
+        holder.mName.setText(post.getUser().getName());
         holder.mPosted.setText(post.getPosted());
         holder.mText.setText(post.getText());
     }

@@ -5,15 +5,25 @@ package yberg.intnet.com.app;
  */
 public class User {
 
-    private int image;
-    private String username, firstName, lastName, email;
+    private int uid;
+    private String username, firstName, lastName, name, email, image;
 
-    public User(String username, String firstName, String lastName, String email, int image) {
+    public User(int uid, String username, String firstName, String lastName, String email, String image) {
         this.username = username;
         this.firstName = firstName;
         this.lastName = lastName;
+        this.name = firstName + " " + lastName;
         this.email = email;
         this.image = image;
+    }
+
+    public User(int uid, String username, String name, String image) {
+        this(uid, username, "", "", "", image);
+        this.name = name;
+    }
+
+    public void setUid(int uid) {
+        this.uid = uid;
     }
 
     public void setUsername(String username) {
@@ -32,8 +42,12 @@ public class User {
         this.email = email;
     }
 
-    public void setImage(int image) {
+    public void setImage(String image) {
         this.image = image;
+    }
+
+    public int getUid() {
+        return uid;
     }
 
     public String getUsername() {
@@ -49,14 +63,14 @@ public class User {
     }
 
     public String getName() {
-        return firstName + " " + lastName;
+        return name;
     }
 
     public String getEmail() {
         return email;
     }
 
-    public int getImage() {
+    public String getImage() {
         return image;
     }
 }

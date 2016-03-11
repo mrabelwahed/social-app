@@ -35,20 +35,20 @@ public class MainActivity extends AppCompatActivity
 
     private SearchView searchView;
     private MenuItem menuItem;
+    private TextView headerUsername, headerName;
 
     private ArrayList<Post> posts;
     private RequestQueue requestQueue;
-
-    private TextView headerUsername, headerName;
 
     private Fragment feedFragment, profileFragment;
 
     private int uid;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_feed);
+        setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(true);
@@ -95,7 +95,7 @@ public class MainActivity extends AppCompatActivity
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.feed_bar_menu, menu);
 
-        menuItem = menu.findItem( R.id.action_search);
+        menuItem = menu.findItem(R.id.action_search);
         searchView = (SearchView) menuItem.getActionView();
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
@@ -132,17 +132,21 @@ public class MainActivity extends AppCompatActivity
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
-        int id = item.getItemId();
-
-        if (id == R.id.nav_home) {
-            FragmentManager fragmentManager = getSupportFragmentManager();
-            fragmentManager.beginTransaction().replace(R.id.fragment_container, new FeedFragment()).commit();
-        } else if (id == R.id.nav_profile) {
-            FragmentManager fragmentManager = getSupportFragmentManager();
-            fragmentManager.beginTransaction().replace(R.id.fragment_container, new ProfileFragment()).commit();
-        } else if (id == R.id.nav_sign_out) {
-            startActivity(new Intent(MainActivity.this, LoginActivity.class));
-            finish();
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        switch (item.getItemId()) {
+            case R.id.nav_home:
+                fragmentManager.beginTransaction().replace(R.id.fragment_container, new FeedFragment()).commit();
+                break;
+            case R.id.nav_profile:
+                fragmentManager.beginTransaction().replace(R.id.fragment_container, new ProfileFragment()).commit();
+                break;
+            case R.id.search:
+                findViewById(R.id.action_search).performClick();
+                break;
+            case R.id.nav_sign_out:
+                startActivity(new Intent(MainActivity.this, LoginActivity.class));
+                finish();
+                break;
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -153,5 +157,9 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onFragmentInteraction(Uri uri) {
 
+    }
+
+    public int getUid() {
+        return uid;
     }
 }

@@ -137,12 +137,12 @@ public class RegisterActivity extends AppCompatActivity {
                     }
                 }
         );
-        firstName.addTextChangedListener(new GenericTextWatcher(firstName));
-        lastName.addTextChangedListener(new GenericTextWatcher(lastName));
-        username.addTextChangedListener(new GenericTextWatcher(username));
-        email.addTextChangedListener(new GenericTextWatcher(email));
-        password.addTextChangedListener(new GenericTextWatcher(password));
-        passwordConfirm.addTextChangedListener(new GenericTextWatcher(passwordConfirm));
+        firstName.addTextChangedListener(new LoginActivity.GenericTextWatcher(firstName));
+        lastName.addTextChangedListener(new LoginActivity.GenericTextWatcher(lastName));
+        username.addTextChangedListener(new LoginActivity.GenericTextWatcher(username));
+        email.addTextChangedListener(new LoginActivity.GenericTextWatcher(email));
+        password.addTextChangedListener(new LoginActivity.GenericTextWatcher(password));
+        passwordConfirm.addTextChangedListener(new LoginActivity.GenericTextWatcher(passwordConfirm));
 
         EditText.OnEditorActionListener editorActionListener = new EditText.OnEditorActionListener() {
 
@@ -165,6 +165,12 @@ public class RegisterActivity extends AppCompatActivity {
                     }
                 }
         );
+    }
+
+    @Override
+    public void onBackPressed() {
+        startActivity(new Intent(RegisterActivity.this, LoginActivity.class));
+        finish();
     }
 
     /**
@@ -198,30 +204,5 @@ public class RegisterActivity extends AppCompatActivity {
             return true;
         }
         return false;
-    }
-
-    @Override
-    public void onBackPressed() {
-        startActivity(new Intent(RegisterActivity.this, LoginActivity.class));
-        finish();
-    }
-
-    private class GenericTextWatcher implements TextWatcher {
-
-        private EditText editText;
-        private GenericTextWatcher(EditText editText) {
-            this.editText = editText;
-        }
-
-        @Override
-        public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-        @Override
-        public void onTextChanged(CharSequence s, int start, int count, int after) {}
-        @Override
-        public void afterTextChanged(Editable editable) {
-            editText.setBackgroundResource(R.drawable.rounded_corners);
-            ViewGroup parent = (ViewGroup) editText.getParent();
-            ((ImageView) parent.getChildAt(parent.indexOfChild(editText) + 1)).setColorFilter(null);
-        }
     }
 }

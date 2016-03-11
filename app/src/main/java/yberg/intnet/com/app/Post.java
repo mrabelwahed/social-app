@@ -5,23 +5,20 @@ package yberg.intnet.com.app;
  */
 public class Post {
 
-    private int image;
-    private String username, name, text, posted;
+    int pid;
+    private User user;
+    private String text, posted, image;
 
-    public Post(String username, String name, String text, String posted, int image) {
-        this.username = "@" + username;
-        this.name = name;
+    public Post(int pid, User user, String text, String posted, String image) {
+        this.pid = pid;
+        this.user = user;
         this.text = text;
         this.posted = posted;
         this.image = image;
     }
 
-    public void setUsername(String username) {
-        this.username = "@" + username;
-    }
-
-    public void setName(String name) {
-        this.name = name;
+    public void setUser(User user) {
+        this.user = user;
     }
 
     public void setText(String text) {
@@ -32,16 +29,12 @@ public class Post {
         this.posted = posted;
     }
 
-    public void setImage(int image) {
+    public void setImage(String image) {
         this.image = image;
     }
 
-    public String getUsername() {
-        return username;
-    }
-
-    public String getName() {
-        return name;
+    public User getUser() {
+        return user;
     }
 
     public String getText() {
@@ -52,7 +45,7 @@ public class Post {
         return posted;
     }
 
-    public int getImage() {
+    public String getImage() {
         return image;
     }
 }

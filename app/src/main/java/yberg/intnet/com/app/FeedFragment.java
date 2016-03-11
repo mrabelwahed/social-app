@@ -172,12 +172,20 @@ public class FeedFragment extends Fragment {
                     posts.clear();
                     for (int i = 0; i < jsonResponse.length(); i++) {
                         // Add the contents of each json object to the posts array list
-                        JSONObject obj = jsonResponse.getJSONObject(i);
-                        posts.add(new Post(obj.getString("username"),
-                                obj.getString("name"),
-                                obj.getString("text"),
-                                obj.getString("posted"),
-                                0));
+                        JSONObject post = jsonResponse.getJSONObject(i);
+                        JSONObject user = post.getJSONObject("user");
+                        posts.add(new Post(
+                                        post.getInt("pid"),
+                                        new User(
+                                                user.getInt("uid"),
+                                                user.getString("username"),
+                                                user.getString("name"),
+                                                user.getString("image")
+                                        ),
+                                        post.getString("text"),
+                                        post.getString("posted"),
+                                        post.getString("image"))
+                        );
                     }
                     mAdapter.notifyDataSetChanged();
                 } catch (JSONException e) {
@@ -194,7 +202,7 @@ public class FeedFragment extends Fragment {
             @Override
             protected Map<String, String> getParams() throws AuthFailureError {
                 Map<String, String> parameters = new HashMap<>();
-                parameters.put("uid", ""+64);
+                parameters.put("uid", "" + ((MainActivity) getActivity()).getUid());
                 return parameters;
             }
         };

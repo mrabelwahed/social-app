@@ -192,10 +192,10 @@ public class LoginActivity extends AppCompatActivity {
         return false;
     }
 
-    private class GenericTextWatcher implements TextWatcher{
+    public static class GenericTextWatcher implements TextWatcher {
 
-        private EditText editText;
-        private GenericTextWatcher(EditText editText) {
+        public EditText editText;
+        public GenericTextWatcher(EditText editText) {
             this.editText = editText;
         }
 
