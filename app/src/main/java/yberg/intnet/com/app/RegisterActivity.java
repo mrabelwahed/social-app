@@ -1,6 +1,8 @@
 package yberg.intnet.com.app;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.LightingColorFilter;
 import android.os.Bundle;
@@ -40,6 +42,7 @@ public class RegisterActivity extends AppCompatActivity {
     private CoordinatorLayout coordinatorLayout;
     private ProgressBar spinner;
     private RequestQueue requestQueue;
+    private ImageView check;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,7 +54,8 @@ public class RegisterActivity extends AppCompatActivity {
         spinner = (ProgressBar) findViewById(R.id.progressBar);
         spinner.getIndeterminateDrawable().setColorFilter(
                 new LightingColorFilter(0xFF000000, Color.WHITE));
-        spinner.setVisibility(View.INVISIBLE);
+
+        check = (ImageView) findViewById(R.id.login_ok);
 
         coordinatorLayout = (CoordinatorLayout) findViewById(R.id.coordinator_layout);
 
@@ -101,6 +105,16 @@ public class RegisterActivity extends AppCompatActivity {
                                     try {
                                         JSONObject jsonResponse = new JSONObject(response);
                                         if (jsonResponse.getBoolean("success")) {
+
+                                            check.setVisibility(View.VISIBLE);
+
+                                            SharedPreferences.Editor editor = RegisterActivity.this.getSharedPreferences(
+                                                    "com.intnet.yberg", Context.MODE_PRIVATE
+                                            ).edit();
+                                            editor.clear();
+                                            editor.putString("username", username.getText().toString());
+                                            editor.apply();
+
                                             startActivity(new Intent(RegisterActivity.this, LoginActivity.class));
                                             finish();
                                         } else {
@@ -165,6 +179,8 @@ public class RegisterActivity extends AppCompatActivity {
                     }
                 }
         );
+
+        setEnabled(true);
     }
 
     @Override

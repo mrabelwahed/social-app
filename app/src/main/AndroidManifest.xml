@@ -15,7 +15,7 @@
             android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name="yberg.intnet.com.app.LoginActivity"
+            android:name=".LoginActivity"
             android:label="@string/title_activity_login"
             android:theme="@style/AppTheme"
             android:windowSoftInputMode="adjustResize">
@@ -26,9 +26,13 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="yberg.intnet.com.app.RegisterActivity"
+            android:name=".RegisterActivity"
             android:label="@string/title_activity_register"
             android:theme="@style/AppTheme" />
+        <activity
+            android:name=".PostActivity"
+            android:label="@string/title_activity_post"
+            android:theme="@style/AppTheme"></activity>
     </application>
 
 </manifest>

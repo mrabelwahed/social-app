@@ -41,6 +41,7 @@ public class LoginActivity extends AppCompatActivity {
     private CoordinatorLayout coordinatorLayout;
     private ProgressBar spinner;
     private RequestQueue requestQueue;
+    private ImageView check;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,7 +51,8 @@ public class LoginActivity extends AppCompatActivity {
         spinner = (ProgressBar) findViewById(R.id.progressBar);
         spinner.getIndeterminateDrawable().setColorFilter(
                 new LightingColorFilter(0xFF000000, Color.WHITE));
-        spinner.setVisibility(View.INVISIBLE);
+
+        check = (ImageView) findViewById(R.id.login_ok);
 
         coordinatorLayout = (CoordinatorLayout) findViewById(R.id.coordinator_layout);
 
@@ -85,9 +87,12 @@ public class LoginActivity extends AppCompatActivity {
 
                             @Override
                             public void onResponse(String response) {
+                                System.out.println("response: " + response);
                                 try {
                                     JSONObject jsonResponse = new JSONObject(response);
                                     if (jsonResponse.getBoolean("success")) {
+
+                                        check.setVisibility(View.VISIBLE);
 
                                         JSONObject user = jsonResponse.getJSONObject("user");
 
@@ -123,6 +128,9 @@ public class LoginActivity extends AppCompatActivity {
                                 parameters.put("username", username.getText().toString());
                                 parameters.put("password", password.getText().toString());
 
+                                System.out.println("Sending " + username.getText().toString() + ", " +
+                                        password.getText().toString() + " to " + Database.LOGIN_URL);
+
                                 return parameters;
                             }
                         };
@@ -155,8 +163,10 @@ public class LoginActivity extends AppCompatActivity {
                 }
         );
 
-        //password.setText("");
-        //loginButton.performClick();
+        setEnabled(true);
+
+        password.setText("123");
+        loginButton.performClick();
     }
 
     /**

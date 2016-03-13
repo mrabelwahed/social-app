@@ -1,15 +1,19 @@
 package yberg.intnet.com.app;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
@@ -53,6 +57,7 @@ public class ProfileFragment extends Fragment {
     private RecyclerView.LayoutManager mLayoutManager;
     private ArrayList<Post> posts;
     private RequestQueue requestQueue;
+    private SwipeRefreshLayout mSwipeRefreshLayout;
 
     public ProfileFragment() {
         // Required empty public constructor
@@ -83,21 +88,28 @@ public class ProfileFragment extends Fragment {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
+        requestQueue = Volley.newRequestQueue(getContext().getApplicationContext());
+
+        updateProfile();
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
+        ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle("Profile");
+
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_profile, container, false);
 
-        final SwipeRefreshLayout mSwipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_refresh);
+        mSwipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_refresh);
+        mSwipeRefreshLayout.setColorSchemeColors(ContextCompat.getColor(getContext(), R.color.colorAccent));
         mSwipeRefreshLayout.setOnRefreshListener(
                 new SwipeRefreshLayout.OnRefreshListener() {
                     @Override
                     public void onRefresh() {
                         mSwipeRefreshLayout.setRefreshing(true);
-                        updateFeed();
+                        updateProfile();
                         mSwipeRefreshLayout.setRefreshing(false);
                     }
                 }
@@ -117,7 +129,7 @@ public class ProfileFragment extends Fragment {
 
         posts = new ArrayList<>();
 
-        mAdapter = new CardAdapter(posts);
+        mAdapter = new CardAdapter(getActivity(), posts, true);
         mRecyclerView.setAdapter(mAdapter);
 
         return view;
@@ -162,30 +174,13 @@ public class ProfileFragment extends Fragment {
         void onFragmentInteraction(Uri uri);
     }
 
-    public void updateFeed() {
+    public void updateProfile() {
         StringRequest getFeedRequest = new StringRequest(Request.Method.POST, Database.FEED_URL, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
                 try {
                     JSONArray jsonResponse = new JSONArray(response);
-                    posts.clear();
-                    for (int i = 0; i < jsonResponse.length(); i++) {
-                        // Add the contents of each json object to the posts array list
-                        JSONObject post = jsonResponse.getJSONObject(i);
-                        JSONObject user = post.getJSONObject("user");
-                        posts.add(new Post(
-                                        post.getInt("pid"),
-                                        new User(
-                                                user.getInt("uid"),
-                                                user.getString("username"),
-                                                user.getString("name"),
-                                                user.getString("image")
-                                        ),
-                                        post.getString("text"),
-                                        post.getString("posted"),
-                                        post.getString("image"))
-                        );
-                    }
+
                     mAdapter.notifyDataSetChanged();
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -201,7 +196,7 @@ public class ProfileFragment extends Fragment {
             @Override
             protected Map<String, String> getParams() throws AuthFailureError {
                 Map<String, String> parameters = new HashMap<>();
-                parameters.put("uid", ""+64);
+                parameters.put("", "");
                 return parameters;
             }
         };

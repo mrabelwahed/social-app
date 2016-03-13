@@ -1,10 +1,13 @@
 package yberg.intnet.com.app;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -93,10 +96,14 @@ public class FeedFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
+        ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle("Start");
+
         // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_profile, container, false);
+        View view = inflater.inflate(R.layout.fragment_feed, container, false);
 
         mSwipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_refresh);
+        mSwipeRefreshLayout.setColorSchemeColors(ContextCompat.getColor(getContext(), R.color.colorAccent));
         mSwipeRefreshLayout.setOnRefreshListener(
                 new SwipeRefreshLayout.OnRefreshListener() {
                     @Override
@@ -118,7 +125,7 @@ public class FeedFragment extends Fragment {
         mLayoutManager = new LinearLayoutManager(getContext());
         mRecyclerView.setLayoutManager(mLayoutManager);
 
-        mAdapter = new CardAdapter(posts);
+        mAdapter = new CardAdapter(getActivity(), posts, true);
         mRecyclerView.setAdapter(mAdapter);
 
         return view;
@@ -168,26 +175,32 @@ public class FeedFragment extends Fragment {
             @Override
             public void onResponse(String response) {
                 try {
-                    JSONArray jsonResponse = new JSONArray(response);
-                    posts.clear();
-                    for (int i = 0; i < jsonResponse.length(); i++) {
-                        // Add the contents of each json object to the posts array list
-                        JSONObject post = jsonResponse.getJSONObject(i);
-                        JSONObject user = post.getJSONObject("user");
-                        posts.add(new Post(
-                                        post.getInt("pid"),
-                                        new User(
-                                                user.getInt("uid"),
-                                                user.getString("username"),
-                                                user.getString("name"),
-                                                user.getString("image")
-                                        ),
-                                        post.getString("text"),
-                                        post.getString("posted"),
-                                        post.getString("image"))
-                        );
+                    JSONObject jsonResponse = new JSONObject(response);
+                    if (jsonResponse.getBoolean("success")) {
+                        posts.clear();
+                        JSONArray feed = jsonResponse.getJSONArray("feed");
+                        for (int i = 0; i < feed.length(); i++) {
+                            // Add the contents of each json object to the posts array list
+                            JSONObject post = feed.getJSONObject(i);
+                            JSONObject user = post.getJSONObject("user");
+                            posts.add(new Post(
+                                            post.getInt("pid"),
+                                            new User(
+                                                    user.getInt("uid"),
+                                                    user.getString("username"),
+                                                    user.getString("name"),
+                                                    user.getString("image")
+                                            ),
+                                            post.getString("text"),
+                                            post.getString("posted"),
+                                            post.getInt("comments"),
+                                            post.getInt("upvotes"),
+                                            post.getInt("downvotes"),
+                                            post.getString("image"))
+                            );
+                        }
+                        mAdapter.notifyDataSetChanged();
                     }
-                    mAdapter.notifyDataSetChanged();
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -202,6 +215,7 @@ public class FeedFragment extends Fragment {
             @Override
             protected Map<String, String> getParams() throws AuthFailureError {
                 Map<String, String> parameters = new HashMap<>();
+                parameters.put("uid", "" + ((MainActivity) getActivity()).getUid());
                 parameters.put("uid", "" + ((MainActivity) getActivity()).getUid());
                 return parameters;
             }

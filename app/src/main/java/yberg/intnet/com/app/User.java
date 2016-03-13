@@ -1,9 +1,11 @@
 package yberg.intnet.com.app;
 
+import java.io.Serializable;
+
 /**
  * Created by Viktor on 2016-03-10.
  */
-public class User {
+public class User implements Serializable {
 
     private int uid;
     private String username, firstName, lastName, name, email, image;

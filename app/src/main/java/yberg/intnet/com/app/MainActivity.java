@@ -12,7 +12,6 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
@@ -20,25 +19,14 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
-import com.android.volley.RequestQueue;
-
-import java.util.ArrayList;
-
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
         ProfileFragment.OnFragmentInteractionListener,
         FeedFragment.OnFragmentInteractionListener {
 
-    private RecyclerView mRecyclerView;
-    private RecyclerView.Adapter mAdapter;
-    private RecyclerView.LayoutManager mLayoutManager;
-
     private SearchView searchView;
     private MenuItem menuItem;
     private TextView headerUsername, headerName;
-
-    private ArrayList<Post> posts;
-    private RequestQueue requestQueue;
 
     private Fragment feedFragment, profileFragment;
 
@@ -49,9 +37,10 @@ public class MainActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(true);
+
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -77,7 +66,7 @@ public class MainActivity extends AppCompatActivity
         uid = prefs.getInt("uid", -1);
 
         FragmentManager fragmentManager = getSupportFragmentManager();
-        fragmentManager.beginTransaction().replace(R.id.fragment_container, feedFragment).commit();
+        fragmentManager.beginTransaction().replace(R.id.fragment_view, feedFragment).commit();
     }
 
     @Override
@@ -135,13 +124,10 @@ public class MainActivity extends AppCompatActivity
         FragmentManager fragmentManager = getSupportFragmentManager();
         switch (item.getItemId()) {
             case R.id.nav_home:
-                fragmentManager.beginTransaction().replace(R.id.fragment_container, new FeedFragment()).commit();
+                fragmentManager.beginTransaction().replace(R.id.fragment_view, new FeedFragment()).commit();
                 break;
             case R.id.nav_profile:
-                fragmentManager.beginTransaction().replace(R.id.fragment_container, new ProfileFragment()).commit();
-                break;
-            case R.id.search:
-                findViewById(R.id.action_search).performClick();
+                fragmentManager.beginTransaction().replace(R.id.fragment_view, new ProfileFragment()).commit();
                 break;
             case R.id.nav_sign_out:
                 startActivity(new Intent(MainActivity.this, LoginActivity.class));

@@ -23,7 +23,7 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <LinearLayout
+            <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
@@ -36,15 +36,18 @@
                     android:src="@drawable/owncloud"/>
 
                 <LinearLayout
+                    android:id="@+id/post_info"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical">
+                    android:orientation="vertical"
+                    android:layout_alignParentTop="true"
+                    android:layout_toEndOf="@+id/image"
+                    android:layout_marginLeft="16dp">
 
                     <LinearLayout
                         android:id="@+id/user"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginLeft="16dp">
+                        android:layout_height="wrap_content">
 
                         <TextView
                             android:id="@+id/username"
@@ -53,7 +56,8 @@
                             android:layout_gravity="center_vertical"
                             android:textStyle="italic"
                             android:text="\@jdoe"
-                            android:textColor="@color/colorTextSecondary" />
+                            android:textColor="@color/colorTextSecondary"
+                            android:layout_marginRight="8dp" />
 
                         <TextView
                             android:id="@+id/name"
@@ -61,44 +65,58 @@
                             android:layout_height="wrap_content"
                             android:layout_gravity="center_vertical"
                             android:text="John Doe"
-                            android:layout_marginLeft="8dp"
-                            android:textColor="@color/colorTextSecondary" />
+                            android:textColor="@color/colorTextSecondary"
+                            android:paddingRight="30dp" />
 
                     </LinearLayout>
 
                     <LinearLayout
-                        android:id="@+id/info"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginLeft="16dp">
+                        android:layout_marginTop="4dp">
+
+                        <ImageView
+                            android:layout_width="12dp"
+                            android:layout_height="12dp"
+                            android:src="@drawable/time"
+                            android:tint="@color/colorDivider"
+                            android:layout_gravity="center_vertical" />
 
                         <TextView
                             android:id="@+id/time"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="2 minutes ago"
-                            android:textColor="@color/colorTextSecondary" />
+                            android:textColor="@color/colorTextSecondary"
+                            android:layout_marginLeft="4dp" />
 
                     </LinearLayout>
 
                 </LinearLayout>
 
-            </LinearLayout>
+                <ImageView
+                    android:id="@+id/close_button"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:src="@drawable/close"
+                    android:layout_alignParentTop="true"
+                    android:layout_alignParentEnd="true"
+                    android:tint="@color/colorDivider"
+                    android:visibility="invisible"
+                    android:padding="4dp"
+                    android:layout_marginTop="-4dp" />
 
-            <LinearLayout
-                android:layout_width="match_parent"
+            </RelativeLayout>
+
+
+            <TextView
+                android:id="@+id/text"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp">
-
-                <TextView
-                    android:id="@+id/text"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="This is a post"
-                    android:textColor="@color/colorText"
-                    android:textSize="18dp" />
-
-            </LinearLayout>
+                android:layout_marginTop="16dp"
+                android:text="This is a post"
+                android:textColor="@color/colorText"
+                android:textSize="18dp" />
 
         </LinearLayout>
 
@@ -106,17 +124,92 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:background="@drawable/custom_border"
-            android:id="@+id/comments"
-            android:padding="16dp">
+            android:orientation="vertical">
 
-            <TextView
-                android:id="@+id/reply"
+            <RelativeLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/show_comments" />
+                android:layout_height="50dp"
+                android:paddingLeft="16dp"
+                android:paddingRight="16dp">
+
+                <TextView
+                    android:id="@+id/comments"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="2 comments"
+                    android:layout_centerVertical="true"
+                    android:layout_alignParentStart="true" />
+
+                <RelativeLayout
+                    android:orientation="horizontal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="50dp"
+                    android:id="@+id/relativeLayout"
+                    android:layout_centerVertical="true"
+                    android:layout_alignParentEnd="true">
+
+                    <ImageView
+                        android:layout_width="40dp"
+                        android:layout_height="wrap_content"
+                        android:src="@drawable/thumb_up"
+                        android:tint="@color/colorDivider"
+                        android:id="@+id/upvote"
+                        android:tag="img"
+                        android:padding="4dp"
+                        android:layout_alignParentTop="true"
+                        android:layout_alignParentStart="true" />
+
+                    <TextView
+                        android:id="@+id/upvotes"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:text="12"
+                        android:layout_centerVertical="true"
+                        android:layout_toEndOf="@+id/upvote"
+                        android:gravity="center" />
+
+                    <ImageView
+                        android:id="@+id/downvote"
+                        android:layout_width="40dp"
+                        android:layout_height="match_parent"
+                        android:src="@drawable/thumb_down"
+                        android:tint="@color/colorDivider"
+                        android:layout_toEndOf="@+id/upvotes"
+                        android:layout_marginLeft="16dp"
+                        android:tag="img"
+                        android:padding="4dp" />
+
+                    <TextView
+                        android:id="@+id/downvotes"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:text="3"
+                        android:layout_centerVertical="true"
+                        android:layout_toEndOf="@+id/downvote"
+                        android:gravity="center" />
+
+                </RelativeLayout>
+
+            </RelativeLayout>
+
+            <LinearLayout
+                android:id="@+id/comments_section"
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:weightSum="1"
+                android:background="@drawable/custom_border">
+
+                <ProgressBar
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/progress"
+                    android:layout_gravity="center"
+                    android:padding="16dp" />
+
+            </LinearLayout>
 
         </LinearLayout>
-
 
     </LinearLayout>
 
