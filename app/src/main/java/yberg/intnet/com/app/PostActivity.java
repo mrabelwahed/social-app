@@ -32,12 +32,10 @@ public class PostActivity extends AppCompatActivity {
     private RecyclerView.Adapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
 
-    private LinearLayout commentsSection;
     private SwipeRefreshLayout mSwipeRefreshLayout;
 
     private Post post;
     private ArrayList<Post> mPosts;
-    private ArrayList<Comment> mComments;
     private RequestQueue requestQueue;
 
     @Override
@@ -56,9 +54,7 @@ public class PostActivity extends AppCompatActivity {
         post = (Post) getIntent().getSerializableExtra("post");
         mPosts.add(post);
 
-        mComments = new ArrayList<>();
-
-        updateComments();
+        updatePost();
 
         mSwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipe_refresh);
         mSwipeRefreshLayout.setColorSchemeColors(ContextCompat.getColor(this, R.color.colorAccent));
@@ -67,7 +63,7 @@ public class PostActivity extends AppCompatActivity {
                     @Override
                     public void onRefresh() {
                         mSwipeRefreshLayout.setRefreshing(true);
-                        updateComments();
+                        updatePost();
                         mSwipeRefreshLayout.setRefreshing(false);
                     }
                 }
@@ -83,7 +79,7 @@ public class PostActivity extends AppCompatActivity {
         mLayoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(mLayoutManager);
 
-        mAdapter = new CardAdapter(this, mPosts, mComments, false);
+        mAdapter = new CardAdapter(this, mPosts, false);
         mRecyclerView.setAdapter(mAdapter);
     }
 
@@ -93,7 +89,7 @@ public class PostActivity extends AppCompatActivity {
         return true;
     }
 
-    public void updateComments() {
+    public void updatePost() {
         StringRequest getPostRequest = new StringRequest(Request.Method.POST, Database.GET_POST_URL, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
@@ -101,27 +97,44 @@ public class PostActivity extends AppCompatActivity {
                 try {
                     JSONObject jsonResponse = new JSONObject(response);
                     if (jsonResponse.getBoolean("success")) {
-                        System.out.println("size: " + mComments.size());
-                        mComments.clear();
-                        System.out.println("size: " + mComments.size());
+                        mPosts.clear();
                         JSONObject post = jsonResponse.getJSONObject("post");
+                        JSONObject user = post.getJSONObject("user");
                         JSONArray comments = post.getJSONArray("comments");
+                        ArrayList<Comment> mComments = new ArrayList<>();
                         for (int i = 0; i < comments.length(); i++) {
                             JSONObject comment = comments.getJSONObject(i);
-                            JSONObject user = comment.getJSONObject("user");
+                            JSONObject usr = comment.getJSONObject("user");
                             mComments.add(new Comment(
-                                            comment.getInt("cid"),
-                                            new User(
-                                                    user.getInt("uid"),
-                                                    user.getString("username"),
-                                                    user.getString("name"),
-                                                    user.getString("image")
-                                            ),
-                                            comment.getString("text"),
-                                            comment.getString("commented"))
-                            );
-                            getLayoutInflater().inflate(R.layout.comment, commentsSection);
+                                    comment.getInt("cid"),
+                                    new User(
+                                            usr.getInt("uid"),
+                                            usr.getString("username"),
+                                            usr.getString("name"),
+                                            usr.getString("image")
+                                    ),
+                                    comment.getString("text"),
+                                    comment.getString("commented")
+                            ));
                         }
+                        System.out.println("user: " + user.getInt("uid"));
+                        mPosts.add(new Post(
+                                post.getInt("pid"),
+                                new User(
+                                        user.getInt("uid"),
+                                        user.getString("username"),
+                                        user.getString("name"),
+                                        user.getString("image")
+                                ),
+                                post.getString("text"),
+                                post.getString("posted"),
+                                post.getInt("numberOfComments"),
+                                mComments,
+                                post.getInt("upvotes"),
+                                post.getInt("downvotes"),
+                                post.getInt("voted"),
+                                post.getString("image")
+                        ));
                         mAdapter.notifyDataSetChanged();
                     }
                 } catch (JSONException e) {
@@ -129,11 +142,8 @@ public class PostActivity extends AppCompatActivity {
                 }
             }
         }, new Response.ErrorListener() {
-
             @Override
-            public void onErrorResponse(VolleyError error) {
-
-            }
+            public void onErrorResponse(VolleyError error) { }
         }) {
             @Override
             protected Map<String, String> getParams() throws AuthFailureError {

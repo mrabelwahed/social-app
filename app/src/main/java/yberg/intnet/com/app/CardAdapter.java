@@ -2,6 +2,7 @@ package yberg.intnet.com.app;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
@@ -13,10 +14,23 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.android.volley.AuthFailureError;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by Viktor on 2016-03-04.
@@ -24,20 +38,14 @@ import java.util.ArrayList;
 public class CardAdapter extends RecyclerView.Adapter<CardAdapter.ViewHolder> {
 
     private ArrayList<Post> mPosts;
-    private ArrayList<Comment> mComments;
     private static Activity mActivity;
-    private static boolean mFromMainActivity;
+    private boolean mFromMainActivity;
 
     // Provide a suitable constructor (depends on the kind of dataset)
     public CardAdapter(Activity activity, ArrayList<Post> posts, boolean fromMainActivity) {
         mActivity = activity;
         mPosts = posts;
         mFromMainActivity = fromMainActivity;
-    }
-
-    public CardAdapter(Activity activity, ArrayList<Post> posts, ArrayList<Comment> comments, boolean fromMainActivity) {
-        this(activity, posts, fromMainActivity);
-        mComments = comments;
     }
 
     // Provide a reference to the views for each data item
@@ -55,11 +63,11 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.ViewHolder> {
         private View.OnClickListener cardListener;
         private View.OnClickListener closeListener;
         private View.OnClickListener voteListener;
+        private RequestQueue requestQueue;
 
         private ArrayList<Post> mPosts;
-        private ArrayList<Comment> mComments;
 
-        public ViewHolder(View view, ArrayList<Post> posts, ArrayList<Comment> comments) {
+        public ViewHolder(View view, ArrayList<Post> posts, boolean mFromMainActivity) {
             super(view);
             mCardView = (CardView) view;
             mUsername = (TextView) view.findViewById(R.id.username);
@@ -74,8 +82,9 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.ViewHolder> {
 
             mCommentsSection = (LinearLayout) view.findViewById(R.id.comments_section);
 
-            this.mPosts = posts;
-            this.mComments = comments;
+            mPosts = posts;
+
+            requestQueue = Volley.newRequestQueue(mActivity.getApplicationContext());
 
             setUpListeners();
 
@@ -109,10 +118,15 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.ViewHolder> {
                         current.setCardElevation(dpToPixels(1, current));
 
                         if (current != card) {
-                            ViewGroup.LayoutParams size = current.getLayoutParams();
+                            /*ViewGroup.LayoutParams size = current.getLayoutParams();
                             size.height = ViewGroup.LayoutParams.WRAP_CONTENT;
-                            current.setLayoutParams(size);
+                            current.setLayoutParams(size);*/
+                            LinearLayout comments = (LinearLayout) current.findViewById(R.id.comments_section);
+                            ViewGroup.LayoutParams size = comments.getLayoutParams();
+                            size.height = 0;
+                            comments.setLayoutParams(size);
                             current.findViewById(R.id.close_button).setVisibility(View.INVISIBLE);
+                            current.setTag("closed");
                         }
                     }
 
@@ -120,22 +134,23 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.ViewHolder> {
                     LinearLayout commentsSection = (LinearLayout) card.findViewById(R.id.comments_section);
                     ImageView closeButton = (ImageView) card.findViewById(R.id.close_button);
 
-
                     ViewGroup.LayoutParams cardSize = card.getLayoutParams();
                     ViewGroup.LayoutParams commentsSectionSize = commentsSection.getLayoutParams();
 
                     closeButton.setVisibility(View.INVISIBLE);
                     commentsSectionSize.height = 0;
 
-                    if (cardSize.height == ViewGroup.LayoutParams.WRAP_CONTENT) {
+                    if (card.getTag().equals("closed")) {
                         closeButton.setVisibility(View.VISIBLE);
                         commentsSectionSize.height = ViewGroup.LayoutParams.WRAP_CONTENT;
-                        cardSize.height = ViewGroup.LayoutParams.MATCH_PARENT;
+                        //cardSize.height = ViewGroup.LayoutParams.MATCH_PARENT;
+                        card.setTag("open");
                         cardView.setCardElevation(dpToPixels(5, card));
                     } else { // if size.height == ViewGroup.LayoutParams.MATCH_PARENT)
                         closeButton.setVisibility(View.INVISIBLE);
                         commentsSectionSize.height = 0;
-                        cardSize.height = ViewGroup.LayoutParams.WRAP_CONTENT;
+                        //cardSize.height = ViewGroup.LayoutParams.WRAP_CONTENT;
+                        card.setTag("closed");
                         commentsSection.setLayoutParams(commentsSectionSize);
                         Intent intent = new Intent(mActivity, PostActivity.class);
                         intent.putExtra("post", mPosts.get(getAdapterPosition()));
@@ -162,34 +177,35 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.ViewHolder> {
                     TransitionManager.endTransitions(recyclerView);
                     TransitionManager.beginDelayedTransition(recyclerView);
 
-                    ViewGroup.LayoutParams cardSize = mCardView.getLayoutParams();
+                    //ViewGroup.LayoutParams cardSize = mCardView.getLayoutParams();
                     ViewGroup.LayoutParams commentsSectionSize = commentsSection.getLayoutParams();
 
-                    if (cardSize.height == ViewGroup.LayoutParams.MATCH_PARENT) {
-                        closeButton.setVisibility(View.INVISIBLE);
-                        commentsSectionSize.height = 0;
-                        cardSize.height = ViewGroup.LayoutParams.WRAP_CONTENT;
-                        commentsSection.setLayoutParams(commentsSectionSize);
-                        mCardView.setLayoutParams(cardSize);
-                        mCardView.setCardElevation(dpToPixels(1, mCardView));
-                    }
+                    closeButton.setVisibility(View.INVISIBLE);
+                    commentsSectionSize.height = 0;
+                    //cardSize.height = ViewGroup.LayoutParams.MATCH_PARENT;
+                    commentsSection.setLayoutParams(commentsSectionSize);
+                    //mCardView.setLayoutParams(cardSize);
+                    mCardView.setCardElevation(dpToPixels(1, mCardView));
+                    mCardView.setTag("closed");
                 }
             };
 
             voteListener = new View.OnClickListener() {
 
                 @Override
-                public void onClick(View v) {
+                public void onClick(final View v) {
 
                     // TODO Send to php file and get amount of up & downvotes back
                     View parent = (View) v.getParent();
 
-                    ImageView up = (ImageView) parent.findViewById(R.id.upvote);
-                    TextView upvotes = (TextView) parent.findViewById(R.id.upvotes);
-                    ImageView down = (ImageView) parent.findViewById(R.id.downvote);
-                    TextView downvotes = (TextView) parent.findViewById(R.id.downvotes);
+                    final ImageView up = (ImageView) parent.findViewById(R.id.upvote);
+                    final TextView upvotes = (TextView) parent.findViewById(R.id.upvotes);
+                    final ImageView down = (ImageView) parent.findViewById(R.id.downvote);
+                    final TextView downvotes = (TextView) parent.findViewById(R.id.downvotes);
 
                     if (v.getId() == R.id.upvote || v.getId() == R.id.upvotes) {
+                        if (down.getTag().equals(R.color.red))
+                            downvotes.setText("" + (Integer.parseInt(downvotes.getText().toString()) - 1));
                         down.setColorFilter(ContextCompat.getColor(mActivity, R.color.colorDivider));
                         down.setTag(R.color.colorDivider);
                         if (up.getTag().equals(R.color.green)) {
@@ -203,6 +219,8 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.ViewHolder> {
                         }
                     }
                     else if (v.getId() == R.id.downvote || v.getId() == R.id.downvotes) {
+                        if (up.getTag().equals(R.color.green))
+                            upvotes.setText("" + (Integer.parseInt(upvotes.getText().toString()) - 1));
                         up.setColorFilter(ContextCompat.getColor(mActivity, R.color.colorDivider));
                         up.setTag(R.color.colorDivider);
                         if (down.getTag().equals(R.color.red)) {
@@ -216,10 +234,52 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.ViewHolder> {
                             downvotes.setText("" + (Integer.parseInt(downvotes.getText().toString()) + 1));
                         }
                     }
+
+                    StringRequest getFeedRequest = new StringRequest(Request.Method.POST, Database.VOTE_URL, new Response.Listener<String>() {
+                        @Override
+                        public void onResponse(String response) {
+                            System.out.println("vote response: " + response);
+                            try {
+                                JSONObject jsonResponse = new JSONObject(response);
+                                if (jsonResponse.getBoolean("success")) {
+                                    upvotes.setText("" + jsonResponse.getInt("upvotes"));
+                                    downvotes.setText("" + jsonResponse.getInt("downvotes"));
+                                    if (jsonResponse.getInt("vote") == 1) {
+                                        up.setColorFilter(ContextCompat.getColor(mActivity,
+                                                jsonResponse.getBoolean("voted") ? R.color.green : R.color.colorDivider));
+                                    }
+                                    else if (jsonResponse.getInt("vote") == -1) {
+                                        down.setColorFilter(ContextCompat.getColor(mActivity,
+                                                jsonResponse.getBoolean("voted") ? R.color.red : R.color.colorDivider));
+                                    }
+                                }
+                                else {
+                                    Snackbar.make(mActivity.findViewById(R.id.base), jsonResponse.getString("message"), Snackbar.LENGTH_LONG).show();
+                                }
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }, new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError error) { }
+                    }) {
+                        @Override
+                        protected Map<String, String> getParams() throws AuthFailureError {
+                            Map<String, String> parameters = new HashMap<>();
+                            parameters.put("uid", "" + MainActivity.getUid());
+                            parameters.put("pid", "" + mPosts.get(getAdapterPosition()).getPid());
+                            if (v.getId() == R.id.upvote || v.getId() == R.id.upvotes)
+                                parameters.put("type", "" + 1);
+                            else if (v.getId() == R.id.downvote || v.getId() == R.id.downvotes)
+                                parameters.put("type", "" + -1);
+                            return parameters;
+                        }
+                    };
+                    requestQueue.add(getFeedRequest);
                 }
             };
         }
-
     }
 
     // Create new views (invoked by the layout manager)
@@ -228,7 +288,7 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.ViewHolder> {
         // Create a new view
 
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.card, parent, false);
-        ViewHolder vh = new ViewHolder(view, mPosts, mComments);
+        ViewHolder vh = new ViewHolder(view, mPosts, mFromMainActivity);
 
         return vh;
     }
@@ -245,18 +305,37 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.ViewHolder> {
         holder.mName.setText(post.getUser().getName());
         holder.mPosted.setText(post.getPosted());
         holder.mText.setText(post.getText());
-        holder.mNoComments.setText(post.getComments() + " comments");
+        holder.mNoComments.setText(post.getNumberOfComments() + " comments");
         holder.mUpvotes.setText("" + post.getUpvotes());
         holder.mDownvotes.setText("" + post.getDownvotes());
+        if (post.getVoted() == 1) {
+            holder.mUpvote.setColorFilter(ContextCompat.getColor(mActivity, R.color.green));
+            holder.mUpvote.setTag(R.color.green);
+        }
+        else if (post.getVoted() == -1) {
+            holder.mDownvote.setColorFilter(ContextCompat.getColor(mActivity, R.color.red));
+            holder.mDownvote.setTag(R.color.red);
+        }
+        else {
+            holder.mUpvote.setColorFilter(ContextCompat.getColor(mActivity, R.color.colorDivider));
+            holder.mUpvote.setTag(R.color.colorDivider);
+            holder.mDownvote.setColorFilter(ContextCompat.getColor(mActivity, R.color.colorDivider));
+            holder.mDownvote.setTag(R.color.colorDivider);
+        }
 
-        if (mComments != null) {
+        if (post.getComments() != null) {
+            ArrayList<Comment> comments = post.getComments();
             holder.mCommentsSection.removeAllViews();
-            if (mComments.size() > 0) {
+            if (comments.size() > 0) {
                 ViewGroup.LayoutParams commentsSectionSize = holder.mCommentsSection.getLayoutParams();
-                commentsSectionSize.height = ViewGroup.LayoutParams.WRAP_CONTENT;
+                System.out.println("mFromMainActivity: " + mFromMainActivity);
+                if (mFromMainActivity)
+                    commentsSectionSize.height = 0;
+                else
+                    commentsSectionSize.height = ViewGroup.LayoutParams.WRAP_CONTENT;
                 holder.mCommentsSection.setLayoutParams(commentsSectionSize);
             }
-            for (Comment c : mComments) {
+            for (Comment c : comments) {
                 ViewGroup container = (ViewGroup) mActivity.getLayoutInflater().inflate(R.layout.comment, null);
                 ((TextView) container.findViewById(R.id.comment)).setText(c.getText());
                 ((TextView) container.findViewById(R.id.user)).setText(c.getUser().getName());

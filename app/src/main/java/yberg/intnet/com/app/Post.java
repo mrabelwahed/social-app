@@ -1,24 +1,30 @@
 package yberg.intnet.com.app;
 
+import android.support.annotation.NonNull;
+
 import java.io.Serializable;
+import java.util.ArrayList;
 
 /**
  * Created by Viktor on 2016-03-06.
  */
 public class Post implements Serializable {
 
-    int pid, comments, upvotes, downvotes;
+    int pid, numberOfComments, upvotes, downvotes, voted;
     private User user;
     private String text, posted, image;
+    private ArrayList<Comment> comments;
 
-    public Post(int pid, User user, String text, String posted, int comments, int upvotes, int downvotes, String image) {
+    public Post(int pid, User user, String text, String posted, int numberOfComments, ArrayList<Comment> comments, int upvotes, int downvotes, int voted, String image) {
         this.pid = pid;
         this.user = user;
         this.text = text;
         this.posted = posted;
+        this.numberOfComments = numberOfComments;
         this.comments = comments;
         this.upvotes = upvotes;
         this.downvotes = downvotes;
+        this.voted = voted;
         this.image = image;
     }
 
@@ -38,7 +44,11 @@ public class Post implements Serializable {
         this.posted = posted;
     }
 
-    public void setComments(int comments) {
+    public void setNumberOfComments(int numberOfComments) {
+        this.numberOfComments = numberOfComments;
+    }
+
+    public void setComments(ArrayList<Comment> comments) {
         this.comments = comments;
     }
 
@@ -48,6 +58,10 @@ public class Post implements Serializable {
 
     public void setDownvotes(int downvotes) {
         this.downvotes = downvotes;
+    }
+
+    public void setVoted(int voted) {
+        this.voted = voted;
     }
 
     public void setImage(String image) {
@@ -70,7 +84,11 @@ public class Post implements Serializable {
         return posted;
     }
 
-    public int getComments() {
+    public int getNumberOfComments() {
+        return numberOfComments;
+    }
+
+    public ArrayList<Comment> getComments() {
         return comments;
     }
 
@@ -80,6 +98,10 @@ public class Post implements Serializable {
 
     public int getDownvotes() {
         return downvotes;
+    }
+
+    public int getVoted() {
+        return voted;
     }
 
     public String getImage() {

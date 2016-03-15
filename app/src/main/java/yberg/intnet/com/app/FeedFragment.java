@@ -1,7 +1,6 @@
 package yberg.intnet.com.app;
 
 import android.content.Context;
-import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -54,7 +53,7 @@ public class FeedFragment extends Fragment {
     private RecyclerView mRecyclerView;
     private RecyclerView.Adapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
-    private ArrayList<Post> posts;
+    private ArrayList<Post> mPosts;
     private RequestQueue requestQueue;
     private SwipeRefreshLayout mSwipeRefreshLayout;
 
@@ -87,7 +86,7 @@ public class FeedFragment extends Fragment {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
-        posts = new ArrayList<>();
+        mPosts = new ArrayList<>();
         requestQueue = Volley.newRequestQueue(getContext().getApplicationContext());
 
         updateFeed();
@@ -125,7 +124,7 @@ public class FeedFragment extends Fragment {
         mLayoutManager = new LinearLayoutManager(getContext());
         mRecyclerView.setLayoutManager(mLayoutManager);
 
-        mAdapter = new CardAdapter(getActivity(), posts, true);
+        mAdapter = new CardAdapter(getActivity(), mPosts, true);
         mRecyclerView.setAdapter(mAdapter);
 
         return view;
@@ -177,27 +176,45 @@ public class FeedFragment extends Fragment {
                 try {
                     JSONObject jsonResponse = new JSONObject(response);
                     if (jsonResponse.getBoolean("success")) {
-                        posts.clear();
+                        mPosts.clear();
                         JSONArray feed = jsonResponse.getJSONArray("feed");
                         for (int i = 0; i < feed.length(); i++) {
                             // Add the contents of each json object to the posts array list
                             JSONObject post = feed.getJSONObject(i);
                             JSONObject user = post.getJSONObject("user");
-                            posts.add(new Post(
-                                            post.getInt("pid"),
-                                            new User(
-                                                    user.getInt("uid"),
-                                                    user.getString("username"),
-                                                    user.getString("name"),
-                                                    user.getString("image")
-                                            ),
-                                            post.getString("text"),
-                                            post.getString("posted"),
-                                            post.getInt("comments"),
-                                            post.getInt("upvotes"),
-                                            post.getInt("downvotes"),
-                                            post.getString("image"))
-                            );
+                            JSONArray comments = post.getJSONArray("comments");
+                            ArrayList<Comment> mComments = new ArrayList<>();
+                            for (int j = 0; j < comments.length(); j++) {
+                                JSONObject comment = comments.getJSONObject(j);
+                                JSONObject usr = comment.getJSONObject("user");
+                                mComments.add(new Comment(comment.getInt("cid"),
+                                                new User(
+                                                        usr.getInt("uid"),
+                                                        usr.getString("username"),
+                                                        usr.getString("name"),
+                                                        usr.getString("image")
+                                                ),
+                                                comment.getString("text"),
+                                                comment.getString("commented")
+                                ));
+                            }
+                            mPosts.add(new Post(
+                                    post.getInt("pid"),
+                                    new User(
+                                            user.getInt("uid"),
+                                            user.getString("username"),
+                                            user.getString("name"),
+                                            user.getString("image")
+                                    ),
+                                    post.getString("text"),
+                                    post.getString("posted"),
+                                    post.getInt("numberOfComments"),
+                                    mComments,
+                                    post.getInt("upvotes"),
+                                    post.getInt("downvotes"),
+                                    post.getInt("voted"),
+                                    post.getString("image")
+                            ));
                         }
                         mAdapter.notifyDataSetChanged();
                     }
@@ -208,9 +225,7 @@ public class FeedFragment extends Fragment {
         }, new Response.ErrorListener() {
 
             @Override
-            public void onErrorResponse(VolleyError error) {
-
-            }
+            public void onErrorResponse(VolleyError error) { }
         }) {
             @Override
             protected Map<String, String> getParams() throws AuthFailureError {

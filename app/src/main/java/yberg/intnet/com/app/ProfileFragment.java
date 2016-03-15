@@ -179,7 +179,7 @@ public class ProfileFragment extends Fragment {
             @Override
             public void onResponse(String response) {
                 try {
-                    JSONArray jsonResponse = new JSONArray(response);
+                    JSONObject jsonResponse = new JSONObject(response);
 
                     mAdapter.notifyDataSetChanged();
                 } catch (JSONException e) {

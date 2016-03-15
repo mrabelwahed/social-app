@@ -30,7 +30,7 @@ public class MainActivity extends AppCompatActivity
 
     private Fragment feedFragment, profileFragment;
 
-    private int uid;
+    private static int uid;
 
 
     @Override
@@ -145,7 +145,7 @@ public class MainActivity extends AppCompatActivity
 
     }
 
-    public int getUid() {
+    public static int getUid() {
         return uid;
     }
 }
