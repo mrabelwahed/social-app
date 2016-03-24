@@ -3,6 +3,7 @@ package yberg.intnet.com.app;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.LightingColorFilter;
+import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
@@ -57,12 +58,13 @@ public class ProfileFragment extends Fragment {
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private ScrollView scrollView;
 
-    private TextView username, name, joined, posts, comments, followers, following, followLabel;
+    private TextView username, name, joined, posts, comments, followers, following, followLabel, nothingToShowTextView;
     private EditText firstName, lastName, email, password, newPassword, passwordConfirm;
-    private LinearLayout followButton, latestPostSection, editProfileButton, editProfileSection;
+    private LinearLayout followButton, latestPostSection, editProfileSection;
     private RelativeLayout submitButton;
     private ImageView followIcon;
     private ProgressBar spinner;
+    private CardView latestPostCard;
 
     public ProfileFragment() {
         // Required empty public constructor
@@ -141,7 +143,8 @@ public class ProfileFragment extends Fragment {
                                     JSONObject jsonResponse = new JSONObject(response);
                                     if (jsonResponse.getBoolean("success")) {
                                         setFollowing(jsonResponse.getBoolean("follows"));
-                                        updateProfile();
+                                        followers.setText("" + jsonResponse.getInt("followers"));
+                                        following.setText("" + jsonResponse.getInt("following"));
                                     } else {
                                         Snackbar.make(getActivity().findViewById(R.id.base),
                                                 jsonResponse.getString("message"), Snackbar.LENGTH_LONG).show();
@@ -169,31 +172,10 @@ public class ProfileFragment extends Fragment {
         );
 
         latestPostSection = (LinearLayout) view.findViewById(R.id.latestPostSection);
-        latestPostSection.setVisibility(View.GONE);
 
         editProfileSection = (LinearLayout) view.findViewById(R.id.editProfileSection);
-        editProfileButton = (LinearLayout) view.findViewById(R.id.editProfileButton);
-        if (MainActivity.getUid() == getArguments().getInt("profile")) {
-            editProfileButton.setVisibility(View.VISIBLE);
-            editProfileSection.setVisibility(View.GONE);
-            editProfileButton.setOnClickListener(
-                    new View.OnClickListener() {
-
-                        @Override
-                        public void onClick(View v) {
-                            TransitionManager.endTransitions(scrollView);
-                            TransitionManager.beginDelayedTransition(scrollView);
-                            editProfileSection.setVisibility(editProfileSection.getVisibility() ==
-                                    View.VISIBLE ? View.GONE : View.VISIBLE);
-                            scrollView.smoothScrollTo(0, (int) editProfileSection.getY());
-                        }
-                    }
-            );
-        }
-        else {
-            editProfileButton.setVisibility(View.GONE);
-            editProfileSection.setVisibility(View.GONE);
-        }
+        editProfileSection.setVisibility(
+                MainActivity.getUid() == getArguments().getInt("profile") ? View.VISIBLE : View.GONE);
 
         firstName = (EditText) view.findViewById(R.id.firstName);
         lastName = (EditText) view.findViewById(R.id.lastName);
@@ -278,23 +260,37 @@ public class ProfileFragment extends Fragment {
         password.addTextChangedListener(new LoginActivity.GenericTextWatcher(password));
         passwordConfirm.addTextChangedListener(new LoginActivity.GenericTextWatcher(passwordConfirm));
 
+        CardView followCard = (CardView) view.findViewById(R.id.followCard);
+        followCard.setCardElevation(MainActivity.dpToPixels(1, followCard));
+
         LayoutInflater factory = LayoutInflater.from(getActivity());
-        CardView card = (CardView) factory.inflate(R.layout.card, null);
-        card.setRadius(MainActivity.dpToPixels(4, card));
+
+        latestPostCard = (CardView) factory.inflate(R.layout.card, null);
+        latestPostCard.setRadius(MainActivity.dpToPixels(2, latestPostCard));
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
         );
-        params.setMargins((int) MainActivity.dpToPixels(16, card), (int) MainActivity.dpToPixels(4, card),
-                (int) MainActivity.dpToPixels(16, card), (int) MainActivity.dpToPixels(4, card));
-        card.setLayoutParams(params);
-        LinearLayout latestPost = (LinearLayout) view.findViewById(R.id.latestPost);
-        latestPost.addView(card);
+        params.setMargins((int) MainActivity.dpToPixels(16, latestPostCard),
+                (int) MainActivity.dpToPixels(4, latestPostCard),
+                (int) MainActivity.dpToPixels(16, latestPostCard),
+                (int) MainActivity.dpToPixels(4, latestPostCard)
+        );
+        latestPostCard.setLayoutParams(params);
 
-        ((TextView) card.findViewById(R.id.username)).setText(username.getText().toString());
-        ((TextView) card.findViewById(R.id.name)).setText(name.getText().toString());
-
-        latestPostSection.setVisibility(View.VISIBLE);
+        nothingToShowTextView = new TextView(getContext());
+        params = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+        );
+        params.setMargins((int) MainActivity.dpToPixels(16, nothingToShowTextView),
+                (int) MainActivity.dpToPixels(4, nothingToShowTextView),
+                (int) MainActivity.dpToPixels(16, nothingToShowTextView),
+                (int) MainActivity.dpToPixels(8, nothingToShowTextView)
+        );
+        nothingToShowTextView.setLayoutParams(params);
+        nothingToShowTextView.setTypeface(null, Typeface.ITALIC);
+        nothingToShowTextView.setText("Nothing to show");
 
         updateProfile();
         setEnabled(true);
@@ -402,8 +398,8 @@ public class ProfileFragment extends Fragment {
         newPassword.setText("");
         passwordConfirm.setText("");
 
-        editProfileButton.setVisibility(View.VISIBLE);
-        editProfileSection.setVisibility(View.GONE);
+        editProfileSection.setVisibility(
+                MainActivity.getUid() == getArguments().getInt("profile") ? View.VISIBLE : View.GONE);
 
         StringRequest profileRequest = new StringRequest(Request.Method.POST, Database.PROFILE_URL, new Response.Listener<String>() {
             @Override
@@ -412,6 +408,7 @@ public class ProfileFragment extends Fragment {
                 try {
                     JSONObject jsonResponse = new JSONObject(response);
                     if (jsonResponse.getBoolean("success")) {
+                        latestPostSection.removeAllViews();
                         JSONObject profile = jsonResponse.getJSONObject("profile");
                         User user = new User(
                                 profile.getInt("uid"),
@@ -421,6 +418,33 @@ public class ProfileFragment extends Fragment {
                                 profile.getString("email"),
                                 profile.getString("image")
                         );
+                        if (!jsonResponse.isNull("post")) {
+                            JSONObject post = jsonResponse.getJSONObject("post");
+                            Post latestPost = new Post(
+                                    post.getInt("pid"),
+                                    user,
+                                    post.getString("text"),
+                                    post.getString("posted"),
+                                    post.getInt("comments"),
+                                    null,
+                                    post.getInt("upvotes"),
+                                    post.getInt("downvotes"),
+                                    post.getInt("voted"),
+                                    post.getString("image")
+                            );
+                            //Populate post card
+                            ((TextView) latestPostCard.findViewById(R.id.username)).setText(user.getUsername());
+                            ((TextView) latestPostCard.findViewById(R.id.name)).setText(user.getName());
+                            ((TextView) latestPostCard.findViewById(R.id.time)).setText(latestPost.getPosted());
+                            ((TextView) latestPostCard.findViewById(R.id.text)).setText(latestPost.getText());
+                            ((TextView) latestPostCard.findViewById(R.id.comments)).setText("" + latestPost.getNumberOfComments());
+                            ((TextView) latestPostCard.findViewById(R.id.upvotes)).setText("" + latestPost.getUpvotes());
+                            ((TextView) latestPostCard.findViewById(R.id.downvotes)).setText("" + latestPost.getDownvotes());
+                            latestPostSection.addView(latestPostCard);
+                        }
+                        else {
+                            latestPostSection.addView(nothingToShowTextView);
+                        }
                         username.setText(user.getUsername());
                         name.setText(user.getName());
                         posts.setText("" + profile.getInt("posts"));

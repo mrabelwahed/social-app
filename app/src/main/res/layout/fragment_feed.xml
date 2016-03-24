@@ -24,13 +24,14 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|right"
-        android:src="@drawable/add"
+        android:src="@drawable/create"
         android:scaleType="fitCenter"
         fab:fab_colorNormal="@color/colorAccent"
         android:layout_marginLeft="16dp"
         android:layout_marginRight="16dp"
         android:layout_alignParentBottom="true"
         android:layout_alignParentEnd="true"
-        android:layout_marginBottom="16dp" />
+        android:layout_marginBottom="16dp"
+        android:tint="#fff" />
 
 </RelativeLayout>

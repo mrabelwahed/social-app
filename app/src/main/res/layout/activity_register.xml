@@ -37,7 +37,7 @@
                     android:layout_marginLeft="36dp"
                     android:layout_marginRight="36dp"
                     android:layout_marginBottom="16dp"
-                    android:textColor="#ffff"
+                    android:textColor="#fff"
                     android:textSize="24dp"
                     android:layout_gravity="left" />
 
@@ -83,7 +83,7 @@
                     </RelativeLayout>
 
                     <View android:layout_width="match_parent"
-                        android:layout_height="1dp"
+                        android:layout_height="0.5dp"
                         android:background="@color/colorDivider"
                         android:layout_marginLeft="12dp"
                         android:layout_marginRight="12dp" />
@@ -119,7 +119,7 @@
                     </RelativeLayout>
 
                     <View android:layout_width="match_parent"
-                        android:layout_height="1dp"
+                        android:layout_height="0.5dp"
                         android:background="@color/colorDivider"
                         android:layout_marginLeft="12dp"
                         android:layout_marginRight="12dp" />
@@ -155,7 +155,7 @@
                     </RelativeLayout>
 
                     <View android:layout_width="match_parent"
-                        android:layout_height="1dp"
+                        android:layout_height="0.5dp"
                         android:background="@color/colorDivider"
                         android:layout_marginLeft="12dp"
                         android:layout_marginRight="12dp" />
@@ -191,7 +191,7 @@
                     </RelativeLayout>
 
                     <View android:layout_width="match_parent"
-                        android:layout_height="1dp"
+                        android:layout_height="0.5dp"
                         android:background="@color/colorDivider"
                         android:layout_marginLeft="12dp"
                         android:layout_marginRight="12dp" />
@@ -228,7 +228,7 @@
                     </RelativeLayout>
 
                     <View android:layout_width="match_parent"
-                        android:layout_height="1dp"
+                        android:layout_height="0.5dp"
                         android:background="@color/colorDivider"
                         android:layout_marginLeft="12dp"
                         android:layout_marginRight="12dp" />
@@ -270,7 +270,7 @@
                     android:id="@+id/registerButton"
                     android:layout_width="match_parent"
                     android:layout_height="48dp"
-                    android:layout_marginTop="16dp"
+                    android:layout_marginTop="8dp"
                     android:elevation="1dp"
                     android:background="@drawable/button"
                     android:layout_marginLeft="36dp"
@@ -318,9 +318,10 @@
                     android:layout_height="wrap_content"
                     android:id="@+id/loginTextView"
                     android:layout_gravity="center_horizontal"
-                    android:text="@string/login"
+                    android:text="@string/already_a_member_sign_in"
                     android:layout_marginTop="16dp"
-                    android:textSize="16dp" />
+                    android:textSize="16dp"
+                    android:textColor="@color/light" />
 
             </LinearLayout>
 

@@ -11,25 +11,26 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/custom_border_dark">
+        android:background="@drawable/custom_border"
+        android:padding="16dp">
 
         <TextView
             android:id="@+id/comment"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Comment"
-            android:textColor="#fff"
+            android:textColor="@color/blue"
             android:textSize="16dp"
             android:layout_centerVertical="true"
-            android:layout_centerHorizontal="true" />
+            android:layout_centerHorizontal="true"
+            android:layout_marginLeft="4dp" />
 
         <ImageView
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:id="@+id/imageView5"
-            android:src="@drawable/chat"
-            android:padding="12dp"
-            android:layout_alignParentTop="true"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/comment"
+            android:tint="@color/blue"
+            android:layout_centerVertical="true"
             android:layout_toStartOf="@+id/comment" />
 
     </RelativeLayout>

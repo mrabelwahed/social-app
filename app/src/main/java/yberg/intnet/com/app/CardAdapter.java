@@ -305,7 +305,7 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.ViewHolder> {
         holder.mName.setText(post.getUser().getName());
         holder.mPosted.setText(post.getPosted());
         holder.mText.setText(post.getText());
-        holder.mNoComments.setText(post.getNumberOfComments() + " comments");
+        holder.mNoComments.setText("" + post.getNumberOfComments());
         holder.mUpvotes.setText("" + post.getUpvotes());
         holder.mDownvotes.setText("" + post.getDownvotes());
         holder.mCardView.setTag("closed");
