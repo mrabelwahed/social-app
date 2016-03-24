@@ -166,7 +166,7 @@ public class LoginActivity extends AppCompatActivity {
         setEnabled(true);
 
         password.setText("123");
-        loginButton.performClick();
+        //loginButton.performClick();
     }
 
     /**

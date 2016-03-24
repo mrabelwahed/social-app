@@ -1,22 +1,539 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.v4.widget.SwipeRefreshLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/swipe_refresh"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <android.support.v4.widget.SwipeRefreshLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        android:id="@+id/swipe_refresh"
+    <ScrollView
+        android:id="@+id/scrollView"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <android.support.v7.widget.RecyclerView
-            xmlns:android="http://schemas.android.com/apk/res/android"
-            android:id="@+id/recycler_view"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:clipToPadding="false"
+            android:orientation="vertical"
+            android:clickable="true">
 
-        </android.support.v7.widget.RecyclerView>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="16dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginRight="16dp">
 
-    </android.support.v4.widget.SwipeRefreshLayout>
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent">
 
-</RelativeLayout>
+                    <ImageView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:src="@drawable/person"
+                        android:tint="#333" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical"
+                    android:clipToPadding="false"
+                    android:paddingLeft="8dp"
+                    android:paddingTop="8dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text=" jdoe"
+                        android:textStyle="italic"
+                        android:textColor="@color/colorPrimary"
+                        android:textSize="32dp"
+                        android:clipToPadding="false"
+                        android:id="@+id/username" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="John Doe"
+                        android:id="@+id/name"
+                        android:textColor="@color/colorPrimary"
+                        android:textSize="26dp" />
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:padding="8dp"
+                        android:id="@+id/followButton"
+                        android:background="@drawable/button"
+                        android:elevation="1dp"
+                        android:layout_marginTop="4dp">
+
+                        <ImageView
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:id="@+id/followIcon"
+                            android:src="@drawable/person_add"
+                            android:tint="#fff" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Follow"
+                            android:textColor="#fff"
+                            android:id="@+id/followLabel"
+                            android:layout_marginLeft="4dp" />
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginLeft="16dp"
+                android:layout_marginRight="16dp">
+
+                <LinearLayout
+                    android:orientation="horizontal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center">
+
+                    <LinearLayout
+                        android:orientation="horizontal"
+                        android:layout_width="150dp"
+                        android:layout_height="match_parent"
+                        android:gravity="center_vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="0"
+                            android:id="@+id/followers"
+                            android:layout_marginRight="8dp"
+                            android:textColor="@color/colorAccent"
+                            android:textSize="46dp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="followers"
+                            android:textSize="16dp"
+                            android:textColor="@color/colorTextSecondary" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:orientation="horizontal"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:gravity="center_vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="0"
+                            android:id="@+id/following"
+                            android:textColor="@color/colorAccent"
+                            android:textSize="46dp"
+                            android:layout_marginRight="8dp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="following"
+                            android:textSize="16dp"
+                            android:textColor="@color/colorTextSecondary" />
+                    </LinearLayout>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:orientation="horizontal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center" >
+
+                    <LinearLayout
+                        android:orientation="horizontal"
+                        android:layout_width="150dp"
+                        android:layout_height="match_parent"
+                        android:gravity="center_vertical" >
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="0"
+                            android:id="@+id/posts"
+                            android:layout_marginRight="8dp"
+                            android:textColor="@color/colorAccent"
+                            android:textSize="46dp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="posts"
+                            android:textSize="16dp"
+                            android:textColor="@color/colorTextSecondary" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:orientation="horizontal"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:gravity="center_vertical" >
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="0"
+                            android:id="@+id/comments"
+                            android:textColor="@color/colorAccent"
+                            android:textSize="46dp"
+                            android:layout_marginRight="8dp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="comments"
+                            android:textSize="16dp"
+                            android:textColor="@color/colorTextSecondary" />
+                    </LinearLayout>
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/latestPostSection"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginTop="16dp"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Latest post"
+                    android:textSize="16dp"
+                    android:textColor="@color/colorPrimary"
+                    android:layout_marginLeft="16dp" />
+
+                <LinearLayout
+                    android:id="@+id/latestPost"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginTop="12dp">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:id="@+id/editProfileButton"
+                    android:padding="8dp"
+                    android:background="@drawable/button_blue"
+                    android:elevation="1dp"
+                    android:layout_marginLeft="16dp"
+                    android:layout_marginRight="16dp"
+                    android:layout_marginBottom="12dp">
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/settings"
+                        android:tint="#fff"
+                        android:layout_marginRight="4dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/edit_profile"
+                        android:textColor="#fff"
+                        android:layout_marginLeft="4dp" />
+
+                </LinearLayout>
+
+
+                <LinearLayout
+                    android:orientation="vertical"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:id="@+id/editProfileSection">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:elevation="1dp"
+                        android:background="@drawable/rounded_corners"
+                        android:layout_marginLeft="16dp"
+                        android:layout_marginRight="16dp"
+                        android:layout_marginTop="4dp"
+                        android:layout_marginBottom="4dp">
+
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content">
+
+                            <EditText
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:hint="First name"
+                                android:textColor="@color/colorText"
+                                android:paddingLeft="44dp"
+                                android:paddingTop="16dp"
+                                android:paddingRight="16dp"
+                                android:paddingBottom="16dp"
+                                android:background="@drawable/rounded_corners"
+                                android:singleLine="true"
+                                android:inputType="textCapWords|textPersonName"
+                                android:selectAllOnFocus="true"
+                                android:id="@+id/firstName">
+                                <requestFocus/>
+                            </EditText>
+
+                            <ImageView
+                                android:layout_width="30dp"
+                                android:layout_height="30dp"
+                                android:src="@drawable/person"
+                                android:layout_centerVertical="true"
+                                android:layout_alignParentStart="true"
+                                android:layout_marginLeft="8dp"
+                                android:tint="@color/colorTextSecondary" />
+
+                        </RelativeLayout>
+
+                        <View android:layout_width="match_parent"
+                            android:layout_height="1dp"
+                            android:background="@color/colorDivider"
+                            android:layout_marginLeft="12dp"
+                            android:layout_marginRight="12dp" />
+
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content">
+
+                            <EditText
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:hint="Last name"
+                                android:textColor="@color/colorText"
+                                android:paddingLeft="44dp"
+                                android:paddingTop="16dp"
+                                android:paddingRight="16dp"
+                                android:paddingBottom="16dp"
+                                android:background="@drawable/rounded_corners"
+                                android:singleLine="true"
+                                android:inputType="textCapWords|textPersonName"
+                                android:selectAllOnFocus="true"
+                                android:id="@+id/lastName" />
+
+                            <ImageView
+                                android:layout_width="30dp"
+                                android:layout_height="30dp"
+                                android:src="@drawable/person"
+                                android:layout_centerVertical="true"
+                                android:layout_alignParentStart="true"
+                                android:layout_marginLeft="8dp"
+                                android:tint="@color/colorTextSecondary" />
+
+                        </RelativeLayout>
+
+                        <View android:layout_width="match_parent"
+                            android:layout_height="1dp"
+                            android:background="@color/colorDivider"
+                            android:layout_marginLeft="12dp"
+                            android:layout_marginRight="12dp" />
+
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content">
+
+                            <EditText
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:hint="E-mail address"
+                                android:textColor="@color/colorText"
+                                android:paddingLeft="44dp"
+                                android:paddingTop="16dp"
+                                android:paddingRight="16dp"
+                                android:paddingBottom="16dp"
+                                android:background="@drawable/rounded_corners"
+                                android:singleLine="true"
+                                android:inputType="textEmailAddress"
+                                android:selectAllOnFocus="true"
+                                android:id="@+id/email" />
+
+                            <ImageView
+                                android:layout_width="30dp"
+                                android:layout_height="30dp"
+                                android:src="@drawable/email"
+                                android:layout_marginLeft="8dp"
+                                android:tint="@color/colorTextSecondary"
+                                android:layout_centerVertical="true"
+                                android:layout_alignParentStart="true" />
+
+                        </RelativeLayout>
+
+                        <View android:layout_width="match_parent"
+                            android:layout_height="1dp"
+                            android:background="@color/colorDivider"
+                            android:layout_marginLeft="12dp"
+                            android:layout_marginRight="12dp" />
+
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content">
+
+                            <EditText
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:hint="Current password"
+                                android:textColor="@color/colorText"
+                                android:paddingLeft="44dp"
+                                android:paddingTop="16dp"
+                                android:paddingRight="16dp"
+                                android:paddingBottom="16dp"
+                                android:background="@drawable/rounded_corners"
+                                android:selectAllOnFocus="true"
+                                android:singleLine="true"
+                                android:fontFamily="sans-serif"
+                                android:inputType="textPassword"
+                                android:id="@+id/password" />
+
+                            <ImageView
+                                android:layout_width="30dp"
+                                android:layout_height="30dp"
+                                android:src="@drawable/lock"
+                                android:layout_centerVertical="true"
+                                android:layout_alignParentStart="true"
+                                android:layout_marginLeft="8dp"
+                                android:tint="@color/colorTextSecondary" />
+
+                        </RelativeLayout>
+
+                        <View android:layout_width="match_parent"
+                            android:layout_height="1dp"
+                            android:background="@color/colorDivider"
+                            android:layout_marginLeft="12dp"
+                            android:layout_marginRight="12dp" />
+
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content">
+
+                            <EditText
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:hint="New password"
+                                android:textColor="@color/colorText"
+                                android:paddingLeft="44dp"
+                                android:paddingTop="16dp"
+                                android:paddingRight="16dp"
+                                android:paddingBottom="16dp"
+                                android:background="@drawable/rounded_corners"
+                                android:selectAllOnFocus="true"
+                                android:singleLine="true"
+                                android:fontFamily="sans-serif"
+                                android:inputType="textPassword"
+                                android:id="@+id/newPassword" />
+
+                            <ImageView
+                                android:layout_width="30dp"
+                                android:layout_height="30dp"
+                                android:src="@drawable/lock"
+                                android:layout_centerVertical="true"
+                                android:layout_alignParentStart="true"
+                                android:layout_marginLeft="8dp"
+                                android:tint="@color/colorTextSecondary" />
+
+                        </RelativeLayout>
+
+                        <View android:layout_width="match_parent"
+                            android:layout_height="1dp"
+                            android:background="@color/colorDivider"
+                            android:layout_marginLeft="12dp"
+                            android:layout_marginRight="12dp" />
+
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content">
+
+                            <EditText
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:hint="Re-enter password"
+                                android:textColor="@color/colorText"
+                                android:paddingLeft="44dp"
+                                android:paddingTop="16dp"
+                                android:paddingRight="16dp"
+                                android:paddingBottom="16dp"
+                                android:background="@drawable/rounded_corners"
+                                android:singleLine="true"
+                                android:fontFamily="sans-serif"
+                                android:inputType="textPassword"
+                                android:selectAllOnFocus="true"
+                                android:id="@+id/passwordConfirm" />
+
+                            <ImageView
+                                android:layout_width="30dp"
+                                android:layout_height="30dp"
+                                android:src="@drawable/lock"
+                                android:layout_centerVertical="true"
+                                android:layout_alignParentStart="true"
+                                android:layout_marginLeft="8dp"
+                                android:tint="@color/colorTextSecondary" />
+
+                        </RelativeLayout>
+
+                    </LinearLayout>
+
+                    <RelativeLayout
+                        android:id="@+id/submitButton"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:elevation="1dp"
+                        android:background="@drawable/button"
+                        android:padding="8dp"
+                        android:layout_margin="16dp">
+
+                        <ProgressBar
+                            android:layout_width="30dp"
+                            android:layout_height="30dp"
+                            android:id="@+id/progressBar"
+                            android:layout_centerVertical="true"
+                            android:layout_alignParentEnd="true" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="match_parent"
+                            android:gravity="center"
+                            android:text="Submit"
+                            android:layout_centerHorizontal="true"
+                            android:textColor="#fff"
+                            android:textSize="18dp" />
+
+                    </RelativeLayout>
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </ScrollView>
+
+</android.support.v4.widget.SwipeRefreshLayout>

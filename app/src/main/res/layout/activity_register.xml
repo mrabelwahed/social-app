@@ -203,7 +203,7 @@
                         <EditText
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:hint="•••••"
+                            android:hint="Password"
                             android:textColor="@color/colorText"
                             android:paddingLeft="44dp"
                             android:paddingTop="16dp"
@@ -212,7 +212,7 @@
                             android:background="@drawable/rounded_corners"
                             android:selectAllOnFocus="true"
                             android:singleLine="true"
-                            
+                            android:fontFamily="sans-serif"
                             android:inputType="textPassword"
                             android:id="@+id/password" />
 
@@ -240,7 +240,7 @@
                         <EditText
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:hint="•••••"
+                            android:hint="Re-enter password"
                             android:textColor="@color/colorText"
                             android:paddingLeft="44dp"
                             android:paddingTop="16dp"
@@ -248,6 +248,7 @@
                             android:paddingBottom="16dp"
                             android:background="@drawable/rounded_corners"
                             android:singleLine="true"
+                            android:fontFamily="sans-serif"
                             android:inputType="textPassword"
                             android:selectAllOnFocus="true"
                             android:id="@+id/passwordConfirm" />

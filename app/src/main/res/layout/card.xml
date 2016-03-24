@@ -60,8 +60,8 @@
                                 android:layout_height="wrap_content"
                                 android:layout_gravity="center_vertical"
                                 android:textStyle="italic"
-                                android:text="\@jdoe"
-                                android:textColor="@color/colorTextSecondary"
+                                android:text=" jdoe"
+                                android:textColor="@color/colorPrimary"
                                 android:layout_marginRight="8dp" />
 
                             <TextView
@@ -70,7 +70,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_gravity="center_vertical"
                                 android:text="John Doe"
-                                android:textColor="@color/colorTextSecondary"
+                                android:textColor="@color/colorPrimary"
                                 android:paddingRight="30dp" />
 
                         </LinearLayout>
@@ -101,15 +101,16 @@
 
                     <ImageView
                         android:id="@+id/close_button"
-                        android:layout_width="40dp"
-                        android:layout_height="40dp"
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
                         android:src="@drawable/close"
                         android:layout_alignParentTop="true"
                         android:layout_alignParentEnd="true"
-                        android:tint="@color/colorDivider"
+                        android:tint="@color/colorPrimary"
                         android:visibility="invisible"
-                        android:padding="4dp"
-                        android:layout_marginTop="-4dp" />
+                        android:padding="12dp"
+                        android:layout_marginTop="-8dp"
+                        android:layout_marginRight="-8dp" />
 
                 </RelativeLayout>
 
@@ -149,7 +150,7 @@
                         android:orientation="horizontal"
                         android:layout_width="wrap_content"
                         android:layout_height="50dp"
-                        android:id="@+id/relativeLayout"
+                        android:id="@+id/upDownVotes"
                         android:layout_centerVertical="true"
                         android:layout_alignParentEnd="true">
 

@@ -11,6 +11,13 @@
     <color name="colorDivider">#B6B6B6</color>
     <color name="background">#ddd</color>
     <color name="light">#F5F5F5</color>
-    <color name="red">#F44336</color>
-    <color name="green">#4CAF50</color>
+    <color name="gray">#9E9E9E</color>
+    <color name="lightGray">#E0E0E0</color>
+    <color name="darkGray">#424242</color>
+    <color name="red">#d9534f</color>
+    <color name="darkRed">#C03A36</color>
+    <color name="green">#5cb85c</color>
+    <color name="darkGreen">#439F43</color>
+    <color name="blue">#428bca</color>
+    <color name="darkBlue">#2972B1</color>
 </resources>

@@ -48,6 +48,7 @@
                     android:paddingRight="8dp" />
 
                 <ImageView
+                    android:id="@+id/image"
                     android:layout_width="12dp"
                     android:layout_height="12dp"
                     android:src="@drawable/time"

@@ -1,14 +1,22 @@
 package yberg.intnet.com.app;
 
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
+import android.support.v4.app.DialogFragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
@@ -26,13 +34,15 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-public class PostActivity extends AppCompatActivity {
+public class PostActivity extends AppCompatActivity
+        implements PostDialog.OnFragmentInteractionListener {
 
     private RecyclerView mRecyclerView;
     private RecyclerView.Adapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
 
     private SwipeRefreshLayout mSwipeRefreshLayout;
+    private LinearLayout commentButton;
 
     private Post post;
     private ArrayList<Post> mPosts;
@@ -81,6 +91,15 @@ public class PostActivity extends AppCompatActivity {
 
         mAdapter = new CardAdapter(this, mPosts, false);
         mRecyclerView.setAdapter(mAdapter);
+    }
+
+    public void showCommentDialog(View v) {
+        FragmentManager fm = getSupportFragmentManager();
+        System.out.println("fm: " + fm);
+        SharedPreferences prefs = getSharedPreferences("com.intnet.yberg", Context.MODE_PRIVATE);
+        PostDialog postDialog = PostDialog.newInstance("Comment", "Commenting as",
+                prefs.getString("username", ""), prefs.getString("name", ""));
+        postDialog.show(fm, "fragment_post_dialog");
     }
 
     @Override
@@ -149,10 +168,55 @@ public class PostActivity extends AppCompatActivity {
             protected Map<String, String> getParams() throws AuthFailureError {
                 Map<String, String> parameters = new HashMap<>();
                 parameters.put("pid", "" + post.getPid());
+                parameters.put("uid", "" + MainActivity.getUid());
                 return parameters;
             }
         };
         requestQueue.add(getPostRequest);
     }
 
+    @Override
+    public void onFragmentInteraction(Uri uri) {
+
+    }
+
+    @Override
+    public void onDialogSubmit(final PostDialog dialog, final String text) {
+        StringRequest addCommentRequest = new StringRequest(Request.Method.POST, Database.ADD_COMMENT_URL, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                System.out.println("addComment response: " + response);
+                try {
+                    JSONObject jsonResponse = new JSONObject(response);
+                    if (jsonResponse.getBoolean("success")) {
+                        Snackbar.make(findViewById(R.id.base),
+                                "Sent comment", Snackbar.LENGTH_LONG).show();
+                        dialog.dismiss();
+                        updatePost();
+                    }
+                    else {
+                        dialog.setEnabled(true);
+                        Snackbar.make(findViewById(R.id.base),
+                                jsonResponse.getString("message"), Snackbar.LENGTH_LONG).show();
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        }, new Response.ErrorListener() {
+
+            @Override
+            public void onErrorResponse(VolleyError error) { }
+        }) {
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                Map<String, String> parameters = new HashMap<>();
+                parameters.put("pid", "" + post.getPid());
+                parameters.put("uid", "" + MainActivity.getUid());
+                parameters.put("text", text);
+                return parameters;
+            }
+        };
+        requestQueue.add(addCommentRequest);
+    }
 }

@@ -7,7 +7,7 @@ android {
     defaultConfig {
         applicationId "yberg.intnet.com.app"
         minSdkVersion 19
-        targetSdkVersion 23
+        targetSdkVersion 22
         versionCode 1
         versionName "1.0"
     }
@@ -29,7 +29,8 @@ dependencies {
     compile 'com.android.support:design:23.2.0'
     compile 'com.android.support:cardview-v7:23.2.0'
     compile 'com.android.support:recyclerview-v7:23.2.0'
-    compile 'com.mcxiaoke.volley:library:1.0.19'
+    compile 'com.android.volley:volley:1.0.0'
     compile 'org.ocpsoft.prettytime:prettytime:4.0.1.Final'
     compile 'com.android.support:support-v4:23.2.0'
+    compile 'com.melnykov:floatingactionbutton:1.3.0'
 }

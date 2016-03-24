@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.GravityCompat;
@@ -14,21 +15,39 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
+import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
+import com.android.volley.AuthFailureError;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.HashMap;
+import java.util.Map;
+
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
         ProfileFragment.OnFragmentInteractionListener,
-        FeedFragment.OnFragmentInteractionListener {
+        FeedFragment.OnFragmentInteractionListener,
+        PostDialog.OnFragmentInteractionListener {
 
     private SearchView searchView;
     private MenuItem menuItem;
     private TextView headerUsername, headerName;
+    private FeedFragment feedFragment;
+    private ProfileFragment profileFragment;
 
-    private Fragment feedFragment, profileFragment;
+    private RequestQueue requestQueue;
 
     private static int uid;
 
@@ -41,6 +60,7 @@ public class MainActivity extends AppCompatActivity
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(true);
 
+        requestQueue = Volley.newRequestQueue(getApplicationContext());
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -51,9 +71,6 @@ public class MainActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
         navigationView.setCheckedItem(R.id.nav_home);
-
-        profileFragment = new ProfileFragment();
-        feedFragment = new FeedFragment();
 
         View header = navigationView.getHeaderView(0);
 
@@ -66,7 +83,9 @@ public class MainActivity extends AppCompatActivity
         uid = prefs.getInt("uid", -1);
 
         FragmentManager fragmentManager = getSupportFragmentManager();
+        feedFragment = FeedFragment.newInstance();
         fragmentManager.beginTransaction().replace(R.id.fragment_view, feedFragment).commit();
+
     }
 
     @Override
@@ -124,10 +143,12 @@ public class MainActivity extends AppCompatActivity
         FragmentManager fragmentManager = getSupportFragmentManager();
         switch (item.getItemId()) {
             case R.id.nav_home:
-                fragmentManager.beginTransaction().replace(R.id.fragment_view, new FeedFragment()).commit();
+                feedFragment = FeedFragment.newInstance();
+                fragmentManager.beginTransaction().replace(R.id.fragment_view, feedFragment).commit();
                 break;
             case R.id.nav_profile:
-                fragmentManager.beginTransaction().replace(R.id.fragment_view, new ProfileFragment()).commit();
+                profileFragment = ProfileFragment.newInstance(getUid());
+                fragmentManager.beginTransaction().replace(R.id.fragment_view, profileFragment).commit();
                 break;
             case R.id.nav_sign_out:
                 startActivity(new Intent(MainActivity.this, LoginActivity.class));
@@ -145,7 +166,50 @@ public class MainActivity extends AppCompatActivity
 
     }
 
+    @Override
+    public void onDialogSubmit(final PostDialog dialog, final String text) {
+        StringRequest addPostRequest = new StringRequest(Request.Method.POST, Database.ADD_POST_URL, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                System.out.println("addPost response: " + response);
+                try {
+                    JSONObject jsonResponse = new JSONObject(response);
+                    if (jsonResponse.getBoolean("success")) {
+                        Snackbar.make(findViewById(R.id.base),
+                                "Sent post", Snackbar.LENGTH_LONG).show();
+                        dialog.dismiss();
+                        feedFragment.updateFeed();
+                    }
+                    else {
+                        dialog.setEnabled(true);
+                        Snackbar.make(findViewById(R.id.base),
+                                jsonResponse.getString("message"), Snackbar.LENGTH_LONG).show();
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        }, new Response.ErrorListener() {
+
+            @Override
+            public void onErrorResponse(VolleyError error) { }
+        }) {
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                Map<String, String> parameters = new HashMap<>();
+                parameters.put("uid", "" + MainActivity.getUid());
+                parameters.put("text", text);
+                return parameters;
+            }
+        };
+        requestQueue.add(addPostRequest);
+    }
+
     public static int getUid() {
         return uid;
+    }
+
+    public static float dpToPixels(int dp, View view) {
+        return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, view.getResources().getDisplayMetrics());
     }
 }

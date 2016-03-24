@@ -1,9 +1,12 @@
 package yberg.intnet.com.app;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -20,6 +23,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.melnykov.fab.FloatingActionButton;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -65,16 +69,14 @@ public class FeedFragment extends Fragment {
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
      *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
      * @return A new instance of fragment FeedFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static FeedFragment newInstance(String param1, String param2) {
+    public static FeedFragment newInstance() {
         FeedFragment fragment = new FeedFragment();
         Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
+        //args.putString(ARG_PARAM1, param1);
+        //args.putString(ARG_PARAM2, param2);
         fragment.setArguments(args);
         return fragment;
     }
@@ -93,7 +95,7 @@ public class FeedFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(final LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
         ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle("Start");
@@ -115,10 +117,38 @@ public class FeedFragment extends Fragment {
         );
 
         mRecyclerView = (RecyclerView) view.findViewById(R.id.recycler_view);
+        /*mRecyclerView.addOnScrollListener(
+                new RecyclerView.OnScrollListener() {
+
+                    @Override
+                    public void onScrollStateChanged(RecyclerView view, int scrollState) {
+                        super.onScrollStateChanged(view, scrollState);
+                    }
+
+                    @Override
+                    public void onScrolled(RecyclerView view, int dx, int dy) {
+                        int topRowVerticalPosition =
+                                (view == null || view.getChildCount() == 0) ? 0 : view.getChildAt(0).getTop();
+                        mSwipeRefreshLayout.setEnabled(topRowVerticalPosition >= 0);
+                    }
+                }
+        );*/
+
+        FloatingActionButton fab = (FloatingActionButton) view.findViewById(R.id.fab);
+        fab.attachToRecyclerView(mRecyclerView);
+        fab.setOnClickListener(
+                new View.OnClickListener() {
+
+                    @Override
+                    public void onClick(View v) {
+                        showPostDialog();
+                    }
+                }
+        );
 
         // use this setting to improve performance if you know that changes
         // in content do not change the layout size of the RecyclerView
-        mRecyclerView.setHasFixedSize(true);
+        // mRecyclerView.setHasFixedSize(true);
 
         // use a linear layout manager
         mLayoutManager = new LinearLayoutManager(getContext());
@@ -128,6 +158,16 @@ public class FeedFragment extends Fragment {
         mRecyclerView.setAdapter(mAdapter);
 
         return view;
+    }
+
+    public void showPostDialog() {
+        FragmentManager fm = getActivity().getSupportFragmentManager();
+        System.out.println("fm: " + fm);
+        SharedPreferences prefs = getActivity().getSharedPreferences("com.intnet.yberg", Context.MODE_PRIVATE);
+        PostDialog postDialog = PostDialog.newInstance("New post", "Posting as",
+                prefs.getString("username", ""), prefs.getString("name", ""));
+        postDialog.show(fm, "fragment_post_dialog");
+
     }
 
     // TODO: Rename method, update argument and hook method into UI event
@@ -184,7 +224,7 @@ public class FeedFragment extends Fragment {
                             JSONObject user = post.getJSONObject("user");
                             JSONArray comments = post.getJSONArray("comments");
                             ArrayList<Comment> mComments = new ArrayList<>();
-                            for (int j = 0; j < comments.length(); j++) {
+                            for (int j = comments.length() - 1; j >= 0; j--) {
                                 JSONObject comment = comments.getJSONObject(j);
                                 JSONObject usr = comment.getJSONObject("user");
                                 mComments.add(new Comment(comment.getInt("cid"),
@@ -230,8 +270,7 @@ public class FeedFragment extends Fragment {
             @Override
             protected Map<String, String> getParams() throws AuthFailureError {
                 Map<String, String> parameters = new HashMap<>();
-                parameters.put("uid", "" + ((MainActivity) getActivity()).getUid());
-                parameters.put("uid", "" + ((MainActivity) getActivity()).getUid());
+                parameters.put("uid", "" + MainActivity.getUid());
                 return parameters;
             }
         };

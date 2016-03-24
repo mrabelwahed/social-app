@@ -41,7 +41,6 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.ViewHolder> {
     private static Activity mActivity;
     private boolean mFromMainActivity;
 
-    // Provide a suitable constructor (depends on the kind of dataset)
     public CardAdapter(Activity activity, ArrayList<Post> posts, boolean fromMainActivity) {
         mActivity = activity;
         mPosts = posts;
@@ -52,7 +51,6 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.ViewHolder> {
     // Complex data items may need more than one view per item, and
     // you provide access to all the views for a data item in a view holder
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        // each data item is just a string in this case
         public CardView mCardView;
         public TextView mUsername, mName, mPosted, mText, mNoComments, mUpvotes, mDownvotes;
         public ImageView mCloseButton;
@@ -115,7 +113,7 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.ViewHolder> {
 
                     for (int i = 0; i < recyclerView.getChildCount(); i++) {
                         CardView current = (CardView) recyclerView.getChildAt(i);
-                        current.setCardElevation(dpToPixels(1, current));
+                        current.setCardElevation(MainActivity.dpToPixels(1, current));
 
                         if (current != card) {
                             /*ViewGroup.LayoutParams size = current.getLayoutParams();
@@ -145,7 +143,7 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.ViewHolder> {
                         commentsSectionSize.height = ViewGroup.LayoutParams.WRAP_CONTENT;
                         //cardSize.height = ViewGroup.LayoutParams.MATCH_PARENT;
                         card.setTag("open");
-                        cardView.setCardElevation(dpToPixels(5, card));
+                        cardView.setCardElevation(MainActivity.dpToPixels(5, card));
                     } else { // if size.height == ViewGroup.LayoutParams.MATCH_PARENT)
                         closeButton.setVisibility(View.INVISIBLE);
                         commentsSectionSize.height = 0;
@@ -185,7 +183,7 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.ViewHolder> {
                     //cardSize.height = ViewGroup.LayoutParams.MATCH_PARENT;
                     commentsSection.setLayoutParams(commentsSectionSize);
                     //mCardView.setLayoutParams(cardSize);
-                    mCardView.setCardElevation(dpToPixels(1, mCardView));
+                    mCardView.setCardElevation(MainActivity.dpToPixels(1, mCardView));
                     mCardView.setTag("closed");
                 }
             };
@@ -247,10 +245,12 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.ViewHolder> {
                                     if (jsonResponse.getInt("vote") == 1) {
                                         up.setColorFilter(ContextCompat.getColor(mActivity,
                                                 jsonResponse.getBoolean("voted") ? R.color.green : R.color.colorDivider));
+                                        up.setTag(jsonResponse.getBoolean("voted") ? R.color.green : R.color.colorDivider);
                                     }
                                     else if (jsonResponse.getInt("vote") == -1) {
                                         down.setColorFilter(ContextCompat.getColor(mActivity,
                                                 jsonResponse.getBoolean("voted") ? R.color.red : R.color.colorDivider));
+                                        down.setTag(jsonResponse.getBoolean("voted") ? R.color.red : R.color.colorDivider);
                                     }
                                 }
                                 else {
@@ -308,6 +308,11 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.ViewHolder> {
         holder.mNoComments.setText(post.getNumberOfComments() + " comments");
         holder.mUpvotes.setText("" + post.getUpvotes());
         holder.mDownvotes.setText("" + post.getDownvotes());
+        holder.mCardView.setTag("closed");
+        holder.mCardView.setCardElevation(MainActivity.dpToPixels(1, holder.mCardView));
+        if (mFromMainActivity)
+            holder.mCloseButton.setVisibility(View.INVISIBLE);
+
         if (post.getVoted() == 1) {
             holder.mUpvote.setColorFilter(ContextCompat.getColor(mActivity, R.color.green));
             holder.mUpvote.setTag(R.color.green);
@@ -326,15 +331,15 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.ViewHolder> {
         if (post.getComments() != null) {
             ArrayList<Comment> comments = post.getComments();
             holder.mCommentsSection.removeAllViews();
-            if (comments.size() > 0) {
-                ViewGroup.LayoutParams commentsSectionSize = holder.mCommentsSection.getLayoutParams();
-                System.out.println("mFromMainActivity: " + mFromMainActivity);
-                if (mFromMainActivity)
-                    commentsSectionSize.height = 0;
-                else
-                    commentsSectionSize.height = ViewGroup.LayoutParams.WRAP_CONTENT;
-                holder.mCommentsSection.setLayoutParams(commentsSectionSize);
-            }
+
+            ViewGroup.LayoutParams commentsSectionSize = holder.mCommentsSection.getLayoutParams();
+            System.out.println("mFromMainActivity: " + mFromMainActivity);
+            if (mFromMainActivity)
+                commentsSectionSize.height = 0;
+            else
+                commentsSectionSize.height = ViewGroup.LayoutParams.WRAP_CONTENT;
+            holder.mCommentsSection.setLayoutParams(commentsSectionSize);
+
             for (Comment c : comments) {
                 ViewGroup container = (ViewGroup) mActivity.getLayoutInflater().inflate(R.layout.comment, null);
                 ((TextView) container.findViewById(R.id.comment)).setText(c.getText());
@@ -344,16 +349,18 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.ViewHolder> {
                 holder.mCommentsSection.addView(container);
             }
         }
+
+        if (!mFromMainActivity) {
+            ViewGroup container = (ViewGroup) mActivity.getLayoutInflater().inflate(R.layout.addcomment, null);
+            ((TextView) container.findViewById(R.id.comment)).setText("Comment");
+            holder.mCommentsSection.addView(container);
+        }
     }
 
     // Return the size of your dataset (invoked by the layout manager)
     @Override
     public int getItemCount() {
         return mPosts.size();
-    }
-
-    public static float dpToPixels(int dp, View view) {
-        return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, view.getResources().getDisplayMetrics());
     }
 
 }

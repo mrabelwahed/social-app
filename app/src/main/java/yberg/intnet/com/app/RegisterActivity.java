@@ -8,6 +8,7 @@ import android.graphics.LightingColorFilter;
 import android.os.Bundle;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
@@ -87,7 +88,7 @@ public class RegisterActivity extends AppCompatActivity {
                             passwordConfirm.setText("");
                             passwordConfirm.setBackgroundResource(R.drawable.edittext_red_border);
                             ((ImageView) parent.getChildAt(parent.indexOfChild(passwordConfirm) + 1))
-                                    .setColorFilter(Color.parseColor("#F44336"));
+                                    .setColorFilter(ContextCompat.getColor(RegisterActivity.this, R.color.green));
                             shouldReturn = true;
                         }
                         // Return if some input is empty
@@ -133,18 +134,16 @@ public class RegisterActivity extends AppCompatActivity {
                             @Override
                             protected Map<String, String> getParams() throws AuthFailureError {
 
-                                Map<String, String> parameters = new HashMap<>();
-
                                 if (password.getText().toString().equals(passwordConfirm.getText().toString())) {
+                                    Map<String, String> parameters = new HashMap<>();
                                     parameters.put("username", username.getText().toString());
                                     parameters.put("firstName", firstName.getText().toString());
                                     parameters.put("lastName", lastName.getText().toString());
                                     parameters.put("email", email.getText().toString());
                                     parameters.put("password", password.getText().toString());
+                                    return parameters;
                                 }
-
-                                System.out.println("sent values");
-                                return parameters;
+                                return null;
                             }
                         };
                         requestQueue.add(registerRequest);
@@ -191,7 +190,7 @@ public class RegisterActivity extends AppCompatActivity {
 
     /**
      * Enables or disables click on the login button and shows or hides a loading spinner.
-     * @param enabled enable or disable
+     * @param enabled Whether the button should be enabled or disabled
      */
     public void setEnabled(boolean enabled) {
         if (enabled) {
@@ -216,7 +215,8 @@ public class RegisterActivity extends AppCompatActivity {
             ViewGroup parent;
             parent = (ViewGroup) editText.getParent();
             editText.setBackgroundResource(R.drawable.edittext_red_border);
-            ((ImageView) parent.getChildAt(parent.indexOfChild(editText) + 1)).setColorFilter(Color.parseColor("#F44336"));
+            ((ImageView) parent.getChildAt(parent.indexOfChild(editText) + 1)).setColorFilter(
+                    ContextCompat.getColor(RegisterActivity.this, R.color.red));
             return true;
         }
         return false;
