@@ -1,6 +1,7 @@
 package yberg.intnet.com.app;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.LightingColorFilter;
 import android.graphics.Typeface;
@@ -65,6 +66,8 @@ public class ProfileFragment extends Fragment {
     private ImageView followIcon;
     private ProgressBar spinner;
     private CardView latestPostCard;
+
+    private Post latestPost;
 
     public ProfileFragment() {
         // Required empty public constructor
@@ -189,73 +192,75 @@ public class ProfileFragment extends Fragment {
                 new LightingColorFilter(0xFF000000, Color.WHITE));
 
         submitButton = (RelativeLayout) view.findViewById(R.id.submitButton);
-        submitButton.setOnClickListener(
-                new View.OnClickListener() {
+        if (MainActivity.getUid() == getArguments().getInt("profile")) {
+            submitButton.setOnClickListener(
+                    new View.OnClickListener() {
 
-                    @Override
-                    public void onClick(View v) {
+                        @Override
+                        public void onClick(View v) {
 
-                        boolean shouldReturn = setBorderIfEmpty(password);
-                        if (!newPassword.getText().toString().equals("") &&
-                                !passwordConfirm.getText().toString().equals(newPassword.getText().toString())) {
-                            ViewGroup parent = (ViewGroup) passwordConfirm.getParent();
-                            passwordConfirm.setText("");
-                            passwordConfirm.setBackgroundResource(R.drawable.edittext_red_border);
-                            ((ImageView) parent.getChildAt(parent.indexOfChild(passwordConfirm) + 1))
-                                    .setColorFilter(ContextCompat.getColor(getActivity(), R.color.red));
-                            shouldReturn = true;
-                        }
-                        // Return if some input is empty
-                        if (shouldReturn)
-                            return;
+                            boolean shouldReturn = setBorderIfEmpty(password);
+                            if (!newPassword.getText().toString().equals("") &&
+                                    !passwordConfirm.getText().toString().equals(newPassword.getText().toString())) {
+                                ViewGroup parent = (ViewGroup) passwordConfirm.getParent();
+                                passwordConfirm.setText("");
+                                passwordConfirm.setBackgroundResource(R.drawable.edittext_red_border);
+                                ((ImageView) parent.getChildAt(parent.indexOfChild(passwordConfirm) + 1))
+                                        .setColorFilter(ContextCompat.getColor(getActivity(), R.color.red));
+                                shouldReturn = true;
+                            }
+                            // Return if some input is empty
+                            if (shouldReturn)
+                                return;
 
-                        hideSoftKeyboard();
-                        setEnabled(false);
+                            hideSoftKeyboard();
+                            setEnabled(false);
 
-                        StringRequest editProfile = new StringRequest(Request.Method.POST, Database.EDIT_PROFILE_URL, new Response.Listener<String>() {
-                            @Override
-                            public void onResponse(String response) {
-                                System.out.println("editProfile response: " + response);
-                                try {
-                                    JSONObject jsonResponse = new JSONObject(response);
-                                    if (jsonResponse.getBoolean("success")) {
-                                        updateProfile();
-                                        Snackbar.make(getActivity().findViewById(R.id.base),
-                                                jsonResponse.getString("message"), Snackbar.LENGTH_LONG).show();
-                                    } else {
-                                        Snackbar.make(getActivity().findViewById(R.id.base),
-                                                jsonResponse.getString("message"), Snackbar.LENGTH_LONG).show();
+                            StringRequest editProfile = new StringRequest(Request.Method.POST, Database.EDIT_PROFILE_URL, new Response.Listener<String>() {
+                                @Override
+                                public void onResponse(String response) {
+                                    System.out.println("editProfile response: " + response);
+                                    try {
+                                        JSONObject jsonResponse = new JSONObject(response);
+                                        if (jsonResponse.getBoolean("success")) {
+                                            updateProfile();
+                                            Snackbar.make(getActivity().findViewById(R.id.base),
+                                                    jsonResponse.getString("message"), Snackbar.LENGTH_LONG).show();
+                                        } else {
+                                            Snackbar.make(getActivity().findViewById(R.id.base),
+                                                    jsonResponse.getString("message"), Snackbar.LENGTH_LONG).show();
+                                        }
+                                    } catch (JSONException e) {
+                                        e.printStackTrace();
                                     }
-                                } catch (JSONException e) {
-                                    e.printStackTrace();
+                                    setEnabled(true);
                                 }
-                                setEnabled(true);
-                            }
-                        }, new Response.ErrorListener() {
+                            }, new Response.ErrorListener() {
 
-                            @Override
-                            public void onErrorResponse(VolleyError error) {
-                            }
-                        }) {
-                            @Override
-                            protected Map<String, String> getParams() throws AuthFailureError {
-                                if (newPassword.getText().toString().equals(passwordConfirm.getText().toString())) {
-                                    Map<String, String> parameters = new HashMap<>();
-                                    parameters.put("uid", "" + MainActivity.getUid());
-                                    parameters.put("firstName", firstName.getText().toString());
-                                    parameters.put("lastName", lastName.getText().toString());
-                                    parameters.put("email", email.getText().toString());
-                                    parameters.put("password", password.getText().toString());
-                                    parameters.put("newPassword", newPassword.getText().toString());
-                                    return parameters;
+                                @Override
+                                public void onErrorResponse(VolleyError error) {
                                 }
-                                return null;
-                            }
-                        };
-                        requestQueue.add(editProfile);
+                            }) {
+                                @Override
+                                protected Map<String, String> getParams() throws AuthFailureError {
+                                    if (newPassword.getText().toString().equals(passwordConfirm.getText().toString())) {
+                                        Map<String, String> parameters = new HashMap<>();
+                                        parameters.put("uid", "" + MainActivity.getUid());
+                                        parameters.put("firstName", firstName.getText().toString());
+                                        parameters.put("lastName", lastName.getText().toString());
+                                        parameters.put("email", email.getText().toString());
+                                        parameters.put("password", password.getText().toString());
+                                        parameters.put("newPassword", newPassword.getText().toString());
+                                        return parameters;
+                                    }
+                                    return null;
+                                }
+                            };
+                            requestQueue.add(editProfile);
+                        }
                     }
-                }
-        );
+            );
+        }
 
         password.addTextChangedListener(new LoginActivity.GenericTextWatcher(password));
         passwordConfirm.addTextChangedListener(new LoginActivity.GenericTextWatcher(passwordConfirm));
@@ -271,19 +276,31 @@ public class ProfileFragment extends Fragment {
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
         );
-        params.setMargins((int) MainActivity.dpToPixels(16, latestPostCard),
+        params.setMargins(
+                (int) MainActivity.dpToPixels(16, latestPostCard),
                 (int) MainActivity.dpToPixels(4, latestPostCard),
                 (int) MainActivity.dpToPixels(16, latestPostCard),
                 (int) MainActivity.dpToPixels(4, latestPostCard)
         );
         latestPostCard.setLayoutParams(params);
+        latestPostCard.setOnClickListener(
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Intent intent = new Intent(getActivity(), PostActivity.class);
+                        intent.putExtra("post", latestPost);
+                        getActivity().startActivity(intent);
+                    }
+                }
+        );
 
         nothingToShowTextView = new TextView(getContext());
         params = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.WRAP_CONTENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
         );
-        params.setMargins((int) MainActivity.dpToPixels(16, nothingToShowTextView),
+        params.setMargins(
+                (int) MainActivity.dpToPixels(16, nothingToShowTextView),
                 (int) MainActivity.dpToPixels(4, nothingToShowTextView),
                 (int) MainActivity.dpToPixels(16, nothingToShowTextView),
                 (int) MainActivity.dpToPixels(8, nothingToShowTextView)
@@ -398,8 +415,12 @@ public class ProfileFragment extends Fragment {
         newPassword.setText("");
         passwordConfirm.setText("");
 
-        editProfileSection.setVisibility(
-                MainActivity.getUid() == getArguments().getInt("profile") ? View.VISIBLE : View.GONE);
+        firstName.clearFocus();
+        lastName.clearFocus();
+        email.clearFocus();
+        password.clearFocus();
+        newPassword.clearFocus();
+        passwordConfirm.clearFocus();
 
         StringRequest profileRequest = new StringRequest(Request.Method.POST, Database.PROFILE_URL, new Response.Listener<String>() {
             @Override
@@ -420,7 +441,7 @@ public class ProfileFragment extends Fragment {
                         );
                         if (!jsonResponse.isNull("post")) {
                             JSONObject post = jsonResponse.getJSONObject("post");
-                            Post latestPost = new Post(
+                            latestPost = new Post(
                                     post.getInt("pid"),
                                     user,
                                     post.getString("text"),
@@ -440,6 +461,22 @@ public class ProfileFragment extends Fragment {
                             ((TextView) latestPostCard.findViewById(R.id.comments)).setText("" + latestPost.getNumberOfComments());
                             ((TextView) latestPostCard.findViewById(R.id.upvotes)).setText("" + latestPost.getUpvotes());
                             ((TextView) latestPostCard.findViewById(R.id.downvotes)).setText("" + latestPost.getDownvotes());
+                            ((ImageView) latestPostCard.findViewById(R.id.upvote)).setColorFilter(
+                                    ContextCompat.getColor(getActivity(), R.color.gray)
+                            );
+                            ((ImageView) latestPostCard.findViewById(R.id.downvote)).setColorFilter(
+                                    ContextCompat.getColor(getActivity(), R.color.gray)
+                            );
+                            if (post.getInt("voted") == 1) {
+                                ((ImageView) latestPostCard.findViewById(R.id.upvote)).setColorFilter(
+                                        ContextCompat.getColor(getActivity(), R.color.green)
+                                );
+                            }
+                            else if (post.getInt("voted") == -1) {
+                                ((ImageView) latestPostCard.findViewById(R.id.downvote)).setColorFilter(
+                                        ContextCompat.getColor(getActivity(), R.color.red)
+                                );
+                            }
                             latestPostSection.addView(latestPostCard);
                         }
                         else {

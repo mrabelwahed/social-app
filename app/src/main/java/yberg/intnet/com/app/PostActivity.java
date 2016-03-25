@@ -15,6 +15,8 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 
@@ -34,15 +36,17 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-public class PostActivity extends AppCompatActivity
-        implements PostDialog.OnFragmentInteractionListener {
+public class PostActivity extends AppCompatActivity implements
+        PostDialog.OnFragmentInteractionListener,
+        ProfileFragment.OnFragmentInteractionListener,
+        AdapterView.OnItemClickListener {
 
     private RecyclerView mRecyclerView;
     private RecyclerView.Adapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
 
     private SwipeRefreshLayout mSwipeRefreshLayout;
-    private LinearLayout commentButton;
+    private LinearLayout postInfo;
 
     private Post post;
     private ArrayList<Post> mPosts;
@@ -218,5 +222,10 @@ public class PostActivity extends AppCompatActivity
             }
         };
         requestQueue.add(addCommentRequest);
+    }
+
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
     }
 }

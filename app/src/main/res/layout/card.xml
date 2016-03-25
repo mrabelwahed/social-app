@@ -53,13 +53,13 @@
                         <LinearLayout
                             android:id="@+id/user"
                             android:layout_width="match_parent"
-                            android:layout_height="wrap_content">
+                            android:layout_height="wrap_content"
+                            android:gravity="top">
 
                             <TextView
                                 android:id="@+id/username"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_gravity="center_vertical"
                                 android:textStyle="italic"
                                 android:text=" jdoe"
                                 android:textColor="@color/blue"
@@ -69,10 +69,8 @@
                                 android:id="@+id/name"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_gravity="center_vertical"
                                 android:text="John Doe"
-                                android:textColor="@color/blue"
-                                android:paddingRight="30dp" />
+                                android:textColor="@color/blue" />
 
                         </LinearLayout>
 
@@ -166,7 +164,7 @@
                             android:layout_width="36dp"
                             android:layout_height="wrap_content"
                             android:src="@drawable/thumb_up"
-                            android:tint="@color/colorDivider"
+                            android:tint="@color/gray"
                             android:id="@+id/upvote"
                             android:tag="img"
                             android:padding="4dp"
@@ -187,7 +185,7 @@
                             android:layout_width="36dp"
                             android:layout_height="match_parent"
                             android:src="@drawable/thumb_down"
-                            android:tint="@color/colorDivider"
+                            android:tint="@color/gray"
                             android:layout_toEndOf="@+id/upvotes"
                             android:layout_marginLeft="8dp"
                             android:tag="img"

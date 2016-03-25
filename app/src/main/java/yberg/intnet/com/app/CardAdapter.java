@@ -3,6 +3,7 @@ package yberg.intnet.com.app;
 import android.app.Activity;
 import android.content.Intent;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
@@ -67,6 +68,7 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.ViewHolder> {
 
         public ViewHolder(View view, ArrayList<Post> posts, boolean mFromMainActivity) {
             super(view);
+
             mCardView = (CardView) view;
             mUsername = (TextView) view.findViewById(R.id.username);
             mName = (TextView) view.findViewById(R.id.name);
@@ -204,11 +206,11 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.ViewHolder> {
                     if (v.getId() == R.id.upvote || v.getId() == R.id.upvotes) {
                         if (down.getTag().equals(R.color.red))
                             downvotes.setText("" + (Integer.parseInt(downvotes.getText().toString()) - 1));
-                        down.setColorFilter(ContextCompat.getColor(mActivity, R.color.colorDivider));
-                        down.setTag(R.color.colorDivider);
+                        down.setColorFilter(ContextCompat.getColor(mActivity, R.color.gray));
+                        down.setTag(R.color.gray);
                         if (up.getTag().equals(R.color.green)) {
-                            up.setColorFilter(ContextCompat.getColor(mActivity, R.color.colorDivider));
-                            up.setTag(R.color.colorDivider);
+                            up.setColorFilter(ContextCompat.getColor(mActivity, R.color.gray));
+                            up.setTag(R.color.gray);
                             upvotes.setText("" + (Integer.parseInt(upvotes.getText().toString()) - 1));
                         } else {
                             up.setColorFilter(ContextCompat.getColor(mActivity, R.color.green));
@@ -219,11 +221,11 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.ViewHolder> {
                     else if (v.getId() == R.id.downvote || v.getId() == R.id.downvotes) {
                         if (up.getTag().equals(R.color.green))
                             upvotes.setText("" + (Integer.parseInt(upvotes.getText().toString()) - 1));
-                        up.setColorFilter(ContextCompat.getColor(mActivity, R.color.colorDivider));
-                        up.setTag(R.color.colorDivider);
+                        up.setColorFilter(ContextCompat.getColor(mActivity, R.color.gray));
+                        up.setTag(R.color.gray);
                         if (down.getTag().equals(R.color.red)) {
-                            down.setColorFilter(ContextCompat.getColor(mActivity, R.color.colorDivider));
-                            down.setTag(R.color.colorDivider);
+                            down.setColorFilter(ContextCompat.getColor(mActivity, R.color.gray));
+                            down.setTag(R.color.gray);
                             downvotes.setText("" + (Integer.parseInt(downvotes.getText().toString()) - 1));
                         }
                         else {
@@ -244,13 +246,13 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.ViewHolder> {
                                     downvotes.setText("" + jsonResponse.getInt("downvotes"));
                                     if (jsonResponse.getInt("vote") == 1) {
                                         up.setColorFilter(ContextCompat.getColor(mActivity,
-                                                jsonResponse.getBoolean("voted") ? R.color.green : R.color.colorDivider));
-                                        up.setTag(jsonResponse.getBoolean("voted") ? R.color.green : R.color.colorDivider);
+                                                jsonResponse.getBoolean("voted") ? R.color.green : R.color.gray));
+                                        up.setTag(jsonResponse.getBoolean("voted") ? R.color.green : R.color.gray);
                                     }
                                     else if (jsonResponse.getInt("vote") == -1) {
                                         down.setColorFilter(ContextCompat.getColor(mActivity,
-                                                jsonResponse.getBoolean("voted") ? R.color.red : R.color.colorDivider));
-                                        down.setTag(jsonResponse.getBoolean("voted") ? R.color.red : R.color.colorDivider);
+                                                jsonResponse.getBoolean("voted") ? R.color.red : R.color.gray));
+                                        down.setTag(jsonResponse.getBoolean("voted") ? R.color.red : R.color.gray);
                                     }
                                 }
                                 else {
@@ -322,10 +324,10 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.ViewHolder> {
             holder.mDownvote.setTag(R.color.red);
         }
         else {
-            holder.mUpvote.setColorFilter(ContextCompat.getColor(mActivity, R.color.colorDivider));
-            holder.mUpvote.setTag(R.color.colorDivider);
-            holder.mDownvote.setColorFilter(ContextCompat.getColor(mActivity, R.color.colorDivider));
-            holder.mDownvote.setTag(R.color.colorDivider);
+            holder.mUpvote.setColorFilter(ContextCompat.getColor(mActivity, R.color.gray));
+            holder.mUpvote.setTag(R.color.gray);
+            holder.mDownvote.setColorFilter(ContextCompat.getColor(mActivity, R.color.gray));
+            holder.mDownvote.setTag(R.color.gray);
         }
 
         if (post.getComments() != null) {
