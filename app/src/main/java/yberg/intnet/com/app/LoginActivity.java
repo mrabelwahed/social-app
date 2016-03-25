@@ -11,6 +11,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,11 +20,14 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
+import com.android.volley.TimeoutError;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
@@ -59,8 +63,8 @@ public class LoginActivity extends AppCompatActivity {
         username = (EditText) findViewById(R.id.username);
         password = (EditText) findViewById(R.id.password);
 
-        String storedUsername;
-        if (!(storedUsername = getSharedPreferences("com.intnet.yberg", Context.MODE_PRIVATE).getString("username", "")).equals("")) {
+        String storedUsername = getSharedPreferences("com.intnet.yberg", Context.MODE_PRIVATE).getString("username", "");
+        if (!storedUsername.equals("")) {
             username.setText(storedUsername);
             password.requestFocus();
         }
@@ -119,6 +123,13 @@ public class LoginActivity extends AppCompatActivity {
                         }, new Response.ErrorListener() {
                             @Override
                             public void onErrorResponse(VolleyError error) {
+                                if (error.networkResponse == null) {
+                                    if (error.getClass().equals(TimeoutError.class)) {
+                                        setEnabled(true);
+                                        Snackbar.make(coordinatorLayout, R.string.request_timeout,
+                                                Snackbar.LENGTH_LONG).show();
+                                    }
+                                }
                             }
                         }) {
                             @Override
@@ -134,6 +145,7 @@ public class LoginActivity extends AppCompatActivity {
                                 return parameters;
                             }
                         };
+                        loginRequest.setRetryPolicy(Database.getRetryPolicy());
                         requestQueue.add(loginRequest);
                     }
                 }
@@ -165,7 +177,7 @@ public class LoginActivity extends AppCompatActivity {
 
         setEnabled(true);
 
-        password.setText("123");
+        //password.setText("123");
         //loginButton.performClick();
     }
 

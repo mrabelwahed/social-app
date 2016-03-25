@@ -22,12 +22,12 @@
                 android:id="@+id/followCard"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="16dp"
-                android:layout_marginRight="16dp"
                 card_view:cardCornerRadius="2dp"
                 card_view:elevation="1dp"
                 android:background="#000"
+                android:layout_marginLeft="8dp"
                 android:layout_marginTop="8dp"
+                android:layout_marginRight="8dp"
                 android:layout_marginBottom="4dp">
 
                 <LinearLayout
@@ -135,7 +135,8 @@
                                 android:layout_width="0dp"
                                 android:layout_height="match_parent"
                                 android:gravity="center_vertical"
-                                android:layout_weight="1">
+                                android:layout_weight="1"
+                                android:id="@+id/followersButton">
 
                                 <TextView
                                     android:layout_width="wrap_content"
@@ -159,7 +160,8 @@
                                 android:layout_width="0dp"
                                 android:layout_height="match_parent"
                                 android:gravity="center_vertical"
-                                android:layout_weight="1">
+                                android:layout_weight="1"
+                                android:id="@+id/followingButton">
 
                                 <TextView
                                     android:layout_width="wrap_content"
@@ -322,8 +324,8 @@
                         android:orientation="vertical"
                         android:elevation="1dp"
                         android:background="@drawable/rounded_corners"
-                        android:layout_marginLeft="16dp"
-                        android:layout_marginRight="16dp"
+                        android:layout_marginLeft="8dp"
+                        android:layout_marginRight="8dp"
                         android:layout_marginTop="4dp">
 
                         <LinearLayout
@@ -556,10 +558,7 @@
                         android:elevation="1dp"
                         android:background="@drawable/button"
                         android:padding="8dp"
-                        android:layout_marginLeft="16dp"
-                        android:layout_marginRight="16dp"
-                        android:layout_marginTop="8dp"
-                        android:layout_marginBottom="16dp">
+                        android:layout_margin="8dp">
 
                         <ProgressBar
                             android:layout_width="30dp"

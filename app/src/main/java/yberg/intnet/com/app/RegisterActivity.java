@@ -23,9 +23,11 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.android.volley.AuthFailureError;
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
+import com.android.volley.TimeoutError;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
@@ -129,7 +131,15 @@ public class RegisterActivity extends AppCompatActivity {
                             }
                         }, new Response.ErrorListener() {
                             @Override
-                            public void onErrorResponse(VolleyError error) {}
+                            public void onErrorResponse(VolleyError error) {
+                                if (error.networkResponse == null) {
+                                    if (error.getClass().equals(TimeoutError.class)) {
+                                        setEnabled(true);
+                                        Snackbar.make(coordinatorLayout, R.string.request_timeout,
+                                                Snackbar.LENGTH_LONG).show();
+                                    }
+                                }
+                            }
                         }) {
                             @Override
                             protected Map<String, String> getParams() throws AuthFailureError {
@@ -146,6 +156,7 @@ public class RegisterActivity extends AppCompatActivity {
                                 return null;
                             }
                         };
+                        registerRequest.setRetryPolicy(Database.getRetryPolicy());
                         requestQueue.add(registerRequest);
                     }
                 }

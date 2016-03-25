@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -15,6 +17,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.RelativeLayout;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
@@ -59,7 +62,9 @@ public class FeedFragment extends Fragment {
     private RecyclerView.LayoutManager mLayoutManager;
     private ArrayList<Post> mPosts;
     private RequestQueue requestQueue;
+
     private SwipeRefreshLayout mSwipeRefreshLayout;
+    private CoordinatorLayout coordinatorLayout;
 
     public FeedFragment() {
         // Required empty public constructor
@@ -74,22 +79,16 @@ public class FeedFragment extends Fragment {
     // TODO: Rename and change types and number of parameters
     public static FeedFragment newInstance() {
         FeedFragment fragment = new FeedFragment();
-        Bundle args = new Bundle();
-        //args.putString(ARG_PARAM1, param1);
-        //args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
         return fragment;
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
         mPosts = new ArrayList<>();
         requestQueue = Volley.newRequestQueue(getContext().getApplicationContext());
+
+        ((MainActivity) getActivity()).getNavigationView().setCheckedItem(R.id.nav_home);
 
         updateFeed();
     }
@@ -102,6 +101,8 @@ public class FeedFragment extends Fragment {
 
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_feed, container, false);
+
+        coordinatorLayout = (CoordinatorLayout) view.findViewById(R.id.base);
 
         mSwipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_refresh);
         mSwipeRefreshLayout.setColorSchemeColors(ContextCompat.getColor(getContext(), R.color.colorAccent));
@@ -117,22 +118,6 @@ public class FeedFragment extends Fragment {
         );
 
         mRecyclerView = (RecyclerView) view.findViewById(R.id.recycler_view);
-        /*mRecyclerView.addOnScrollListener(
-                new RecyclerView.OnScrollListener() {
-
-                    @Override
-                    public void onScrollStateChanged(RecyclerView view, int scrollState) {
-                        super.onScrollStateChanged(view, scrollState);
-                    }
-
-                    @Override
-                    public void onScrolled(RecyclerView view, int dx, int dy) {
-                        int topRowVerticalPosition =
-                                (view == null || view.getChildCount() == 0) ? 0 : view.getChildAt(0).getTop();
-                        mSwipeRefreshLayout.setEnabled(topRowVerticalPosition >= 0);
-                    }
-                }
-        );*/
 
         FloatingActionButton fab = (FloatingActionButton) view.findViewById(R.id.fab);
         fab.attachToRecyclerView(mRecyclerView);
@@ -154,7 +139,12 @@ public class FeedFragment extends Fragment {
         mLayoutManager = new LinearLayoutManager(getContext());
         mRecyclerView.setLayoutManager(mLayoutManager);
 
-        mAdapter = new CardAdapter(getActivity(), mPosts, true);
+        mAdapter = new CardAdapter(getActivity(), mPosts, new CardAdapter.OnItemClickListener() {
+            @Override
+            public void onClick(View caller) {
+
+            }
+        }, true);
         mRecyclerView.setAdapter(mAdapter);
 
         return view;
@@ -262,11 +252,8 @@ public class FeedFragment extends Fragment {
                     e.printStackTrace();
                 }
             }
-        }, new Response.ErrorListener() {
-
-            @Override
-            public void onErrorResponse(VolleyError error) { }
-        }) {
+        }, Database.getErrorListener(coordinatorLayout)
+        ) {
             @Override
             protected Map<String, String> getParams() throws AuthFailureError {
                 Map<String, String> parameters = new HashMap<>();
@@ -274,6 +261,7 @@ public class FeedFragment extends Fragment {
                 return parameters;
             }
         };
+        getFeedRequest.setRetryPolicy(Database.getRetryPolicy());
         requestQueue.add(getFeedRequest);
     }
 }

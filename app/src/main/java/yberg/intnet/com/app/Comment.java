@@ -18,6 +18,10 @@ public class Comment implements Serializable {
         this.commented = commented;
     }
 
+    public void setCid(int cid) {
+        this.cid = cid;
+    }
+
     public void setUser(User user) {
         this.user = user;
     }
@@ -28,6 +32,10 @@ public class Comment implements Serializable {
 
     public void setCommented(String posted) {
         this.commented = commented;
+    }
+
+    public int getCid() {
+        return cid;
     }
 
     public User getUser() {

@@ -1,14 +1,15 @@
 package yberg.intnet.com.app;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
-import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -16,14 +17,13 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
+import com.android.volley.TimeoutError;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
@@ -48,8 +48,8 @@ public class PostActivity extends AppCompatActivity implements
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private LinearLayout postInfo;
 
-    private Post post;
-    private ArrayList<Post> mPosts;
+    private Post receivedPost;
+    private ArrayList<Post> mPost;
     private RequestQueue requestQueue;
 
     @Override
@@ -64,13 +64,11 @@ public class PostActivity extends AppCompatActivity implements
 
         requestQueue = Volley.newRequestQueue(getApplicationContext());
 
-        mPosts = new ArrayList<>();
-        post = (Post) getIntent().getSerializableExtra("post");
-        mPosts.add(post);
+        mPost = new ArrayList<>();
+        receivedPost = (Post) getIntent().getSerializableExtra("post");
+        mPost.add(receivedPost);
 
-        updatePost();
-
-        mSwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipe_refresh);
+        mSwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipeRefresh);
         mSwipeRefreshLayout.setColorSchemeColors(ContextCompat.getColor(this, R.color.colorAccent));
         mSwipeRefreshLayout.setOnRefreshListener(
                 new SwipeRefreshLayout.OnRefreshListener() {
@@ -93,8 +91,122 @@ public class PostActivity extends AppCompatActivity implements
         mLayoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(mLayoutManager);
 
-        mAdapter = new CardAdapter(this, mPosts, false);
+        mAdapter = new CardAdapter(this, mPost, new CardAdapter.OnItemClickListener() {
+            @Override
+            public void onClick(final View v) {
+
+                AlertDialog.Builder builder = new AlertDialog.Builder(PostActivity.this);
+                DialogInterface.OnClickListener dialogClickListener;
+
+                switch (v.getId()) {
+                    case R.id.deletePostButton:
+                        dialogClickListener = new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                switch (which){
+                                    case DialogInterface.BUTTON_POSITIVE:
+                                        StringRequest deletePostRequest = new StringRequest(Request.Method.POST, Database.DELETE_POST_URL, new Response.Listener<String>() {
+                                            @Override
+                                            public void onResponse(String response) {
+                                                System.out.println("deletePost response: " + response);
+                                                try {
+                                                    JSONObject jsonResponse = new JSONObject(response);
+                                                    if (jsonResponse.getBoolean("success")) {
+                                                        Snackbar.make(findViewById(R.id.base),
+                                                                "Deleted post", Snackbar.LENGTH_LONG).show();
+                                                        finish();
+                                                    }
+                                                    else {
+                                                        Snackbar.make(findViewById(R.id.base),
+                                                                jsonResponse.getString("message"), Snackbar.LENGTH_LONG).show();
+                                                    }
+                                                } catch (JSONException e) {
+                                                    e.printStackTrace();
+                                                }
+                                            }
+                                        }, Database.getErrorListener(findViewById(R.id.base))
+                                        ) {
+                                            @Override
+                                            protected Map<String, String> getParams() throws AuthFailureError {
+                                                Map<String, String> parameters = new HashMap<>();
+                                                parameters.put("uid", "" + MainActivity.getUid());
+                                                parameters.put("pid", "" + mPost.get(0).getPid());
+                                                return parameters;
+                                            }
+                                        };
+                                        deletePostRequest.setRetryPolicy(Database.getRetryPolicy());
+                                        requestQueue.add(deletePostRequest);
+                                        break;
+                                }
+                            }
+                        };
+                        builder.setMessage("Do you really want to delete this post?")
+                                .setPositiveButton("Yes", dialogClickListener)
+                                .setNegativeButton("Cancel", dialogClickListener).show();
+                        break;
+                    case R.id.deleteCommentButton:
+                        dialogClickListener = new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                switch (which){
+                                    case DialogInterface.BUTTON_POSITIVE:
+                                        StringRequest deleteCommentRequest = new StringRequest(Request.Method.POST, Database.DELETE_COMMENT_URL, new Response.Listener<String>() {
+                                            @Override
+                                            public void onResponse(String response) {
+                                                System.out.println("deleteComment response: " + response);
+                                                try {
+                                                    JSONObject jsonResponse = new JSONObject(response);
+                                                    if (jsonResponse.getBoolean("success")) {
+                                                        Snackbar.make(findViewById(R.id.base),
+                                                                "Deleted comment", Snackbar.LENGTH_LONG).show();
+                                                        updatePost();
+                                                    }
+                                                    else {
+                                                        Snackbar.make(findViewById(R.id.base),
+                                                                jsonResponse.getString("message"), Snackbar.LENGTH_LONG).show();
+                                                    }
+                                                } catch (JSONException e) {
+                                                    e.printStackTrace();
+                                                }
+                                            }
+                                        }, Database.getErrorListener(findViewById(R.id.base))
+                                        ) {
+                                            @Override
+                                            protected Map<String, String> getParams() throws AuthFailureError {
+                                                Map<String, String> parameters = new HashMap<>();
+                                                parameters.put("uid", "" + MainActivity.getUid());
+                                                parameters.put("cid", "" + mPost.get(0).getComments().get(
+                                                        ((ViewGroup) mRecyclerView.findViewById(R.id.comments_section)).indexOfChild((View) v.getParent().getParent())
+                                                ).getCid());
+
+                                                System.out.println("index: " + ((ViewGroup) mRecyclerView.findViewById(R.id.comments_section)).indexOfChild((View)v.getParent().getParent()));
+                                                System.out.println("cid: " + parameters.get("cid"));
+                                                return parameters;
+                                            }
+                                        };
+                                        deleteCommentRequest.setRetryPolicy(Database.getRetryPolicy());
+                                        requestQueue.add(deleteCommentRequest);
+                                        break;
+                                }
+                            }
+                        };
+                        builder = new AlertDialog.Builder(PostActivity.this);
+                        builder.setMessage("Do you really want to delete this post?")
+                                .setPositiveButton("Yes", dialogClickListener)
+                                .setNegativeButton("Cancel", dialogClickListener).show();
+                        break;
+                    case R.id.postInfo:
+                        MainActivity.profileFragment = ProfileFragment.newInstance(mPost.get(0).getUser().getUid());
+                        MainActivity.getMainFragmentManager().beginTransaction().replace(
+                                R.id.fragment_view, MainActivity.profileFragment).commitAllowingStateLoss();
+                        finish();
+                        break;
+                }
+            }
+        }, false);
         mRecyclerView.setAdapter(mAdapter);
+
+        updatePost();
     }
 
     public void showCommentDialog(View v) {
@@ -120,7 +232,7 @@ public class PostActivity extends AppCompatActivity implements
                 try {
                     JSONObject jsonResponse = new JSONObject(response);
                     if (jsonResponse.getBoolean("success")) {
-                        mPosts.clear();
+                        mPost.clear();
                         JSONObject post = jsonResponse.getJSONObject("post");
                         JSONObject user = post.getJSONObject("user");
                         JSONArray comments = post.getJSONArray("comments");
@@ -141,7 +253,7 @@ public class PostActivity extends AppCompatActivity implements
                             ));
                         }
                         System.out.println("user: " + user.getInt("uid"));
-                        mPosts.add(new Post(
+                        mPost.add(new Post(
                                 post.getInt("pid"),
                                 new User(
                                         user.getInt("uid"),
@@ -160,22 +272,34 @@ public class PostActivity extends AppCompatActivity implements
                         ));
                         mAdapter.notifyDataSetChanged();
                     }
+                    else {
+                        MainActivity.makeSnackbar(jsonResponse.getString("message"));
+                        finish();
+                    }
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
             }
         }, new Response.ErrorListener() {
             @Override
-            public void onErrorResponse(VolleyError error) { }
+            public void onErrorResponse(VolleyError error) {
+                if (error.networkResponse == null) {
+                    if (error.getClass().equals(TimeoutError.class)) {
+                        MainActivity.makeSnackbar(R.string.request_timeout);
+                        finish();
+                    }
+                }
+            }
         }) {
             @Override
             protected Map<String, String> getParams() throws AuthFailureError {
                 Map<String, String> parameters = new HashMap<>();
-                parameters.put("pid", "" + post.getPid());
+                parameters.put("pid", "" + mPost.get(0).getPid());
                 parameters.put("uid", "" + MainActivity.getUid());
                 return parameters;
             }
         };
+        getPostRequest.setRetryPolicy(Database.getRetryPolicy());
         requestQueue.add(getPostRequest);
     }
 
@@ -207,20 +331,18 @@ public class PostActivity extends AppCompatActivity implements
                     e.printStackTrace();
                 }
             }
-        }, new Response.ErrorListener() {
-
-            @Override
-            public void onErrorResponse(VolleyError error) { }
-        }) {
+        }, Database.getErrorListener(findViewById(R.id.base))
+        ) {
             @Override
             protected Map<String, String> getParams() throws AuthFailureError {
                 Map<String, String> parameters = new HashMap<>();
-                parameters.put("pid", "" + post.getPid());
+                parameters.put("pid", "" + mPost.get(0).getPid());
                 parameters.put("uid", "" + MainActivity.getUid());
                 parameters.put("text", text);
                 return parameters;
             }
         };
+        addCommentRequest.setRetryPolicy(Database.getRetryPolicy());
         requestQueue.add(addCommentRequest);
     }
 

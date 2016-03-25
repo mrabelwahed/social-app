@@ -3,13 +3,11 @@ package yberg.intnet.com.app;
 import android.app.Activity;
 import android.content.Intent;
 import android.support.design.widget.Snackbar;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.transition.TransitionManager;
-import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,11 +19,9 @@ import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
-import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -41,23 +37,112 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.ViewHolder> {
     private ArrayList<Post> mPosts;
     private static Activity mActivity;
     private boolean mFromMainActivity;
+    private OnItemClickListener mListener;
 
-    public CardAdapter(Activity activity, ArrayList<Post> posts, boolean fromMainActivity) {
+    public CardAdapter(Activity activity, ArrayList<Post> posts, OnItemClickListener listener, boolean fromMainActivity) {
         mActivity = activity;
         mPosts = posts;
+        mListener = listener;
         mFromMainActivity = fromMainActivity;
+    }
+
+    // Create new views (invoked by the layout manager)
+    @Override
+    public CardAdapter.ViewHolder onCreateViewHolder(final ViewGroup parent, int viewType) {
+        // Create a new view
+
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.card, parent, false);
+        ViewHolder vh = new ViewHolder(view, mPosts, new CardAdapter.ViewHolder.OnItemClickListener() {
+            public void onClick(View caller) { mListener.onClick(caller); }
+        }, mFromMainActivity);
+
+        return vh;
+    }
+
+    // Replace the contents of a view (invoked by the layout manager)
+    @Override
+    public void onBindViewHolder(ViewHolder holder, int position) {
+        // - get element from your dataset at this position
+        // - replace the contents of the view with that element
+
+        Post post = mPosts.get(position);
+
+        holder.mUsername.setText("@" + post.getUser().getUsername());
+        holder.mName.setText(post.getUser().getName());
+        holder.mPosted.setText(post.getPosted());
+        holder.mText.setText(post.getText());
+        holder.mNoComments.setText("" + post.getNumberOfComments());
+        holder.mUpvotes.setText("" + post.getUpvotes());
+        holder.mDownvotes.setText("" + post.getDownvotes());
+        holder.mCardView.setTag("closed");
+        holder.mCardView.setCardElevation(MainActivity.dpToPixels(1, holder.mCardView));
+
+        if (mFromMainActivity)
+            holder.mCloseButton.setVisibility(View.INVISIBLE);
+
+        if (!mFromMainActivity && MainActivity.getUid() == post.getUser().getUid())
+            holder.mDeletePostButton.setVisibility(View.VISIBLE);
+
+        holder.mUpvote.setColorFilter(ContextCompat.getColor(mActivity, R.color.gray));
+        holder.mUpvote.setTag(R.color.gray);
+        holder.mDownvote.setColorFilter(ContextCompat.getColor(mActivity, R.color.gray));
+        holder.mDownvote.setTag(R.color.gray);
+
+        if (post.getVoted() == 1) {
+            holder.mUpvote.setColorFilter(ContextCompat.getColor(mActivity, R.color.green));
+            holder.mUpvote.setTag(R.color.green);
+        }
+        else if (post.getVoted() == -1) {
+            holder.mDownvote.setColorFilter(ContextCompat.getColor(mActivity, R.color.red));
+            holder.mDownvote.setTag(R.color.red);
+        }
+
+        if (post.getComments() != null) {
+            ArrayList<Comment> comments = post.getComments();
+            holder.mCommentsSection.removeAllViews();
+
+            ViewGroup.LayoutParams commentsSectionSize = holder.mCommentsSection.getLayoutParams();
+            System.out.println("mFromMainActivity: " + mFromMainActivity);
+            if (mFromMainActivity)
+                commentsSectionSize.height = 0;
+            else
+                commentsSectionSize.height = ViewGroup.LayoutParams.WRAP_CONTENT;
+            holder.mCommentsSection.setLayoutParams(commentsSectionSize);
+
+            for (Comment c : comments) {
+                ViewGroup container = (ViewGroup) mActivity.getLayoutInflater().inflate(R.layout.comment, null);
+                ((TextView) container.findViewById(R.id.comment)).setText(c.getText());
+                ((TextView) container.findViewById(R.id.user)).setText(c.getUser().getName());
+                ((TextView) container.findViewById(R.id.time)).setText(c.getCommented());
+                holder.mCommentsSection.removeView(holder.mCommentsSection.findViewById(R.id.progress));
+                holder.mCommentsSection.addView(container);
+                if (!mFromMainActivity && MainActivity.getUid() == c.getUser().getUid()) {
+                    holder.mDeleteCommentButton = (ImageView) container.findViewById(R.id.deleteCommentButton);
+                    holder.mDeleteCommentButton.setOnClickListener(holder);
+                    holder.mDeleteCommentButton.setVisibility(View.VISIBLE);
+                }
+            }
+        }
+
+        if (!mFromMainActivity) {
+            ViewGroup container = (ViewGroup) mActivity.getLayoutInflater().inflate(R.layout.addcomment, null);
+            ((TextView) container.findViewById(R.id.comment)).setText("Comment");
+            holder.mCommentsSection.addView(container);
+        }
     }
 
     // Provide a reference to the views for each data item
     // Complex data items may need more than one view per item, and
     // you provide access to all the views for a data item in a view holder
-    public static class ViewHolder extends RecyclerView.ViewHolder {
+    public static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         public CardView mCardView;
         public TextView mUsername, mName, mPosted, mText, mNoComments, mUpvotes, mDownvotes;
-        public ImageView mCloseButton;
+        public ImageView mCloseButton, mDeletePostButton, mDeleteCommentButton;
         public ImageView mUpvote, mDownvote;
 
-        public LinearLayout mCommentsSection;
+        public LinearLayout mCommentsSection, mPostInfo;
+
+        private OnItemClickListener mListener;
 
         private View.OnClickListener cardListener;
         private View.OnClickListener closeListener;
@@ -65,9 +150,14 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.ViewHolder> {
         private RequestQueue requestQueue;
 
         private ArrayList<Post> mPosts;
+        private boolean mFromMainActivity;
 
-        public ViewHolder(View view, ArrayList<Post> posts, boolean mFromMainActivity) {
+        public ViewHolder(View view, ArrayList<Post> posts, OnItemClickListener listener, boolean fromMainActivity) {
             super(view);
+
+            mPosts = posts;
+            mListener = listener;
+            mFromMainActivity = fromMainActivity;
 
             mCardView = (CardView) view;
             mUsername = (TextView) view.findViewById(R.id.username);
@@ -82,8 +172,6 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.ViewHolder> {
 
             mCommentsSection = (LinearLayout) view.findViewById(R.id.comments_section);
 
-            mPosts = posts;
-
             requestQueue = Volley.newRequestQueue(mActivity.getApplicationContext());
 
             setUpListeners();
@@ -94,10 +182,17 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.ViewHolder> {
             mDownvotes.setOnClickListener(voteListener);
 
             if (mFromMainActivity) {
-                mCloseButton = (ImageView) view.findViewById(R.id.close_button);
+                mCloseButton = (ImageView) view.findViewById(R.id.closeButton);
                 mCloseButton.setOnClickListener(closeListener);
 
                 mCardView.setOnClickListener(cardListener);
+            }
+            else {
+                mDeletePostButton = (ImageView) view.findViewById(R.id.deletePostButton);
+                mDeletePostButton.setOnClickListener(this);
+
+                mPostInfo = (LinearLayout) view.findViewById(R.id.postInfo);
+                mPostInfo.setOnClickListener(this);
             }
         }
 
@@ -125,14 +220,14 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.ViewHolder> {
                             ViewGroup.LayoutParams size = comments.getLayoutParams();
                             size.height = 0;
                             comments.setLayoutParams(size);
-                            current.findViewById(R.id.close_button).setVisibility(View.INVISIBLE);
+                            current.findViewById(R.id.closeButton).setVisibility(View.INVISIBLE);
                             current.setTag("closed");
                         }
                     }
 
                     CardView cardView = (CardView) card;
                     LinearLayout commentsSection = (LinearLayout) card.findViewById(R.id.comments_section);
-                    ImageView closeButton = (ImageView) card.findViewById(R.id.close_button);
+                    ImageView closeButton = (ImageView) card.findViewById(R.id.closeButton);
 
                     ViewGroup.LayoutParams cardSize = card.getLayoutParams();
                     ViewGroup.LayoutParams commentsSectionSize = commentsSection.getLayoutParams();
@@ -166,29 +261,31 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.ViewHolder> {
                 }
             };
 
-            closeListener = new View.OnClickListener() {
+            if (mFromMainActivity) {
+                closeListener = new View.OnClickListener() {
 
-                @Override
-                public void onClick(View closeButton) {
+                    @Override
+                    public void onClick(View closeButton) {
 
-                    RecyclerView recyclerView = (RecyclerView) mCardView.getParent();
-                    LinearLayout commentsSection = (LinearLayout) mCardView.findViewById(R.id.comments_section);
+                        RecyclerView recyclerView = (RecyclerView) mCardView.getParent();
+                        LinearLayout commentsSection = (LinearLayout) mCardView.findViewById(R.id.comments_section);
 
-                    TransitionManager.endTransitions(recyclerView);
-                    TransitionManager.beginDelayedTransition(recyclerView);
+                        TransitionManager.endTransitions(recyclerView);
+                        TransitionManager.beginDelayedTransition(recyclerView);
 
-                    //ViewGroup.LayoutParams cardSize = mCardView.getLayoutParams();
-                    ViewGroup.LayoutParams commentsSectionSize = commentsSection.getLayoutParams();
+                        //ViewGroup.LayoutParams cardSize = mCardView.getLayoutParams();
+                        ViewGroup.LayoutParams commentsSectionSize = commentsSection.getLayoutParams();
 
-                    closeButton.setVisibility(View.INVISIBLE);
-                    commentsSectionSize.height = 0;
-                    //cardSize.height = ViewGroup.LayoutParams.MATCH_PARENT;
-                    commentsSection.setLayoutParams(commentsSectionSize);
-                    //mCardView.setLayoutParams(cardSize);
-                    mCardView.setCardElevation(MainActivity.dpToPixels(1, mCardView));
-                    mCardView.setTag("closed");
-                }
-            };
+                        closeButton.setVisibility(View.INVISIBLE);
+                        commentsSectionSize.height = 0;
+                        //cardSize.height = ViewGroup.LayoutParams.MATCH_PARENT;
+                        commentsSection.setLayoutParams(commentsSectionSize);
+                        //mCardView.setLayoutParams(cardSize);
+                        mCardView.setCardElevation(MainActivity.dpToPixels(1, mCardView));
+                        mCardView.setTag("closed");
+                    }
+                };
+            }
 
             voteListener = new View.OnClickListener() {
 
@@ -235,7 +332,7 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.ViewHolder> {
                         }
                     }
 
-                    StringRequest getFeedRequest = new StringRequest(Request.Method.POST, Database.VOTE_URL, new Response.Listener<String>() {
+                    StringRequest voteRequest = new StringRequest(Request.Method.POST, Database.VOTE_URL, new Response.Listener<String>() {
                         @Override
                         public void onResponse(String response) {
                             System.out.println("vote response: " + response);
@@ -262,10 +359,8 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.ViewHolder> {
                                 e.printStackTrace();
                             }
                         }
-                    }, new Response.ErrorListener() {
-                        @Override
-                        public void onErrorResponse(VolleyError error) { }
-                    }) {
+                    }, Database.getErrorListener(mActivity.findViewById(R.id.base))
+                    ) {
                         @Override
                         protected Map<String, String> getParams() throws AuthFailureError {
                             Map<String, String> parameters = new HashMap<>();
@@ -278,84 +373,22 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.ViewHolder> {
                             return parameters;
                         }
                     };
-                    requestQueue.add(getFeedRequest);
+                    voteRequest.setRetryPolicy(Database.getRetryPolicy());
+                    requestQueue.add(voteRequest);
                 }
             };
         }
-    }
 
-    // Create new views (invoked by the layout manager)
-    @Override
-    public CardAdapter.ViewHolder onCreateViewHolder(final ViewGroup parent, int viewType) {
-        // Create a new view
-
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.card, parent, false);
-        ViewHolder vh = new ViewHolder(view, mPosts, mFromMainActivity);
-
-        return vh;
-    }
-
-    // Replace the contents of a view (invoked by the layout manager)
-    @Override
-    public void onBindViewHolder(ViewHolder holder, int position) {
-        // - get element from your dataset at this position
-        // - replace the contents of the view with that element
-
-        Post post = mPosts.get(position);
-
-        holder.mUsername.setText("@" + post.getUser().getUsername());
-        holder.mName.setText(post.getUser().getName());
-        holder.mPosted.setText(post.getPosted());
-        holder.mText.setText(post.getText());
-        holder.mNoComments.setText("" + post.getNumberOfComments());
-        holder.mUpvotes.setText("" + post.getUpvotes());
-        holder.mDownvotes.setText("" + post.getDownvotes());
-        holder.mCardView.setTag("closed");
-        holder.mCardView.setCardElevation(MainActivity.dpToPixels(1, holder.mCardView));
-        if (mFromMainActivity)
-            holder.mCloseButton.setVisibility(View.INVISIBLE);
-
-        if (post.getVoted() == 1) {
-            holder.mUpvote.setColorFilter(ContextCompat.getColor(mActivity, R.color.green));
-            holder.mUpvote.setTag(R.color.green);
-        }
-        else if (post.getVoted() == -1) {
-            holder.mDownvote.setColorFilter(ContextCompat.getColor(mActivity, R.color.red));
-            holder.mDownvote.setTag(R.color.red);
-        }
-        else {
-            holder.mUpvote.setColorFilter(ContextCompat.getColor(mActivity, R.color.gray));
-            holder.mUpvote.setTag(R.color.gray);
-            holder.mDownvote.setColorFilter(ContextCompat.getColor(mActivity, R.color.gray));
-            holder.mDownvote.setTag(R.color.gray);
+        @Override
+        public void onClick(View v) {
+            mListener.onClick(v);
         }
 
-        if (post.getComments() != null) {
-            ArrayList<Comment> comments = post.getComments();
-            holder.mCommentsSection.removeAllViews();
-
-            ViewGroup.LayoutParams commentsSectionSize = holder.mCommentsSection.getLayoutParams();
-            System.out.println("mFromMainActivity: " + mFromMainActivity);
-            if (mFromMainActivity)
-                commentsSectionSize.height = 0;
-            else
-                commentsSectionSize.height = ViewGroup.LayoutParams.WRAP_CONTENT;
-            holder.mCommentsSection.setLayoutParams(commentsSectionSize);
-
-            for (Comment c : comments) {
-                ViewGroup container = (ViewGroup) mActivity.getLayoutInflater().inflate(R.layout.comment, null);
-                ((TextView) container.findViewById(R.id.comment)).setText(c.getText());
-                ((TextView) container.findViewById(R.id.user)).setText(c.getUser().getName());
-                ((TextView) container.findViewById(R.id.time)).setText(c.getCommented());
-                holder.mCommentsSection.removeView(holder.mCommentsSection.findViewById(R.id.progress));
-                holder.mCommentsSection.addView(container);
-            }
-        }
-
-        if (!mFromMainActivity) {
-            ViewGroup container = (ViewGroup) mActivity.getLayoutInflater().inflate(R.layout.addcomment, null);
-            ((TextView) container.findViewById(R.id.comment)).setText("Comment");
-            holder.mCommentsSection.addView(container);
+        /**
+         * OnClick interface for custom behavior.
+         */
+        public interface OnItemClickListener {
+            void onClick(View caller);
         }
     }
 
@@ -363,6 +396,13 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.ViewHolder> {
     @Override
     public int getItemCount() {
         return mPosts.size();
+    }
+
+    /**
+     * OnClick interface for custom behavior.
+     */
+    public interface OnItemClickListener {
+        void onClick(View caller);
     }
 
 }

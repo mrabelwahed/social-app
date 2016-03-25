@@ -33,10 +33,12 @@ public class SearchAdapter extends ArrayAdapter<SearchItem> {
 
         if (view == null) {
 
-            System.out.println("EMPTY!!");
             // Get a new instance of the row layout view
             LayoutInflater inflater = context.getLayoutInflater();
-            view = inflater.inflate(R.layout.search_item, null);
+            if (context instanceof PeopleActivity)
+                view = inflater.inflate(R.layout.person_item, null);
+            else
+                view = inflater.inflate(R.layout.search_item, null);
 
             holder = new Holder(view);
             view.setTag(holder);

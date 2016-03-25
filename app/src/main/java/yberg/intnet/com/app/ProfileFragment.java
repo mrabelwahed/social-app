@@ -32,6 +32,7 @@ import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
+import com.android.volley.TimeoutError;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
@@ -61,13 +62,16 @@ public class ProfileFragment extends Fragment {
 
     private TextView username, name, joined, posts, comments, followers, following, followLabel, nothingToShowTextView;
     private EditText firstName, lastName, email, password, newPassword, passwordConfirm;
-    private LinearLayout followButton, latestPostSection, editProfileSection;
+    private LinearLayout followButton, followersButton, followingButton, latestPostSection, editProfileSection;
     private RelativeLayout submitButton;
     private ImageView followIcon;
     private ProgressBar spinner;
     private CardView latestPostCard;
 
     private Post latestPost;
+    private User user;
+
+    private boolean myProfile = false;
 
     public ProfileFragment() {
         // Required empty public constructor
@@ -93,6 +97,14 @@ public class ProfileFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         requestQueue = Volley.newRequestQueue(getContext().getApplicationContext());
+
+        if (MainActivity.getUid() == getArguments().getInt("profile"))
+            myProfile = true;
+
+        if (myProfile)
+            ((MainActivity) getActivity()).getNavigationView().setCheckedItem(R.id.nav_profile);
+        else
+            ((MainActivity) getActivity()).getNavigationView().setCheckedItem(R.id.nav_search);
     }
 
     @Override
@@ -149,18 +161,14 @@ public class ProfileFragment extends Fragment {
                                         followers.setText("" + jsonResponse.getInt("followers"));
                                         following.setText("" + jsonResponse.getInt("following"));
                                     } else {
-                                        Snackbar.make(getActivity().findViewById(R.id.base),
-                                                jsonResponse.getString("message"), Snackbar.LENGTH_LONG).show();
+                                        MainActivity.makeSnackbar(jsonResponse.getString("message"));
                                     }
                                 } catch (JSONException e) {
                                     e.printStackTrace();
                                 }
                             }
-                        }, new Response.ErrorListener() {
-
-                            @Override
-                            public void onErrorResponse(VolleyError error) { }
-                        }) {
+                        }, Database.getErrorListener(mSwipeRefreshLayout)
+                        ) {
                             @Override
                             protected Map<String, String> getParams() throws AuthFailureError {
                                 Map<String, String> parameters = new HashMap<>();
@@ -169,7 +177,36 @@ public class ProfileFragment extends Fragment {
                                 return parameters;
                             }
                         };
+                        followRequest.setRetryPolicy(Database.getRetryPolicy());
                         requestQueue.add(followRequest);
+                    }
+                }
+        );
+
+        followersButton = (LinearLayout) view.findViewById(R.id.followersButton);
+        followersButton.setOnClickListener(
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Intent intent = new Intent(getActivity(), PeopleActivity.class);
+                        intent.putExtra("uid", getArguments().getInt("profile"));
+                        intent.putExtra("firstName", user != null ? user.getFirstName() : "");
+                        intent.putExtra("show", "followers");
+                        startActivity(intent);
+                    }
+                }
+        );
+
+        followingButton = (LinearLayout) view.findViewById(R.id.followingButton);
+        followingButton.setOnClickListener(
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Intent intent = new Intent(getActivity(), PeopleActivity.class);
+                        intent.putExtra("uid", getArguments().getInt("profile"));
+                        intent.putExtra("firstName", user != null ? user.getFirstName() : "");
+                        intent.putExtra("show", "Following");
+                        startActivity(intent);
                     }
                 }
         );
@@ -177,8 +214,7 @@ public class ProfileFragment extends Fragment {
         latestPostSection = (LinearLayout) view.findViewById(R.id.latestPostSection);
 
         editProfileSection = (LinearLayout) view.findViewById(R.id.editProfileSection);
-        editProfileSection.setVisibility(
-                MainActivity.getUid() == getArguments().getInt("profile") ? View.VISIBLE : View.GONE);
+        editProfileSection.setVisibility(myProfile ? View.VISIBLE : View.GONE);
 
         firstName = (EditText) view.findViewById(R.id.firstName);
         lastName = (EditText) view.findViewById(R.id.lastName);
@@ -192,7 +228,7 @@ public class ProfileFragment extends Fragment {
                 new LightingColorFilter(0xFF000000, Color.WHITE));
 
         submitButton = (RelativeLayout) view.findViewById(R.id.submitButton);
-        if (MainActivity.getUid() == getArguments().getInt("profile")) {
+        if (myProfile) {
             submitButton.setOnClickListener(
                     new View.OnClickListener() {
 
@@ -216,7 +252,7 @@ public class ProfileFragment extends Fragment {
                             hideSoftKeyboard();
                             setEnabled(false);
 
-                            StringRequest editProfile = new StringRequest(Request.Method.POST, Database.EDIT_PROFILE_URL, new Response.Listener<String>() {
+                            StringRequest editProfileRequest = new StringRequest(Request.Method.POST, Database.EDIT_PROFILE_URL, new Response.Listener<String>() {
                                 @Override
                                 public void onResponse(String response) {
                                     System.out.println("editProfile response: " + response);
@@ -236,9 +272,15 @@ public class ProfileFragment extends Fragment {
                                     setEnabled(true);
                                 }
                             }, new Response.ErrorListener() {
-
                                 @Override
                                 public void onErrorResponse(VolleyError error) {
+                                    if (error.networkResponse == null) {
+                                        if (error.getClass().equals(TimeoutError.class)) {
+                                            setEnabled(true);
+                                            Snackbar.make(getActivity().findViewById(R.id.base), R.string.request_timeout,
+                                                    Snackbar.LENGTH_LONG).show();
+                                        }
+                                    }
                                 }
                             }) {
                                 @Override
@@ -256,7 +298,8 @@ public class ProfileFragment extends Fragment {
                                     return null;
                                 }
                             };
-                            requestQueue.add(editProfile);
+                            editProfileRequest.setRetryPolicy(Database.getRetryPolicy());
+                            requestQueue.add(editProfileRequest);
                         }
                     }
             );
@@ -277,9 +320,9 @@ public class ProfileFragment extends Fragment {
                 LinearLayout.LayoutParams.WRAP_CONTENT
         );
         params.setMargins(
-                (int) MainActivity.dpToPixels(16, latestPostCard),
+                (int) MainActivity.dpToPixels(8, latestPostCard),
                 (int) MainActivity.dpToPixels(4, latestPostCard),
-                (int) MainActivity.dpToPixels(16, latestPostCard),
+                (int) MainActivity.dpToPixels(8, latestPostCard),
                 (int) MainActivity.dpToPixels(4, latestPostCard)
         );
         latestPostCard.setLayoutParams(params);
@@ -301,7 +344,7 @@ public class ProfileFragment extends Fragment {
         );
         params.setMargins(
                 (int) MainActivity.dpToPixels(16, nothingToShowTextView),
-                (int) MainActivity.dpToPixels(4, nothingToShowTextView),
+                (int) MainActivity.dpToPixels(8, nothingToShowTextView),
                 (int) MainActivity.dpToPixels(16, nothingToShowTextView),
                 (int) MainActivity.dpToPixels(8, nothingToShowTextView)
         );
@@ -422,16 +465,16 @@ public class ProfileFragment extends Fragment {
         newPassword.clearFocus();
         passwordConfirm.clearFocus();
 
-        StringRequest profileRequest = new StringRequest(Request.Method.POST, Database.PROFILE_URL, new Response.Listener<String>() {
+        StringRequest getProfileRequest = new StringRequest(Request.Method.POST, Database.GET_PROFILE_URL, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
-                System.out.println("profile response: " + response);
+                System.out.println("getProfile response: " + response);
                 try {
                     JSONObject jsonResponse = new JSONObject(response);
                     if (jsonResponse.getBoolean("success")) {
                         latestPostSection.removeAllViews();
                         JSONObject profile = jsonResponse.getJSONObject("profile");
-                        User user = new User(
+                        user = new User(
                                 profile.getInt("uid"),
                                 profile.getString("username"),
                                 profile.getString("firstName"),
@@ -502,13 +545,8 @@ public class ProfileFragment extends Fragment {
                     e.printStackTrace();
                 }
             }
-        }, new Response.ErrorListener() {
-
-            @Override
-            public void onErrorResponse(VolleyError error) {
-
-            }
-        }) {
+        }, Database.getErrorListener(getActivity().findViewById(R.id.base))
+        ) {
             @Override
             protected Map<String, String> getParams() throws AuthFailureError {
                 Map<String, String> parameters = new HashMap<>();
@@ -517,6 +555,7 @@ public class ProfileFragment extends Fragment {
                 return parameters;
             }
         };
-        requestQueue.add(profileRequest);
+        getProfileRequest.setRetryPolicy(Database.getRetryPolicy());
+        requestQueue.add(getProfileRequest);
     }
 }

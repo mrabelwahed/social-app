@@ -18,4 +18,6 @@
     <string name="title_activity_post">PostActivity</string>
 
     <string name="edit_profile">Edit profile</string>
+    <string name="request_timeout">Request timed out. Try again later.</string>
+    <string name="title_activity_people">PeopleActivity</string>
 </resources>

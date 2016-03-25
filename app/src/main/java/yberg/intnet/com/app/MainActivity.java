@@ -5,9 +5,9 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.MenuItemCompat;
@@ -48,13 +48,19 @@ public class MainActivity extends AppCompatActivity
         PostDialog.OnFragmentInteractionListener,
         AdapterView.OnItemClickListener {
 
+    private static CoordinatorLayout coordinatorLayout;
+
     private SearchView searchView;
     private ListPopupWindow listPopupWindow;
     private MenuItem menuItem;
     private TextView headerUsername, headerName;
-    private FeedFragment feedFragment;
-    private ProfileFragment profileFragment;
 
+    private static FragmentManager fragmentManager;
+    public static FeedFragment feedFragment;
+    public static ProfileFragment profileFragment;
+
+    private DrawerLayout drawer;
+    private NavigationView navigationView;
     private ArrayAdapter searchAdapter;
 
     private RequestQueue requestQueue;
@@ -70,15 +76,19 @@ public class MainActivity extends AppCompatActivity
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(true);
 
+        fragmentManager = getSupportFragmentManager();
+
+        coordinatorLayout = (CoordinatorLayout) findViewById(R.id.base);
+
         requestQueue = Volley.newRequestQueue(getApplicationContext());
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.setDrawerListener(toggle);
         toggle.syncState();
 
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
         navigationView.setCheckedItem(R.id.nav_home);
 
@@ -92,7 +102,6 @@ public class MainActivity extends AppCompatActivity
 
         uid = prefs.getInt("uid", -1);
 
-        FragmentManager fragmentManager = getSupportFragmentManager();
         feedFragment = FeedFragment.newInstance();
         fragmentManager.beginTransaction().replace(R.id.fragment_view, feedFragment).commit();
 
@@ -104,7 +113,13 @@ public class MainActivity extends AppCompatActivity
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
-            super.onBackPressed();
+            if (profileFragment != null && profileFragment.isAdded()) {
+                feedFragment = FeedFragment.newInstance();
+                fragmentManager.beginTransaction().replace(R.id.fragment_view, feedFragment).commit();
+            }
+            else {
+                super.onBackPressed();
+            }
         }
     }
 
@@ -132,14 +147,19 @@ public class MainActivity extends AppCompatActivity
                     searchView.setIconified(true);
                 }
                 menuItem.collapseActionView();
+
+                if (!searchItems.isEmpty()) {
+                    profileFragment = ProfileFragment.newInstance(searchItems.get(0).getUid());
+                    fragmentManager.beginTransaction().replace(R.id.fragment_view, profileFragment).commit();
+                }
+
                 return false;
             }
 
             @Override
             public boolean onQueryTextChange(final String s) {
                 if (!s.equals("")) {
-
-                    StringRequest editProfile = new StringRequest(Request.Method.POST, Database.SEARCH_PROFILE_URL, new Response.Listener<String>() {
+                    StringRequest editProfileRequest = new StringRequest(Request.Method.POST, Database.SEARCH_PROFILE_URL, new Response.Listener<String>() {
                         @Override
                         public void onResponse(String response) {
                             System.out.println("searchProfile response: " + response);
@@ -171,18 +191,14 @@ public class MainActivity extends AppCompatActivity
                                         listPopupWindow.dismiss();
                                     }
                                 } else {
-                                    Snackbar.make(findViewById(R.id.base),
-                                            jsonResponse.getString("message"), Snackbar.LENGTH_LONG).show();
+                                    makeSnackbar(jsonResponse.getString("message"));
                                 }
                             } catch (JSONException e) {
                                 e.printStackTrace();
                             }
                         }
-                    }, new Response.ErrorListener() {
-
-                        @Override
-                        public void onErrorResponse(VolleyError error) { }
-                    }) {
+                    }, Database.getErrorListener(coordinatorLayout)
+                    ) {
                         @Override
                         protected Map<String, String> getParams() throws AuthFailureError {
                             Map<String, String> parameters = new HashMap<>();
@@ -190,7 +206,8 @@ public class MainActivity extends AppCompatActivity
                             return parameters;
                         }
                     };
-                    requestQueue.add(editProfile);
+                    editProfileRequest.setRetryPolicy(Database.getRetryPolicy());
+                    requestQueue.add(editProfileRequest);
 
                 } else {
                     listPopupWindow.dismiss();
@@ -199,12 +216,29 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
+        MenuItemCompat.setOnActionExpandListener(menuItem, new MenuItemCompat.OnActionExpandListener() {
+            @Override
+                public boolean onMenuItemActionCollapse(MenuItem item) {
+                // Do something when collapsed
+                if (feedFragment.isAdded())
+                    getNavigationView().setCheckedItem(R.id.nav_home);
+                else if (profileFragment.isAdded())
+                    getNavigationView().setCheckedItem(R.id.nav_profile);
+                return true;  // Return true to collapse action view
+            }
+
+            @Override
+            public boolean onMenuItemActionExpand(MenuItem item) {
+                // Do something when expanded
+                return true;  // Return true to expand action view
+            }
+        });
+
         return true;
     }
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        FragmentManager fragmentManager = getSupportFragmentManager();
         profileFragment = ProfileFragment.newInstance(
                 ((SearchItem) searchAdapter.getItem(position)).getUid()
         );
@@ -230,7 +264,6 @@ public class MainActivity extends AppCompatActivity
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
-        FragmentManager fragmentManager = getSupportFragmentManager();
         switch (item.getItemId()) {
             case R.id.nav_home:
                 feedFragment = FeedFragment.newInstance();
@@ -239,6 +272,9 @@ public class MainActivity extends AppCompatActivity
             case R.id.nav_profile:
                 profileFragment = ProfileFragment.newInstance(getUid());
                 fragmentManager.beginTransaction().replace(R.id.fragment_view, profileFragment).commit();
+                break;
+            case R.id.nav_search:
+                menuItem.expandActionView();
                 break;
             case R.id.nav_sign_out:
                 startActivity(new Intent(MainActivity.this, LoginActivity.class));
@@ -265,15 +301,13 @@ public class MainActivity extends AppCompatActivity
                 try {
                     JSONObject jsonResponse = new JSONObject(response);
                     if (jsonResponse.getBoolean("success")) {
-                        Snackbar.make(findViewById(R.id.base),
-                                "Sent post", Snackbar.LENGTH_LONG).show();
+                        makeSnackbar("Sent post");
                         dialog.dismiss();
                         feedFragment.updateFeed();
                     }
                     else {
                         dialog.setEnabled(true);
-                        Snackbar.make(findViewById(R.id.base),
-                                jsonResponse.getString("message"), Snackbar.LENGTH_LONG).show();
+                        makeSnackbar(jsonResponse.getString("message"));
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -295,11 +329,27 @@ public class MainActivity extends AppCompatActivity
         requestQueue.add(addPostRequest);
     }
 
+    public NavigationView getNavigationView() {
+        return navigationView;
+    }
+
     public static int getUid() {
         return uid;
     }
 
     public static float dpToPixels(int dp, View view) {
         return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, view.getResources().getDisplayMetrics());
+    }
+
+    public static FragmentManager getMainFragmentManager() {
+        return fragmentManager;
+    }
+
+    public static void makeSnackbar(String text) {
+        Snackbar.make(coordinatorLayout, text, Snackbar.LENGTH_LONG).show();
+    }
+
+    public static void makeSnackbar(int resId) {
+        Snackbar.make(coordinatorLayout, coordinatorLayout.getResources().getText(resId), Snackbar.LENGTH_LONG).show();
     }
 }

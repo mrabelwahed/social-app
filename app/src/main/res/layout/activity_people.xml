@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
-    tools:context="yberg.intnet.com.app.PostActivity"
+    tools:context="yberg.intnet.com.app.PeopleActivity"
     android:id="@+id/base">
 
     <android.support.design.widget.AppBarLayout
@@ -22,27 +22,29 @@
 
     </android.support.design.widget.AppBarLayout>
 
-    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="4dp"
+        android:elevation="1dp"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <android.support.v4.widget.SwipeRefreshLayout
-            xmlns:android="http://schemas.android.com/apk/res/android"
             android:id="@+id/swipeRefresh"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-            <android.support.v7.widget.RecyclerView
-                xmlns:android="http://schemas.android.com/apk/res/android"
-                android:id="@+id/recycler_view"
+            <ListView
+                android:id="@+id/listView"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
-
-            </android.support.v7.widget.RecyclerView>
+                android:layout_height="wrap_content"
+                android:dividerHeight="0.5dp" />
 
         </android.support.v4.widget.SwipeRefreshLayout>
 
     </RelativeLayout>
+
+
 
 </android.support.design.widget.CoordinatorLayout>
