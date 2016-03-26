@@ -89,8 +89,10 @@ public class RegisterActivity extends AppCompatActivity {
                             ViewGroup parent = (ViewGroup) passwordConfirm.getParent();
                             passwordConfirm.setText("");
                             passwordConfirm.setBackgroundResource(R.drawable.edittext_red_border);
+                            passwordConfirm.requestFocus();
                             ((ImageView) parent.getChildAt(parent.indexOfChild(passwordConfirm) + 1))
-                                    .setColorFilter(ContextCompat.getColor(RegisterActivity.this, R.color.green));
+                                    .setColorFilter(ContextCompat.getColor(RegisterActivity.this, R.color.red));
+                            Snackbar.make(coordinatorLayout, "Passwords do not match", Snackbar.LENGTH_LONG).show();
                             shouldReturn = true;
                         }
                         // Return if some input is empty
@@ -122,6 +124,10 @@ public class RegisterActivity extends AppCompatActivity {
                                             finish();
                                         } else {
                                             Snackbar.make(coordinatorLayout, jsonResponse.getString("message"), Snackbar.LENGTH_LONG).show();
+                                            if (jsonResponse.getInt("error") == 1) {
+                                                setBorder(username, R.drawable.edittext_red_border, R.color.red);
+                                                username.requestFocus();
+                                            }
                                         }
                                     } catch (JSONException e) {
                                         e.printStackTrace();
@@ -223,13 +229,17 @@ public class RegisterActivity extends AppCompatActivity {
      */
     public boolean setBorderIfEmpty(EditText editText) {
         if (editText.getText().toString().equals("")) {
-            ViewGroup parent;
-            parent = (ViewGroup) editText.getParent();
-            editText.setBackgroundResource(R.drawable.edittext_red_border);
-            ((ImageView) parent.getChildAt(parent.indexOfChild(editText) + 1)).setColorFilter(
-                    ContextCompat.getColor(RegisterActivity.this, R.color.red));
+            setBorder(editText, R.drawable.edittext_red_border, R.color.red);
             return true;
         }
         return false;
+    }
+
+    public void setBorder(EditText editText, int drawable, int colorId) {
+        ViewGroup parent;
+        parent = (ViewGroup) editText.getParent();
+        editText.setBackgroundResource(drawable);
+        ((ImageView) parent.getChildAt(parent.indexOfChild(editText) + 1)).setColorFilter(
+                ContextCompat.getColor(RegisterActivity.this, colorId));
     }
 }

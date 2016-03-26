@@ -11,7 +11,6 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,10 +19,8 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
-import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -50,6 +47,16 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        SharedPreferences prefs = getSharedPreferences("com.intnet.yberg", Context.MODE_PRIVATE);
+        int storedUid = prefs.getInt("uid", -1);
+        if (storedUid != -1) {
+            //username.setText(storedUsername);
+            //password.requestFocus();
+            startActivity(new Intent(this, MainActivity.class));
+            finish();
+        }
+
         setContentView(R.layout.activity_login);
 
         spinner = (ProgressBar) findViewById(R.id.progressBar);
@@ -62,12 +69,6 @@ public class LoginActivity extends AppCompatActivity {
 
         username = (EditText) findViewById(R.id.username);
         password = (EditText) findViewById(R.id.password);
-
-        String storedUsername = getSharedPreferences("com.intnet.yberg", Context.MODE_PRIVATE).getString("username", "");
-        if (!storedUsername.equals("")) {
-            username.setText(storedUsername);
-            password.requestFocus();
-        }
 
         requestQueue = Volley.newRequestQueue(getApplicationContext());
 

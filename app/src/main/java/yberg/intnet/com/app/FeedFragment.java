@@ -2,6 +2,7 @@ package yberg.intnet.com.app;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.CoordinatorLayout;
@@ -18,6 +19,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
@@ -46,14 +48,6 @@ import java.util.Map;
  * create an instance of this fragment.
  */
 public class FeedFragment extends Fragment {
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
 
     private OnFragmentInteractionListener mListener;
 
@@ -207,46 +201,55 @@ public class FeedFragment extends Fragment {
                     JSONObject jsonResponse = new JSONObject(response);
                     if (jsonResponse.getBoolean("success")) {
                         mPosts.clear();
-                        JSONArray feed = jsonResponse.getJSONArray("feed");
-                        for (int i = 0; i < feed.length(); i++) {
-                            // Add the contents of each json object to the posts array list
-                            JSONObject post = feed.getJSONObject(i);
-                            JSONObject user = post.getJSONObject("user");
-                            JSONArray comments = post.getJSONArray("comments");
-                            ArrayList<Comment> mComments = new ArrayList<>();
-                            for (int j = comments.length() - 1; j >= 0; j--) {
-                                JSONObject comment = comments.getJSONObject(j);
-                                JSONObject usr = comment.getJSONObject("user");
-                                mComments.add(new Comment(comment.getInt("cid"),
-                                                new User(
-                                                        usr.getInt("uid"),
-                                                        usr.getString("username"),
-                                                        usr.getString("name"),
-                                                        usr.getString("image")
-                                                ),
-                                                comment.getString("text"),
-                                                comment.getString("commented")
+                        if (!jsonResponse.isNull("feed")) {
+                            JSONArray feed = jsonResponse.getJSONArray("feed");
+                            for (int i = 0; i < feed.length(); i++) {
+                                // Add the contents of each json object to the posts array list
+                                JSONObject post = feed.getJSONObject(i);
+                                JSONObject user = post.getJSONObject("user");
+                                JSONArray comments = post.getJSONArray("comments");
+                                ArrayList<Comment> mComments = new ArrayList<>();
+                                for (int j = comments.length() - 1; j >= 0; j--) {
+                                    JSONObject comment = comments.getJSONObject(j);
+                                    JSONObject usr = comment.getJSONObject("user");
+                                    mComments.add(new Comment(comment.getInt("cid"),
+                                            new User(
+                                                    usr.getInt("uid"),
+                                                    usr.getString("username"),
+                                                    usr.getString("name"),
+                                                    usr.getString("image")
+                                            ),
+                                            comment.getString("text"),
+                                            comment.getString("commented")
+                                    ));
+                                }
+                                mPosts.add(new Post(
+                                        post.getInt("pid"),
+                                        new User(
+                                                user.getInt("uid"),
+                                                user.getString("username"),
+                                                user.getString("name"),
+                                                user.getString("image")
+                                        ),
+                                        post.getString("text"),
+                                        post.getString("posted"),
+                                        post.getInt("numberOfComments"),
+                                        mComments,
+                                        post.getInt("upvotes"),
+                                        post.getInt("downvotes"),
+                                        post.getInt("voted"),
+                                        post.getString("image")
                                 ));
                             }
-                            mPosts.add(new Post(
-                                    post.getInt("pid"),
-                                    new User(
-                                            user.getInt("uid"),
-                                            user.getString("username"),
-                                            user.getString("name"),
-                                            user.getString("image")
-                                    ),
-                                    post.getString("text"),
-                                    post.getString("posted"),
-                                    post.getInt("numberOfComments"),
-                                    mComments,
-                                    post.getInt("upvotes"),
-                                    post.getInt("downvotes"),
-                                    post.getInt("voted"),
-                                    post.getString("image")
-                            ));
+                        }
+                        else {
+                            TextView tv = new TextView(getActivity());
+                            mRecyclerView.setBackgroundResource(R.drawable.account);
                         }
                         mAdapter.notifyDataSetChanged();
+                    }
+                    else {
+                        MainActivity.makeSnackbar(jsonResponse.getString("message"));
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();

@@ -16,7 +16,8 @@
             android:id="@+id/recycler_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:scrollbars="vertical" />
+            android:scrollbars="vertical"
+            android:scaleType="centerCrop" />
 
     </android.support.v4.widget.SwipeRefreshLayout>
 
@@ -26,7 +27,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|right"
         android:src="@drawable/create"
-        android:scaleType="fitCenter"
+        android:scaleType="centerInside"
         fab:fab_colorNormal="@color/colorAccent"
         android:layout_marginLeft="16dp"
         android:layout_marginRight="16dp"

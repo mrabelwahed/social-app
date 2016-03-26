@@ -1,5 +1,6 @@
 package yberg.intnet.com.app;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -37,6 +38,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -64,6 +67,7 @@ public class MainActivity extends AppCompatActivity
     private ArrayAdapter searchAdapter;
 
     private RequestQueue requestQueue;
+    private SharedPreferences prefs;
 
     private static int uid;
 
@@ -94,7 +98,7 @@ public class MainActivity extends AppCompatActivity
 
         View header = navigationView.getHeaderView(0);
 
-        SharedPreferences prefs = getSharedPreferences("com.intnet.yberg", Context.MODE_PRIVATE);
+        prefs = getSharedPreferences("com.intnet.yberg", Context.MODE_PRIVATE);
         headerUsername = (TextView) header.findViewById(R.id.username);
         headerName = (TextView) header.findViewById(R.id.name);
         headerUsername.setText("@" + prefs.getString("username", ""));
@@ -277,7 +281,9 @@ public class MainActivity extends AppCompatActivity
                 menuItem.expandActionView();
                 break;
             case R.id.nav_sign_out:
-                startActivity(new Intent(MainActivity.this, LoginActivity.class));
+                SharedPreferences.Editor editor = prefs.edit();
+                editor.clear().apply();
+                startActivity(new Intent(this, LoginActivity.class));
                 finish();
                 break;
         }
@@ -331,6 +337,26 @@ public class MainActivity extends AppCompatActivity
 
     public NavigationView getNavigationView() {
         return navigationView;
+    }
+
+    public static Activity getActivity() throws ClassNotFoundException,
+            NoSuchMethodException, InvocationTargetException, IllegalAccessException, NoSuchFieldException {
+        Class activityThreadClass = Class.forName("android.app.ActivityThread");
+        Object activityThread = activityThreadClass.getMethod("currentActivityThread").invoke(null);
+        Field activitiesField = activityThreadClass.getDeclaredField("mActivities");
+        HashMap activities = (HashMap) activitiesField.get(activityThread);
+        for (Object activityRecord : activities.values()) {
+            Class activityRecordClass = activityRecord.getClass();
+            Field pausedField = activityRecordClass.getDeclaredField("paused");
+            pausedField.setAccessible(true);
+            if (!pausedField.getBoolean(activityRecord)) {
+                Field activityField = activityRecordClass.getDeclaredField("activity");
+                activityField.setAccessible(true);
+                Activity activity = (Activity) activitiesField.get(activityRecord);
+                return activity;
+            }
+        }
+        return null;
     }
 
     public static int getUid() {

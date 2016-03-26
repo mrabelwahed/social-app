@@ -40,6 +40,7 @@ import com.android.volley.toolbox.Volley;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -101,10 +102,16 @@ public class ProfileFragment extends Fragment {
         if (MainActivity.getUid() == getArguments().getInt("profile"))
             myProfile = true;
 
-        if (myProfile)
-            ((MainActivity) getActivity()).getNavigationView().setCheckedItem(R.id.nav_profile);
-        else
-            ((MainActivity) getActivity()).getNavigationView().setCheckedItem(R.id.nav_search);
+
+        try {
+            if (myProfile)
+                ((MainActivity) MainActivity.getActivity()).getNavigationView().setCheckedItem(R.id.nav_profile);
+            else
+                ((MainActivity) MainActivity.getActivity()).getNavigationView().setCheckedItem(R.id.nav_search);
+        } catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException |
+                IllegalAccessException | NoSuchFieldException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -241,8 +248,10 @@ public class ProfileFragment extends Fragment {
                                 ViewGroup parent = (ViewGroup) passwordConfirm.getParent();
                                 passwordConfirm.setText("");
                                 passwordConfirm.setBackgroundResource(R.drawable.edittext_red_border);
+                                passwordConfirm.requestFocus();
                                 ((ImageView) parent.getChildAt(parent.indexOfChild(passwordConfirm) + 1))
                                         .setColorFilter(ContextCompat.getColor(getActivity(), R.color.red));
+                                MainActivity.makeSnackbar("Passwords do not match");
                                 shouldReturn = true;
                             }
                             // Return if some input is empty
@@ -260,11 +269,9 @@ public class ProfileFragment extends Fragment {
                                         JSONObject jsonResponse = new JSONObject(response);
                                         if (jsonResponse.getBoolean("success")) {
                                             updateProfile();
-                                            Snackbar.make(getActivity().findViewById(R.id.base),
-                                                    jsonResponse.getString("message"), Snackbar.LENGTH_LONG).show();
+                                            MainActivity.makeSnackbar(jsonResponse.getString("message"));
                                         } else {
-                                            Snackbar.make(getActivity().findViewById(R.id.base),
-                                                    jsonResponse.getString("message"), Snackbar.LENGTH_LONG).show();
+                                            MainActivity.makeSnackbar(jsonResponse.getString("message"));
                                         }
                                     } catch (JSONException e) {
                                         e.printStackTrace();
@@ -277,8 +284,7 @@ public class ProfileFragment extends Fragment {
                                     if (error.networkResponse == null) {
                                         if (error.getClass().equals(TimeoutError.class)) {
                                             setEnabled(true);
-                                            Snackbar.make(getActivity().findViewById(R.id.base), R.string.request_timeout,
-                                                    Snackbar.LENGTH_LONG).show();
+                                            MainActivity.makeSnackbar(R.string.request_timeout);
                                         }
                                     }
                                 }
@@ -538,8 +544,7 @@ public class ProfileFragment extends Fragment {
                             ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle(user.getUsername());
                         } catch (NullPointerException ignored) { }
                     } else {
-                        Snackbar.make(getActivity().findViewById(R.id.base),
-                                jsonResponse.getString("message"), Snackbar.LENGTH_LONG).show();
+                        MainActivity.makeSnackbar(jsonResponse.getString("message"));
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();

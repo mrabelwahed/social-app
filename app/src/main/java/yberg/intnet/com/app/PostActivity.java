@@ -112,8 +112,7 @@ public class PostActivity extends AppCompatActivity implements
                                                 try {
                                                     JSONObject jsonResponse = new JSONObject(response);
                                                     if (jsonResponse.getBoolean("success")) {
-                                                        Snackbar.make(findViewById(R.id.base),
-                                                                "Deleted post", Snackbar.LENGTH_LONG).show();
+                                                        MainActivity.makeSnackbar("Deleted post");
                                                         finish();
                                                     }
                                                     else {
