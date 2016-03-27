@@ -7,18 +7,14 @@ import android.graphics.LightingColorFilter;
 import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
-import android.transition.TransitionManager;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -40,7 +36,6 @@ import com.android.volley.toolbox.Volley;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -85,7 +80,6 @@ public class ProfileFragment extends Fragment {
      * @param profile Profile uid
      * @return A new instance of fragment ProfileFragment.
      */
-    // TODO: Rename and change types and number of parameters
     public static ProfileFragment newInstance(int profile) {
         ProfileFragment fragment = new ProfileFragment();
         Bundle args = new Bundle();
@@ -103,15 +97,15 @@ public class ProfileFragment extends Fragment {
             myProfile = true;
 
 
-        try {
+        //try {
             if (myProfile)
-                ((MainActivity) MainActivity.getActivity()).getNavigationView().setCheckedItem(R.id.nav_profile);
+                ((MainActivity) getActivity()).getNavigationView().setCheckedItem(R.id.nav_profile);
             else
-                ((MainActivity) MainActivity.getActivity()).getNavigationView().setCheckedItem(R.id.nav_search);
-        } catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException |
-                IllegalAccessException | NoSuchFieldException e) {
-            e.printStackTrace();
-        }
+                ((MainActivity) getActivity()).getNavigationView().setCheckedItem(R.id.nav_search);
+        //} catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException |
+        //        IllegalAccessException | NoSuchFieldException e) {
+        //    e.printStackTrace();
+        //}
     }
 
     @Override
