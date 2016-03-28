@@ -6,22 +6,27 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.ListPopupWindow;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewTreeObserver;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
@@ -107,8 +112,7 @@ public class MainActivity extends AppCompatActivity
         uid = prefs.getInt("uid", -1);
 
         feedFragment = FeedFragment.newInstance();
-        fragmentManager.beginTransaction().replace(R.id.fragment_view, feedFragment).commit();
-
+        fragmentManager.beginTransaction().replace(R.id.fragmentView, feedFragment).commit();
     }
 
     @Override
@@ -119,7 +123,7 @@ public class MainActivity extends AppCompatActivity
         } else {
             if (profileFragment != null && profileFragment.isAdded()) {
                 feedFragment = FeedFragment.newInstance();
-                fragmentManager.beginTransaction().replace(R.id.fragment_view, feedFragment).commit();
+                fragmentManager.beginTransaction().replace(R.id.fragmentView, feedFragment).commit();
             }
             else {
                 super.onBackPressed();
@@ -154,7 +158,7 @@ public class MainActivity extends AppCompatActivity
 
                 if (!searchItems.isEmpty()) {
                     profileFragment = ProfileFragment.newInstance(searchItems.get(0).getUid());
-                    fragmentManager.beginTransaction().replace(R.id.fragment_view, profileFragment).commit();
+                    fragmentManager.beginTransaction().replace(R.id.fragmentView, profileFragment).commit();
                 }
 
                 return false;
@@ -246,7 +250,7 @@ public class MainActivity extends AppCompatActivity
         profileFragment = ProfileFragment.newInstance(
                 ((SearchItem) searchAdapter.getItem(position)).getUid()
         );
-        fragmentManager.beginTransaction().replace(R.id.fragment_view, profileFragment).commit();
+        fragmentManager.beginTransaction().replace(R.id.fragmentView, profileFragment).commit();
         MenuItemCompat.collapseActionView(menuItem);
         listPopupWindow.dismiss();
     }
@@ -271,11 +275,11 @@ public class MainActivity extends AppCompatActivity
         switch (item.getItemId()) {
             case R.id.nav_home:
                 feedFragment = FeedFragment.newInstance();
-                fragmentManager.beginTransaction().replace(R.id.fragment_view, feedFragment).commit();
+                fragmentManager.beginTransaction().replace(R.id.fragmentView, feedFragment).commit();
                 break;
             case R.id.nav_profile:
                 profileFragment = ProfileFragment.newInstance(getUid());
-                fragmentManager.beginTransaction().replace(R.id.fragment_view, profileFragment).commit();
+                fragmentManager.beginTransaction().replace(R.id.fragmentView, profileFragment).commit();
                 break;
             case R.id.nav_search:
                 menuItem.expandActionView();

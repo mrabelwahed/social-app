@@ -102,7 +102,6 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.ViewHolder> {
             holder.mCommentsSection.removeAllViews();
 
             ViewGroup.LayoutParams commentsSectionSize = holder.mCommentsSection.getLayoutParams();
-            System.out.println("mFromMainActivity: " + mFromMainActivity);
             if (mFromMainActivity)
                 commentsSectionSize.height = 0;
             else
@@ -292,7 +291,6 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.ViewHolder> {
                 @Override
                 public void onClick(final View v) {
 
-                    // TODO Send to php file and get amount of up & downvotes back
                     View parent = (View) v.getParent();
 
                     final ImageView up = (ImageView) parent.findViewById(R.id.upvote);

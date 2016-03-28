@@ -2,12 +2,11 @@ package yberg.intnet.com.app;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
-import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
@@ -18,17 +17,13 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
-import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
-import com.melnykov.fab.FloatingActionButton;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -83,22 +78,19 @@ public class FeedFragment extends Fragment {
         requestQueue = Volley.newRequestQueue(getContext().getApplicationContext());
 
         ((MainActivity) getActivity()).getNavigationView().setCheckedItem(R.id.nav_home);
-
-        updateFeed();
+        ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle("Start");
     }
 
     @Override
     public View onCreateView(final LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle("Start");
-
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_feed, container, false);
 
         coordinatorLayout = (CoordinatorLayout) view.findViewById(R.id.base);
 
-        mSwipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_refresh);
+        mSwipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipeRefresh);
         mSwipeRefreshLayout.setColorSchemeColors(ContextCompat.getColor(getContext(), R.color.colorAccent));
         mSwipeRefreshLayout.setOnRefreshListener(
                 new SwipeRefreshLayout.OnRefreshListener() {
@@ -111,10 +103,9 @@ public class FeedFragment extends Fragment {
                 }
         );
 
-        mRecyclerView = (RecyclerView) view.findViewById(R.id.recycler_view);
+        mRecyclerView = (RecyclerView) view.findViewById(R.id.recyclerView);
 
         FloatingActionButton fab = (FloatingActionButton) view.findViewById(R.id.fab);
-        fab.attachToRecyclerView(mRecyclerView);
         fab.setOnClickListener(
                 new View.OnClickListener() {
 
@@ -140,6 +131,8 @@ public class FeedFragment extends Fragment {
             }
         }, true);
         mRecyclerView.setAdapter(mAdapter);
+
+        updateFeed();
 
         return view;
     }
@@ -197,6 +190,7 @@ public class FeedFragment extends Fragment {
         StringRequest getFeedRequest = new StringRequest(Request.Method.POST, Database.FEED_URL, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
+                System.out.println("getFeedRequest response: " + response);
                 try {
                     JSONObject jsonResponse = new JSONObject(response);
                     if (jsonResponse.getBoolean("success")) {
@@ -243,13 +237,12 @@ public class FeedFragment extends Fragment {
                             }
                         }
                         else {
-                            TextView tv = new TextView(getActivity());
                             mRecyclerView.setBackgroundResource(R.drawable.account);
                         }
                         mAdapter.notifyDataSetChanged();
                     }
                     else {
-                        MainActivity.makeSnackbar(jsonResponse.getString("message"));
+                        Snackbar.make(coordinatorLayout, jsonResponse.getString("message"), Snackbar.LENGTH_LONG);
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();

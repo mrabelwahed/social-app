@@ -112,12 +112,12 @@ public class ProfileFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle("Profile");
+        ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle("Profile");
 
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_profile, container, false);
 
-        mSwipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_refresh);
+        mSwipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipeRefresh);
         mSwipeRefreshLayout.setColorSchemeColors(ContextCompat.getColor(getContext(), R.color.colorAccent));
         mSwipeRefreshLayout.setOnRefreshListener(
                 new SwipeRefreshLayout.OnRefreshListener() {
@@ -535,7 +535,8 @@ public class ProfileFragment extends Fragment {
                         setFollowing(profile.getInt("follows") == 1);
 
                         try {
-                            ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle(user.getUsername());
+                            if (!((AppCompatActivity) getActivity()).getSupportActionBar().getTitle().equals(user.getName()))
+                                ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle(user.getName());
                         } catch (NullPointerException ignored) { }
                     } else {
                         MainActivity.makeSnackbar(jsonResponse.getString("message"));

@@ -87,7 +87,7 @@ public class PeopleActivity extends AppCompatActivity {
                 int uid = people.get(position).getUid();
                 MainActivity.profileFragment = ProfileFragment.newInstance(uid);
                 MainActivity.getMainFragmentManager().beginTransaction().replace(
-                        R.id.fragment_view, MainActivity.profileFragment).commitAllowingStateLoss();
+                        R.id.fragmentView, MainActivity.profileFragment).commitAllowingStateLoss();
                 finish();
             }
         });

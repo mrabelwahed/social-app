@@ -81,7 +81,7 @@ public class PostActivity extends AppCompatActivity implements
                 }
         );
 
-        mRecyclerView = (RecyclerView) findViewById(R.id.recycler_view);
+        mRecyclerView = (RecyclerView) findViewById(R.id.recyclerView);
 
         // use this setting to improve performance if you know that changes
         // in content do not change the layout size of the RecyclerView
@@ -190,14 +190,14 @@ public class PostActivity extends AppCompatActivity implements
                             }
                         };
                         builder = new AlertDialog.Builder(PostActivity.this);
-                        builder.setMessage("Do you really want to delete this post?")
+                        builder.setMessage("Do you really want to delete this comment?")
                                 .setPositiveButton("Yes", dialogClickListener)
                                 .setNegativeButton("Cancel", dialogClickListener).show();
                         break;
                     case R.id.postInfo:
                         MainActivity.profileFragment = ProfileFragment.newInstance(mPost.get(0).getUser().getUid());
                         MainActivity.getMainFragmentManager().beginTransaction().replace(
-                                R.id.fragment_view, MainActivity.profileFragment).commitAllowingStateLoss();
+                                R.id.fragmentView, MainActivity.profileFragment).commitAllowingStateLoss();
                         finish();
                         break;
                 }

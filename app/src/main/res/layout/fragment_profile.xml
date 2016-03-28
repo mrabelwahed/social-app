@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.v4.widget.SwipeRefreshLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/swipe_refresh"
+    android:id="@+id/swipeRefresh"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -13,6 +13,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:paddingBottom="4dp"
             android:clipToPadding="false"
             android:orientation="vertical"
             android:clickable="true">
@@ -328,14 +329,6 @@
                         android:layout_marginRight="8dp"
                         android:layout_marginTop="4dp">
 
-                        <LinearLayout
-                            android:id="@+id/dummy"
-                            android:focusable="true"
-                            android:focusableInTouchMode="true"
-                            android:layout_width="0px"
-                            android:layout_height="0px"
-                            android:orientation="horizontal"/>
-
                         <RelativeLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content">
@@ -558,7 +551,10 @@
                         android:elevation="1dp"
                         android:background="@drawable/button"
                         android:padding="8dp"
-                        android:layout_margin="8dp">
+                        android:layout_marginLeft="8dp"
+                        android:layout_marginTop="8dp"
+                        android:layout_marginRight="8dp"
+                        android:layout_marginBottom="4dp">
 
                         <ProgressBar
                             android:layout_width="30dp"
