@@ -27,15 +27,15 @@
                 android:layout_height="36dp"
                 android:src="@drawable/person"
                 android:tint="#333"
-                android:id="@+id/commentImage" />
+                android:id="@+id/commentUser" />
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:layout_marginLeft="16dp"
-                android:layout_alignBottom="@+id/commentImage"
-                android:layout_toEndOf="@+id/commentImage">
+                android:layout_alignBottom="@+id/commentUser"
+                android:layout_toEndOf="@+id/commentUser">
 
                 <TextView
                     android:id="@+id/user"
@@ -53,12 +53,30 @@
                     android:textSize="16dp" />
 
                 <LinearLayout
+                    android:orientation="horizontal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/post_image_border"
+                    android:layout_marginTop="4dp"
+                    android:id="@+id/commentImageBorder">
+
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/commentImage"
+                        android:src="@drawable/account"
+                        android:scaleType="fitXY"
+                        android:adjustViewBounds="true"
+                        android:layout_margin="2dp" />
+                </LinearLayout>
+
+                <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp">
 
                     <ImageView
-                        android:id="@+id/image"
+                        android:id="@+id/photoButton"
                         android:layout_width="12dp"
                         android:layout_height="12dp"
                         android:src="@drawable/time"

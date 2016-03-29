@@ -7,7 +7,7 @@
     android:background="@drawable/rounded_item">
 
     <ImageView
-        android:id="@+id/image"
+        android:id="@+id/photoButton"
         android:layout_width="24dp"
         android:layout_height="24dp"
         android:src="@drawable/person"

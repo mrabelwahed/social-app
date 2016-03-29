@@ -96,9 +96,7 @@ public class FeedFragment extends Fragment {
                 new SwipeRefreshLayout.OnRefreshListener() {
                     @Override
                     public void onRefresh() {
-                        mSwipeRefreshLayout.setRefreshing(true);
                         updateFeed();
-                        mSwipeRefreshLayout.setRefreshing(false);
                     }
                 }
         );
@@ -144,7 +142,6 @@ public class FeedFragment extends Fragment {
         PostDialog postDialog = PostDialog.newInstance("New post", "Posting as",
                 prefs.getString("username", ""), prefs.getString("name", ""));
         postDialog.show(fm, "fragment_post_dialog");
-
     }
 
     // TODO: Rename method, update argument and hook method into UI event
@@ -187,10 +184,12 @@ public class FeedFragment extends Fragment {
     }
 
     public void updateFeed() {
+        mSwipeRefreshLayout.setRefreshing(true);
         StringRequest getFeedRequest = new StringRequest(Request.Method.POST, Database.FEED_URL, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
                 System.out.println("getFeedRequest response: " + response);
+                mSwipeRefreshLayout.setRefreshing(false);
                 try {
                     JSONObject jsonResponse = new JSONObject(response);
                     if (jsonResponse.getBoolean("success")) {
@@ -211,10 +210,11 @@ public class FeedFragment extends Fragment {
                                                     usr.getInt("uid"),
                                                     usr.getString("username"),
                                                     usr.getString("name"),
-                                                    usr.getString("image")
+                                                    usr.isNull("image") ? null : usr.getString("image")
                                             ),
                                             comment.getString("text"),
-                                            comment.getString("commented")
+                                            comment.getString("commented"),
+                                            comment.isNull("image") ? null : comment.getString("image")
                                     ));
                                 }
                                 mPosts.add(new Post(
@@ -223,7 +223,7 @@ public class FeedFragment extends Fragment {
                                                 user.getInt("uid"),
                                                 user.getString("username"),
                                                 user.getString("name"),
-                                                user.getString("image")
+                                                user.isNull("image") ? null : user.getString("image")
                                         ),
                                         post.getString("text"),
                                         post.getString("posted"),
@@ -232,7 +232,7 @@ public class FeedFragment extends Fragment {
                                         post.getInt("upvotes"),
                                         post.getInt("downvotes"),
                                         post.getInt("voted"),
-                                        post.getString("image")
+                                        post.isNull("image") ? null : post.getString("image")
                                 ));
                             }
                         }
@@ -248,7 +248,7 @@ public class FeedFragment extends Fragment {
                     e.printStackTrace();
                 }
             }
-        }, Database.getErrorListener(coordinatorLayout)
+        }, Database.getErrorListener(coordinatorLayout, mSwipeRefreshLayout)
         ) {
             @Override
             protected Map<String, String> getParams() throws AuthFailureError {
@@ -259,5 +259,9 @@ public class FeedFragment extends Fragment {
         };
         getFeedRequest.setRetryPolicy(Database.getRetryPolicy());
         requestQueue.add(getFeedRequest);
+    }
+
+    public void makeSnackbar(String text) {
+        Snackbar.make(coordinatorLayout, text, Snackbar.LENGTH_LONG).show();
     }
 }

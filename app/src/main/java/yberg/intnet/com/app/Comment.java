@@ -9,13 +9,14 @@ public class Comment implements Serializable {
 
     int cid;
     private User user;
-    private String text, commented;
+    private String text, commented, image;
 
-    public Comment(int cid, User user, String text, String commented) {
+    public Comment(int cid, User user, String text, String commented, String image) {
         this.cid = cid;
         this.user = user;
         this.text = text;
         this.commented = commented;
+        this.image = image;
     }
 
     public void setCid(int cid) {
@@ -34,6 +35,10 @@ public class Comment implements Serializable {
         this.commented = commented;
     }
 
+    public void setImage(String image) {
+        this.image = image;
+    }
+
     public int getCid() {
         return cid;
     }
@@ -50,4 +55,7 @@ public class Comment implements Serializable {
         return commented;
     }
 
+    public String getImage() {
+        return image;
+    }
 }

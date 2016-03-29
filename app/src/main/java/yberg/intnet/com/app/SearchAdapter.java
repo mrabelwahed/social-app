@@ -67,7 +67,7 @@ public class SearchAdapter extends ArrayAdapter<SearchItem> {
         ImageView image;
         TextView username, name;
         public Holder(View v) {
-            image = (ImageView) v.findViewById(R.id.image);
+            image = (ImageView) v.findViewById(R.id.photoButton);
             username = (TextView) v.findViewById(R.id.username);
             name = (TextView) v.findViewById(R.id.name);
         }

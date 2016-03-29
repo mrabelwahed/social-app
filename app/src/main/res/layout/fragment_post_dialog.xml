@@ -35,7 +35,7 @@
                         android:text="New post"
                         android:id="@+id/header"
                         android:textSize="24dp"
-                        android:textColor="@color/colorPrimary"
+                        android:textColor="@color/blue"
                         android:layout_centerVertical="true"
                         android:layout_alignParentStart="true" />
 
@@ -44,7 +44,7 @@
                         android:layout_height="48dp"
                         android:id="@+id/closeButton"
                         android:src="@drawable/close"
-                        android:tint="@color/colorPrimary"
+                        android:tint="@color/blue"
                         android:padding="12dp"
                         android:layout_marginRight="-12dp"
                         android:layout_centerVertical="true"
@@ -57,7 +57,9 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp">
+                android:layout_marginTop="8dp"
+                android:orientation="vertical"
+                android:layout_marginBottom="8dp">
 
                 <EditText
                     android:layout_width="match_parent"
@@ -92,23 +94,102 @@
             <LinearLayout
                 android:orientation="horizontal"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                android:layout_height="match_parent"
+                android:gravity="center_vertical">
 
                 <ImageView
-                    android:layout_width="48dp"
+                    android:layout_width="wrap_content"
                     android:layout_height="48dp"
-                    android:id="@+id/imageView3"
+                    android:id="@+id/imageButton"
                     android:src="@drawable/photo"
-                    android:tint="@color/colorPrimary"
-                    android:padding="12dp" />
+                    android:tint="@color/blue"
+                    android:paddingTop="12dp"
+                    android:paddingBottom="12dp"
+                    android:scaleType="fitXY"
+                    android:adjustViewBounds="true"
+                    android:paddingLeft="6dp"
+                    android:paddingRight="6dp" />
 
                 <ImageView
-                    android:layout_width="48dp"
+                    android:layout_width="wrap_content"
                     android:layout_height="48dp"
-                    android:id="@+id/imageView4"
+                    android:id="@+id/cameraButton"
                     android:src="@drawable/camera"
-                    android:tint="@color/colorPrimary"
-                    android:padding="12dp" />
+                    android:paddingTop="12dp"
+                    android:paddingBottom="12dp"
+                    android:scaleType="fitXY"
+                    android:adjustViewBounds="true"
+                    android:tint="@color/blue"
+                    android:paddingLeft="6dp"
+                    android:paddingRight="6dp" />
+
+                <RelativeLayout
+                    android:orientation="horizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/rounded_item_pressed"
+                    android:gravity="center_vertical"
+                    android:layout_marginLeft="8dp"
+                    android:layout_marginTop="4dp"
+                    android:layout_marginBottom="4dp"
+                    android:id="@+id/attachment">
+
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:adjustViewBounds="true"
+                        android:layout_alignParentBottom="true"
+                        android:layout_alignParentStart="true"
+                        android:src="@drawable/attachment"
+                        android:padding="8dp"
+                        android:tint="@color/colorTextSecondary"
+                        android:scaleType="fitXY"
+                        android:id="@+id/imageView2" />
+
+                    <LinearLayout
+                        android:orientation="horizontal"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center_vertical"
+                        android:layout_alignParentTop="true"
+                        android:layout_toEndOf="@+id/imageView2"
+                        android:layout_toStartOf="@+id/attachmentCloseButton">
+
+                        <ImageView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:id="@+id/attachedImage"
+                            android:scaleType="fitXY"
+                            android:adjustViewBounds="true"
+                            android:layout_marginTop="2dp"
+                            android:layout_marginRight="8dp"
+                            android:layout_marginBottom="2dp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="image_name.jpg"
+                            android:id="@+id/attachedImageName"
+                            android:textColor="@color/colorTextSecondary"
+                            android:textSize="10dp" />
+                    </LinearLayout>
+
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:id="@+id/attachmentCloseButton"
+                        android:src="@drawable/close"
+                        android:tint="@color/colorTextSecondary"
+                        android:paddingTop="8dp"
+                        android:paddingBottom="8dp"
+                        android:scaleType="fitXY"
+                        android:adjustViewBounds="true"
+                        android:paddingLeft="6dp"
+                        android:paddingRight="6dp"
+                        android:layout_alignParentEnd="true" />
+
+                </RelativeLayout>
+
             </LinearLayout>
 
             <LinearLayout
@@ -142,7 +223,7 @@
                                 android:layout_height="wrap_content"
                                 android:text="\@jdoe"
                                 android:textStyle="italic"
-                                android:textColor="@color/colorPrimary" />
+                                android:textColor="@color/blue" />
 
                             <TextView
                                 android:id="@+id/name"
@@ -150,7 +231,7 @@
                                 android:layout_height="wrap_content"
                                 android:text="John Doe"
                                 android:layout_marginLeft="8dp"
-                                android:textColor="@color/colorPrimary" />
+                                android:textColor="@color/blue" />
 
                         </LinearLayout>
 
@@ -161,10 +242,19 @@
                         android:layout_height="48dp"
                         android:id="@+id/sendButton"
                         android:src="@drawable/send"
-                        android:tint="@color/colorAccent"
+                        android:tint="@color/green"
                         android:layout_alignParentTop="true"
                         android:layout_alignParentEnd="true"
                         android:padding="4dp" />
+
+                    <ProgressBar
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:id="@+id/progressBar"
+                        android:layout_centerVertical="true"
+                        android:layout_alignParentEnd="true"
+                        android:visibility="gone"
+                        android:padding="8dp" />
 
                 </RelativeLayout>
 

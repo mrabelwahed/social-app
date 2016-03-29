@@ -123,7 +123,7 @@ public class PostActivity extends AppCompatActivity implements
                                                     e.printStackTrace();
                                                 }
                                             }
-                                        }, Database.getErrorListener(findViewById(R.id.base))
+                                        }, Database.getErrorListener(findViewById(R.id.base), mSwipeRefreshLayout)
                                         ) {
                                             @Override
                                             protected Map<String, String> getParams() throws AuthFailureError {
@@ -168,7 +168,7 @@ public class PostActivity extends AppCompatActivity implements
                                                     e.printStackTrace();
                                                 }
                                             }
-                                        }, Database.getErrorListener(findViewById(R.id.base))
+                                        }, Database.getErrorListener(findViewById(R.id.base), mSwipeRefreshLayout)
                                         ) {
                                             @Override
                                             protected Map<String, String> getParams() throws AuthFailureError {
@@ -245,10 +245,11 @@ public class PostActivity extends AppCompatActivity implements
                                             usr.getInt("uid"),
                                             usr.getString("username"),
                                             usr.getString("name"),
-                                            usr.getString("image")
+                                            usr.isNull("image") ? null : usr.getString("image")
                                     ),
                                     comment.getString("text"),
-                                    comment.getString("commented")
+                                    comment.getString("commented"),
+                                    comment.isNull("image") ? null : comment.getString("image")
                             ));
                         }
                         System.out.println("user: " + user.getInt("uid"));
@@ -258,7 +259,7 @@ public class PostActivity extends AppCompatActivity implements
                                         user.getInt("uid"),
                                         user.getString("username"),
                                         user.getString("name"),
-                                        user.getString("image")
+                                        user.isNull("image") ? null : user.getString("image")
                                 ),
                                 post.getString("text"),
                                 post.getString("posted"),
@@ -267,7 +268,7 @@ public class PostActivity extends AppCompatActivity implements
                                 post.getInt("upvotes"),
                                 post.getInt("downvotes"),
                                 post.getInt("voted"),
-                                post.getString("image")
+                                post.isNull("image") ? null : post.getString("image")
                         ));
                         mAdapter.notifyDataSetChanged();
                     }
@@ -308,7 +309,7 @@ public class PostActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void onDialogSubmit(final PostDialog dialog, final String text) {
+    public void onDialogSubmit(final PostDialog dialog, final String text, final String fileName) {
         StringRequest addCommentRequest = new StringRequest(Request.Method.POST, Database.ADD_COMMENT_URL, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
@@ -330,7 +331,7 @@ public class PostActivity extends AppCompatActivity implements
                     e.printStackTrace();
                 }
             }
-        }, Database.getErrorListener(findViewById(R.id.base))
+        }, Database.getErrorListener(findViewById(R.id.base), mSwipeRefreshLayout)
         ) {
             @Override
             protected Map<String, String> getParams() throws AuthFailureError {
@@ -338,6 +339,8 @@ public class PostActivity extends AppCompatActivity implements
                 parameters.put("pid", "" + mPost.get(0).getPid());
                 parameters.put("uid", "" + MainActivity.getUid());
                 parameters.put("text", text);
+                if (fileName != null)
+                    parameters.put("image", fileName);
                 return parameters;
             }
         };

@@ -168,7 +168,7 @@ public class ProfileFragment extends Fragment {
                                     e.printStackTrace();
                                 }
                             }
-                        }, Database.getErrorListener(mSwipeRefreshLayout)
+                        }, Database.getErrorListener(mSwipeRefreshLayout, mSwipeRefreshLayout)
                         ) {
                             @Override
                             protected Map<String, String> getParams() throws AuthFailureError {
@@ -480,7 +480,7 @@ public class ProfileFragment extends Fragment {
                                 profile.getString("firstName"),
                                 profile.getString("lastName"),
                                 profile.getString("email"),
-                                profile.getString("image")
+                                profile.isNull("image") ? null : profile.getString("image")
                         );
                         if (!jsonResponse.isNull("post")) {
                             JSONObject post = jsonResponse.getJSONObject("post");
@@ -494,7 +494,7 @@ public class ProfileFragment extends Fragment {
                                     post.getInt("upvotes"),
                                     post.getInt("downvotes"),
                                     post.getInt("voted"),
-                                    post.getString("image")
+                                    post.isNull("image") ? null : post.getString("image")
                             );
                             //Populate post card
                             ((TextView) latestPostCard.findViewById(R.id.username)).setText(user.getUsername());
@@ -545,7 +545,7 @@ public class ProfileFragment extends Fragment {
                     e.printStackTrace();
                 }
             }
-        }, Database.getErrorListener(getActivity().findViewById(R.id.base))
+        }, Database.getErrorListener(getActivity().findViewById(R.id.base), mSwipeRefreshLayout)
         ) {
             @Override
             protected Map<String, String> getParams() throws AuthFailureError {

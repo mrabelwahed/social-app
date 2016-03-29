@@ -6,27 +6,22 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.ListPopupWindow;
-import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewTreeObserver;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
@@ -205,7 +200,7 @@ public class MainActivity extends AppCompatActivity
                                 e.printStackTrace();
                             }
                         }
-                    }, Database.getErrorListener(coordinatorLayout)
+                    }, Database.getErrorListener(coordinatorLayout, null)
                     ) {
                         @Override
                         protected Map<String, String> getParams() throws AuthFailureError {
@@ -303,7 +298,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onDialogSubmit(final PostDialog dialog, final String text) {
+    public void onDialogSubmit(final PostDialog dialog, final String text, final String fileName) {
         StringRequest addPostRequest = new StringRequest(Request.Method.POST, Database.ADD_POST_URL, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
@@ -333,6 +328,8 @@ public class MainActivity extends AppCompatActivity
                 Map<String, String> parameters = new HashMap<>();
                 parameters.put("uid", "" + MainActivity.getUid());
                 parameters.put("text", text);
+                if (fileName != null)
+                    parameters.put("image", fileName);
                 return parameters;
             }
         };
@@ -376,10 +373,13 @@ public class MainActivity extends AppCompatActivity
     }
 
     public static void makeSnackbar(String text) {
-        Snackbar.make(coordinatorLayout, text, Snackbar.LENGTH_LONG).show();
+        if (feedFragment.isAdded())
+            feedFragment.makeSnackbar(text);
+        else
+            Snackbar.make(coordinatorLayout, text, Snackbar.LENGTH_LONG).show();
     }
 
     public static void makeSnackbar(int resId) {
-        Snackbar.make(coordinatorLayout, coordinatorLayout.getResources().getText(resId), Snackbar.LENGTH_LONG).show();
+        makeSnackbar(coordinatorLayout.getResources().getText(resId).toString());
     }
 }

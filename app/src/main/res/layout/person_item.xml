@@ -8,7 +8,7 @@
     android:elevation="1dp">
 
     <ImageView
-        android:id="@+id/image"
+        android:id="@+id/photoButton"
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:src="@drawable/person"

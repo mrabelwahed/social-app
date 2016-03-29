@@ -2,12 +2,14 @@ package yberg.intnet.com.app;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.BitmapFactory;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.transition.TransitionManager;
+import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -77,6 +79,16 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.ViewHolder> {
         holder.mCardView.setTag("closed");
         holder.mCardView.setCardElevation(MainActivity.dpToPixels(1, holder.mCardView));
 
+        holder.mPostImageBorder.setVisibility(View.GONE);
+        holder.mPostImage.setImageBitmap(null);
+        if (post.getImage() != null) {
+            byte[] imageAsBytes = Base64.decode(post.getImage().getBytes(), Base64.DEFAULT);
+            holder.mPostImage.setImageBitmap(
+                    BitmapFactory.decodeByteArray(imageAsBytes, 0, imageAsBytes.length)
+            );
+            holder.mPostImageBorder.setVisibility(View.VISIBLE);
+        }
+
         if (mFromMainActivity)
             holder.mCloseButton.setVisibility(View.INVISIBLE);
 
@@ -113,6 +125,15 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.ViewHolder> {
                 ((TextView) container.findViewById(R.id.comment)).setText(c.getText());
                 ((TextView) container.findViewById(R.id.user)).setText(c.getUser().getName());
                 ((TextView) container.findViewById(R.id.time)).setText(c.getCommented());
+                LinearLayout commentImageBorder = (LinearLayout) container.findViewById(R.id.commentImageBorder);
+                commentImageBorder.setVisibility(View.GONE);
+                if (c.getImage() != null) {
+                    byte[] imageAsBytes = Base64.decode(c.getImage().getBytes(), Base64.DEFAULT);
+                    ((ImageView) container.findViewById(R.id.commentImage)).setImageBitmap(
+                            BitmapFactory.decodeByteArray(imageAsBytes, 0, imageAsBytes.length)
+                    );
+                    commentImageBorder.setVisibility(View.VISIBLE);
+                }
                 holder.mCommentsSection.removeView(holder.mCommentsSection.findViewById(R.id.progress));
                 holder.mCommentsSection.addView(container);
                 if (!mFromMainActivity && MainActivity.getUid() == c.getUser().getUid()) {
@@ -137,9 +158,8 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.ViewHolder> {
         public CardView mCardView;
         public TextView mUsername, mName, mPosted, mText, mNoComments, mUpvotes, mDownvotes;
         public ImageView mCloseButton, mDeletePostButton, mDeleteCommentButton;
-        public ImageView mUpvote, mDownvote;
-
-        public LinearLayout mCommentsSection, mPostInfo;
+        public ImageView mUpvote, mDownvote, mPostImage;
+        public LinearLayout mCommentsSection, mPostInfo, mPostImageBorder;
 
         private OnItemClickListener mListener;
 
@@ -163,13 +183,16 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.ViewHolder> {
             mName = (TextView) view.findViewById(R.id.name);
             mPosted = (TextView) view.findViewById(R.id.time);
             mText = (TextView) view.findViewById(R.id.text);
+            mPostImage = (ImageView) view.findViewById(R.id.postImage);
+            mPostImageBorder = (LinearLayout) view.findViewById(R.id.postImageBorder);
             mNoComments = (TextView) view.findViewById(R.id.comments);
             mUpvote = (ImageView) view.findViewById(R.id.upvote);
             mUpvotes = (TextView) view.findViewById(R.id.upvotes);
             mDownvote = (ImageView) view.findViewById(R.id.downvote);
             mDownvotes = (TextView) view.findViewById(R.id.downvotes);
-
             mCommentsSection = (LinearLayout) view.findViewById(R.id.comments_section);
+
+            mPostImageBorder.setVisibility(View.GONE);
 
             requestQueue = Volley.newRequestQueue(mActivity.getApplicationContext());
 
@@ -357,7 +380,7 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.ViewHolder> {
                                 e.printStackTrace();
                             }
                         }
-                    }, Database.getErrorListener(mActivity.findViewById(R.id.base))
+                    }, Database.getErrorListener(mActivity.findViewById(R.id.base), null)
                     ) {
                         @Override
                         protected Map<String, String> getParams() throws AuthFailureError {
