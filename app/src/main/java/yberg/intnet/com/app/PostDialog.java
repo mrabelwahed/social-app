@@ -5,10 +5,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Matrix;
-import android.media.ThumbnailUtils;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
@@ -16,7 +13,6 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.transition.TransitionManager;
-import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -39,10 +35,11 @@ import com.android.volley.toolbox.Volley;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
+
+import yberg.intnet.com.app.util.BitmapHandler;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -56,25 +53,22 @@ public class PostDialog extends DialogFragment {
 
     public static int RESULT_LOAD_IMAGE = 1;
     public static int RESULT_CAMERA     = 2;
-    public static int THUMB_HEIGHT      = 128;
-    public static int IMAGE_QUALITY     = 70;  // 0 - 100
-    public static int MAX_WIDTH         = 960;
-    public static int MAX_HEIGHT        = 540;
 
     private OnFragmentInteractionListener mListener;
 
     private EditText postText;
     private TextView header, postingAs, username, name, attachedImageName;
-    private ImageView closeButton, sendButton, imageButton, cameraButton, attachedImage, attachmentCloseButton;
+    private ImageView closeButton, sendButton, imageButton, cameraButton, attachedImage,
+            attachmentCloseButton;
     private View view;
     private RelativeLayout attachment;
     private ProgressBar progressBar;
 
     private RequestQueue requestQueue;
 
-    private String imgDecodableString, encodedString;
     private Uri fileUri;
     private Bitmap imageToUpload;
+    private BitmapHandler bitmapHandler;
 
     public PostDialog() {
         // Empty constructor required for DialogFragment
@@ -105,6 +99,12 @@ public class PostDialog extends DialogFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        bitmapHandler = new BitmapHandler(new BitmapHandler.OnPostExecuteListener() {
+            @Override
+            public void onPostExecute(String encodedImage) {
+                uploadImageToServer(encodedImage);
+            }
+        });
         requestQueue = Volley.newRequestQueue(getActivity().getApplicationContext());
     }
 
@@ -171,8 +171,7 @@ public class PostDialog extends DialogFragment {
                         System.out.println("imageToUpload: " + imageToUpload);
                         if (imageToUpload != null) {
                             setEnabled(false);
-                            imageToUpload = getCompressedBitmap(imageToUpload);
-                            new Base64Encoder(imageToUpload).execute();
+                            bitmapHandler.process(imageToUpload);
                         }
                         else {
                             mListener.onDialogSubmit(PostDialog.this, postText.getText().toString(), null);
@@ -240,12 +239,12 @@ public class PostDialog extends DialogFragment {
                     cursor.moveToFirst();
 
                     int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
-                    imgDecodableString = cursor.getString(columnIndex);
+                    String imgDecodableString = cursor.getString(columnIndex);
                     cursor.close();
 
                     // Set the Image in ImageView after decoding the String
                     imageToUpload = BitmapFactory.decodeFile(imgDecodableString);
-                    Bitmap thumbnail = getThumbnail(imageToUpload);
+                    Bitmap thumbnail = bitmapHandler.getThumbnail(imageToUpload);
                     attachedImage.setImageBitmap(thumbnail);
 
                     String fileName;
@@ -258,7 +257,7 @@ public class PostDialog extends DialogFragment {
                     attachedImageName.setText(fileName);
                 } else if (requestCode == RESULT_CAMERA) {
                     imageToUpload = BitmapFactory.decodeFile(fileUri.getPath());
-                    Bitmap thumbnail = getThumbnail(imageToUpload);
+                    Bitmap thumbnail = bitmapHandler.getThumbnail(imageToUpload);
                     attachedImage.setImageBitmap(thumbnail);
                 }
             }
@@ -267,25 +266,6 @@ public class PostDialog extends DialogFragment {
             Snackbar.make(view, "Something went wrong", Snackbar.LENGTH_LONG).show();
             attachment.setVisibility(View.INVISIBLE);
         }
-    }
-
-    public Bitmap getThumbnail(Bitmap bitmap) {
-        return ThumbnailUtils.extractThumbnail(bitmap,
-                (int) ((bitmap.getWidth() / (double) bitmap.getHeight()) * THUMB_HEIGHT), THUMB_HEIGHT);
-    }
-
-    public Bitmap getCompressedBitmap(Bitmap bitmap) {
-        if (bitmap.getWidth() > MAX_WIDTH || bitmap.getHeight() > MAX_HEIGHT) {
-            float scale = Math.min(((float) MAX_WIDTH / bitmap.getWidth()),
-                    ((float) MAX_HEIGHT / bitmap.getHeight()));
-            Matrix matrix = new Matrix();
-            matrix.postScale(scale, scale);
-            Bitmap resizedImage = Bitmap.createBitmap(bitmap, 0, 0,
-                    bitmap.getWidth(), bitmap.getHeight(), matrix, true);
-            bitmap.recycle();
-            return resizedImage;
-        }
-        return bitmap;
     }
 
     @Override
@@ -331,34 +311,7 @@ public class PostDialog extends DialogFragment {
         void onDialogSubmit(final PostDialog dialog, final String text, final String fileName);
     }
 
-    private class Base64Encoder extends AsyncTask<Void, Void, Void> {
-
-        Bitmap bitmap;
-
-        public Base64Encoder(Bitmap bitmap) {
-            this.bitmap = bitmap;
-        }
-
-        @Override
-        protected Void doInBackground(Void... params) {
-
-            ByteArrayOutputStream stream = new ByteArrayOutputStream();
-            bitmap.compress(Bitmap.CompressFormat.JPEG, IMAGE_QUALITY, stream);
-
-            byte[] array = stream.toByteArray();
-            encodedString = Base64.encodeToString(array, 0);
-
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            uploadImageToServer();
-        }
-
-    }
-
-    public void uploadImageToServer() {
+    public void uploadImageToServer(final String encodedImage) {
         StringRequest uploadRequest = new StringRequest(Request.Method.POST, Database.UPLOAD_URL, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
@@ -392,7 +345,7 @@ public class PostDialog extends DialogFragment {
             protected Map<String, String> getParams() throws AuthFailureError {
                 Map<String, String> parameters = new HashMap<>();
                 parameters.put("uid", "" + MainActivity.getUid());
-                parameters.put("image", encodedString);
+                parameters.put("image", encodedImage);
                 return parameters;
             }
         };

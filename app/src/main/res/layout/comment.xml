@@ -11,8 +11,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/custom_border"
-        android:paddingTop="16dp"
-        android:paddingBottom="16dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
         android:layout_marginLeft="16dp"
         android:layout_marginRight="16dp">
 
@@ -26,7 +26,6 @@
                 android:layout_width="36dp"
                 android:layout_height="36dp"
                 android:src="@drawable/person"
-                android:tint="#333"
                 android:id="@+id/commentUser" />
 
             <LinearLayout
@@ -37,12 +36,34 @@
                 android:layout_alignBottom="@+id/commentUser"
                 android:layout_toEndOf="@+id/commentUser">
 
-                <TextView
-                    android:id="@+id/user"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="John Doe"
-                    android:paddingRight="8dp" />
+                <LinearLayout
+                    android:orientation="horizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <LinearLayout
+                        android:orientation="horizontal"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content">
+
+                        <TextView
+                            android:id="@+id/username"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="jdoe"
+                            android:layout_marginRight="8dp"
+                            android:textStyle="italic"
+                            android:textColor="@color/blue" />
+
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/user"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="John Doe"
+                        android:textColor="@color/blue" />
+                </LinearLayout>
 
                 <TextView
                     android:id="@+id/comment"
@@ -58,7 +79,8 @@
                     android:layout_height="wrap_content"
                     android:background="@drawable/post_image_border"
                     android:layout_marginTop="4dp"
-                    android:id="@+id/commentImageBorder">
+                    android:id="@+id/commentImageBorder"
+                    android:layout_marginBottom="4dp">
 
                     <ImageView
                         android:layout_width="wrap_content"
@@ -72,8 +94,7 @@
 
                 <LinearLayout
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp">
+                    android:layout_height="wrap_content">
 
                     <ImageView
                         android:id="@+id/photoButton"

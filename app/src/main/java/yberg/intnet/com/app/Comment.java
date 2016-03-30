@@ -17,7 +17,7 @@ public class Comment implements Serializable {
         this.cid = cid;
         this.user = user;
         this.text = text;
-        this.commented = (new Time()).getPrettyTime(commented);
+        this.commented = commented;
         this.image = image;
     }
 

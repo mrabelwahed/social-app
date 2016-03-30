@@ -36,6 +36,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import yberg.intnet.com.app.util.Time;
+
 public class PostActivity extends AppCompatActivity implements
         PostDialog.OnFragmentInteractionListener,
         ProfileFragment.OnFragmentInteractionListener,
@@ -51,6 +53,7 @@ public class PostActivity extends AppCompatActivity implements
     private Post receivedPost;
     private ArrayList<Post> mPost;
     private RequestQueue requestQueue;
+    private Time time;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,6 +65,7 @@ public class PostActivity extends AppCompatActivity implements
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle("Post");
 
+        time = new Time(this);
         requestQueue = Volley.newRequestQueue(getApplicationContext());
 
         mPost = new ArrayList<>();
@@ -248,7 +252,7 @@ public class PostActivity extends AppCompatActivity implements
                                             usr.isNull("image") ? null : usr.getString("image")
                                     ),
                                     comment.getString("text"),
-                                    comment.getString("commented"),
+                                    time.getPrettyTime(comment.getString("commented")),
                                     comment.isNull("image") ? null : comment.getString("image")
                             ));
                         }
@@ -262,7 +266,7 @@ public class PostActivity extends AppCompatActivity implements
                                         user.isNull("image") ? null : user.getString("image")
                                 ),
                                 post.getString("text"),
-                                post.getString("posted"),
+                                time.getPrettyTime(post.getString("posted")),
                                 post.getInt("numberOfComments"),
                                 mComments,
                                 post.getInt("upvotes"),

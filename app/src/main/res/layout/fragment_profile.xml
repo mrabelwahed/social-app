@@ -51,11 +51,39 @@
                             android:layout_height="match_parent"
                             android:layout_weight="1">
 
-                            <ImageView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:src="@drawable/person"
-                                android:tint="#333" />
+                            <RelativeLayout
+                                android:layout_width="144dp"
+                                android:layout_height="144dp"
+                                android:background="@drawable/rounded_corners">
+
+                                <ImageView
+                                    android:layout_width="match_parent"
+                                    android:layout_height="match_parent"
+                                    android:src="@drawable/person"
+                                    android:id="@+id/profilePicture" />
+
+                                <LinearLayout
+                                    android:orientation="vertical"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="match_parent"
+                                    android:gravity="center"
+                                    android:background="#44000000"
+                                    android:id="@+id/editImageButton">
+
+                                    <ImageView
+                                        android:layout_width="48dp"
+                                        android:layout_height="48dp"
+                                        android:src="@drawable/create"
+                                        android:tint="#fff" />
+
+                                    <TextView
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:text="Update picture"
+                                        android:textColor="#fff" />
+                                </LinearLayout>
+
+                            </RelativeLayout>
 
                         </LinearLayout>
 
@@ -67,14 +95,14 @@
                             android:layout_weight="1">
 
                             <TextView
+                                android:id="@+id/username"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text=" jdoe"
+                                android:text="yberg"
                                 android:textStyle="italic"
                                 android:textColor="@color/blue"
                                 android:textSize="32dp"
-                                android:clipToPadding="false"
-                                android:id="@+id/username" />
+                                android:clipToPadding="false" />
 
                             <TextView
                                 android:layout_width="wrap_content"
@@ -98,7 +126,7 @@
                                 <ImageView
                                     android:layout_width="24dp"
                                     android:layout_height="24dp"
-                                    android:id="@+id/followIcon"
+                                    android:id="@+id/followButtonIcon"
                                     android:src="@drawable/person_add"
                                     android:tint="#fff" />
 
@@ -107,7 +135,7 @@
                                     android:layout_height="wrap_content"
                                     android:text="Follow"
                                     android:textColor="#fff"
-                                    android:id="@+id/followLabel"
+                                    android:id="@+id/followButtonLabel"
                                     android:layout_marginLeft="4dp" />
 
                             </LinearLayout>
@@ -346,7 +374,8 @@
                                 android:singleLine="true"
                                 android:inputType="textCapWords|textPersonName"
                                 android:selectAllOnFocus="true"
-                                android:id="@+id/firstName" />
+                                android:id="@+id/firstName"
+                                android:textSize="16dp" />
 
                             <ImageView
                                 android:layout_width="30dp"
@@ -382,7 +411,8 @@
                                 android:singleLine="true"
                                 android:inputType="textCapWords|textPersonName"
                                 android:selectAllOnFocus="true"
-                                android:id="@+id/lastName" />
+                                android:id="@+id/lastName"
+                                android:textSize="16dp" />
 
                             <ImageView
                                 android:layout_width="30dp"
@@ -418,7 +448,8 @@
                                 android:singleLine="true"
                                 android:inputType="textEmailAddress"
                                 android:selectAllOnFocus="true"
-                                android:id="@+id/email" />
+                                android:id="@+id/email"
+                                android:textSize="16dp" />
 
                             <ImageView
                                 android:layout_width="30dp"
@@ -455,7 +486,8 @@
                                 android:singleLine="true"
                                 android:fontFamily="sans-serif"
                                 android:inputType="textPassword"
-                                android:id="@+id/password" />
+                                android:id="@+id/password"
+                                android:textSize="16dp" />
 
                             <ImageView
                                 android:layout_width="30dp"
@@ -492,7 +524,8 @@
                                 android:singleLine="true"
                                 android:fontFamily="sans-serif"
                                 android:inputType="textPassword"
-                                android:id="@+id/newPassword" />
+                                android:id="@+id/newPassword"
+                                android:textSize="16dp" />
 
                             <ImageView
                                 android:layout_width="30dp"
@@ -529,7 +562,8 @@
                                 android:fontFamily="sans-serif"
                                 android:inputType="textPassword"
                                 android:selectAllOnFocus="true"
-                                android:id="@+id/passwordConfirm" />
+                                android:id="@+id/passwordConfirm"
+                                android:textSize="16dp" />
 
                             <ImageView
                                 android:layout_width="30dp"
@@ -570,7 +604,7 @@
                             android:text="Submit"
                             android:layout_centerHorizontal="true"
                             android:textColor="#fff"
-                            android:textSize="18dp" />
+                            android:textSize="16dp" />
 
                     </RelativeLayout>
                 </LinearLayout>

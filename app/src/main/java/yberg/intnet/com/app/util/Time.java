@@ -1,10 +1,16 @@
 package yberg.intnet.com.app.util;
 
+import android.content.Context;
+import android.content.res.Resources;
+
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+
+import yberg.intnet.com.app.R;
 
 /**
  * Created by Viktor on 2016-03-30.
@@ -12,9 +18,7 @@ import java.util.Date;
 
 public class Time {
 
-    public static final String[] months = {"January", "February", "March", "April",
-            "May", "June", "July", "August", "September", "October",
-            "November", "December", };
+    public ArrayList<String> months;
 
     public static final int YEAR = Calendar.YEAR;
     public static final int MONTH = Calendar.MONTH;
@@ -24,7 +28,22 @@ public class Time {
 
     DateFormat dateFormat;
 
-    public Time() {
+    public Time(Context context) {
+        months = new ArrayList<>();
+        Resources strings = context.getResources();
+        months.add(strings.getString(R.string.january));
+        months.add(strings.getString(R.string.february));
+        months.add(strings.getString(R.string.march));
+        months.add(strings.getString(R.string.april));
+        months.add(strings.getString(R.string.may));
+        months.add(strings.getString(R.string.june));
+        months.add(strings.getString(R.string.july));
+        months.add(strings.getString(R.string.august));
+        months.add(strings.getString(R.string.september));
+        months.add(strings.getString(R.string.october));
+        months.add(strings.getString(R.string.november));
+        months.add(strings.getString(R.string.december));
+
         dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     }
 
@@ -40,18 +59,8 @@ public class Time {
             e.printStackTrace();
         }
         then.setTime(date);
-        System.out.println("then: " +
-                        then.get(YEAR) + "-" +
-                        then.get(MONTH) + "-" +
-                        then.get(DATE)
-        );
 
         Calendar now = Calendar.getInstance();
-        System.out.println("now: " +
-                        now.get(YEAR) + "-" +
-                        now.get(MONTH) + "-" +
-                        now.get(DATE)
-        );
 
         boolean sameYear = false;
         boolean sameDay = false;
@@ -91,8 +100,6 @@ public class Time {
     private boolean wasYesterday(Calendar now, Calendar then) {
         Calendar nextDay = then;
         nextDay.add(Calendar.DAY_OF_YEAR, 1);
-        System.out.println("today:   " + now);
-        System.out.println("nextDay: " + nextDay);
         if (now.get(YEAR) == nextDay.get(YEAR)) {
             if (now.get(MONTH) == nextDay.get(MONTH)) {
                 if (now.get(DATE) == nextDay.get(DATE)) {
@@ -106,7 +113,7 @@ public class Time {
     private String getDate(Calendar cal) {
         StringBuilder date = new StringBuilder();
         date.append(cal.get(DATE)).append(" ");
-        date.append(months[cal.get(MONTH)]);
+        date.append(months.get(cal.get(MONTH)));
         return date.toString();
     }
 
@@ -116,11 +123,6 @@ public class Time {
         time.append(":");
         time.append(cal.get(MINUTE) > 9 ? cal.get(MINUTE) : "0" + cal.get(MINUTE));
         return time.toString();
-    }
-
-    public static void main(String[] args) {
-        Time time = new Time();
-        System.out.println("\n" + time.getPrettyTime("2016-03-30 20:00:00"));
     }
 
 }

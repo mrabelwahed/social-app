@@ -68,7 +68,8 @@
                             android:singleLine="true"
                             android:inputType="textNoSuggestions"
                             android:selectAllOnFocus="true"
-                            android:id="@+id/username">
+                            android:id="@+id/username"
+                            android:textSize="16dp">
                             <requestFocus/>
                         </EditText>
 
@@ -106,7 +107,8 @@
                             android:singleLine="true"
                             android:inputType="textPassword"
                             android:selectAllOnFocus="true"
-                            android:id="@+id/password" />
+                            android:id="@+id/password"
+                            android:textSize="16dp" />
 
                         <ImageView
                             android:layout_width="30dp"

@@ -33,6 +33,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import yberg.intnet.com.app.util.Time;
+
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
@@ -54,6 +56,8 @@ public class FeedFragment extends Fragment {
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private CoordinatorLayout coordinatorLayout;
 
+    private Time time;
+
     public FeedFragment() {
         // Required empty public constructor
     }
@@ -64,7 +68,6 @@ public class FeedFragment extends Fragment {
      *
      * @return A new instance of fragment FeedFragment.
      */
-    // TODO: Rename and change types and number of parameters
     public static FeedFragment newInstance() {
         FeedFragment fragment = new FeedFragment();
         return fragment;
@@ -74,6 +77,7 @@ public class FeedFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mPosts = new ArrayList<>();
+        time = new Time(getContext());
 
         requestQueue = Volley.newRequestQueue(getContext().getApplicationContext());
 
@@ -214,7 +218,7 @@ public class FeedFragment extends Fragment {
                                                         usr.isNull("image") ? null : usr.getString("image")
                                                 ),
                                                 comment.getString("text"),
-                                                comment.getString("commented"),
+                                                time.getPrettyTime(comment.getString("commented")),
                                                 comment.isNull("image") ? null : comment.getString("image")
                                         ));
                                     }
@@ -227,7 +231,7 @@ public class FeedFragment extends Fragment {
                                                     user.isNull("image") ? null : user.getString("image")
                                             ),
                                             post.getString("text"),
-                                            post.getString("posted"),
+                                            time.getPrettyTime(post.getString("posted")),
                                             post.getInt("numberOfComments"),
                                             mComments,
                                             post.getInt("upvotes"),

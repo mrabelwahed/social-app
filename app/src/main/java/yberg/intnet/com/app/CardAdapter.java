@@ -69,8 +69,18 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.ViewHolder> {
 
         Post post = mPosts.get(position);
 
-        holder.mUsername.setText("@" + post.getUser().getUsername());
+        holder.mUsername.setText(post.getUser().getUsername());
         holder.mName.setText(post.getUser().getName());
+        if (post.getUser().getImage() != null) {
+            byte[] imageAsBytes = Base64.decode(post.getUser().getImage().getBytes(), Base64.DEFAULT);
+            holder.mPostProfilePicture.setImageBitmap(
+                    BitmapFactory.decodeByteArray(imageAsBytes, 0, imageAsBytes.length)
+            );
+        }
+        else {
+            holder.mPostProfilePicture.setImageBitmap(null);
+            holder.mPostProfilePicture.setImageResource(R.drawable.person);
+        }
         holder.mPosted.setText(post.getPosted());
         holder.mText.setText(post.getText());
         holder.mNoComments.setText("" + post.getNumberOfComments());
@@ -87,6 +97,9 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.ViewHolder> {
                     BitmapFactory.decodeByteArray(imageAsBytes, 0, imageAsBytes.length)
             );
             holder.mPostImageBorder.setVisibility(View.VISIBLE);
+        }
+        else {
+            holder.mPostImage.setImageBitmap(null);
         }
 
         if (mFromMainActivity)
@@ -122,8 +135,9 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.ViewHolder> {
 
             for (Comment c : comments) {
                 ViewGroup container = (ViewGroup) mActivity.getLayoutInflater().inflate(R.layout.comment, null);
-                ((TextView) container.findViewById(R.id.comment)).setText(c.getText());
+                ((TextView) container.findViewById(R.id.username)).setText(c.getUser().getUsername());
                 ((TextView) container.findViewById(R.id.user)).setText(c.getUser().getName());
+                ((TextView) container.findViewById(R.id.comment)).setText(c.getText());
                 ((TextView) container.findViewById(R.id.time)).setText(c.getCommented());
                 LinearLayout commentImageBorder = (LinearLayout) container.findViewById(R.id.commentImageBorder);
                 commentImageBorder.setVisibility(View.GONE);
@@ -158,7 +172,7 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.ViewHolder> {
         public CardView mCardView;
         public TextView mUsername, mName, mPosted, mText, mNoComments, mUpvotes, mDownvotes;
         public ImageView mCloseButton, mDeletePostButton, mDeleteCommentButton;
-        public ImageView mUpvote, mDownvote, mPostImage;
+        public ImageView mPostProfilePicture, mUpvote, mDownvote, mPostImage;
         public LinearLayout mCommentsSection, mPostInfo, mPostImageBorder;
 
         private OnItemClickListener mListener;
@@ -181,6 +195,7 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.ViewHolder> {
             mCardView = (CardView) view;
             mUsername = (TextView) view.findViewById(R.id.username);
             mName = (TextView) view.findViewById(R.id.name);
+            mPostProfilePicture = (ImageView) view.findViewById(R.id.postProfilePicture);
             mPosted = (TextView) view.findViewById(R.id.time);
             mText = (TextView) view.findViewById(R.id.text);
             mPostImage = (ImageView) view.findViewById(R.id.postImage);

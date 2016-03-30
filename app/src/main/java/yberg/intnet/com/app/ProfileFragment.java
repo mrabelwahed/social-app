@@ -2,16 +2,24 @@ package yberg.intnet.com.app;
 
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.LightingColorFilter;
 import android.graphics.Typeface;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.provider.MediaStore;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
+import android.transition.TransitionManager;
+import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -36,8 +44,12 @@ import com.android.volley.toolbox.Volley;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.ByteArrayOutputStream;
 import java.util.HashMap;
 import java.util.Map;
+
+import yberg.intnet.com.app.util.BitmapHandler;
+import yberg.intnet.com.app.util.Time;
 
 
 /**
@@ -50,22 +62,29 @@ import java.util.Map;
  */
 public class ProfileFragment extends Fragment {
 
+    public static final int RESULT_LOAD_IMAGE   = 1;
+
     private OnFragmentInteractionListener mListener;
     private RequestQueue requestQueue;
 
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private ScrollView scrollView;
 
-    private TextView username, name, joined, posts, comments, followers, following, followLabel, nothingToShowTextView;
+    private TextView username, name, joined, posts, comments, followers, following,
+            followButtonLabel, nothingToShowTextView;
     private EditText firstName, lastName, email, password, newPassword, passwordConfirm;
-    private LinearLayout followButton, followersButton, followingButton, latestPostSection, editProfileSection;
+    private LinearLayout editImageButton, followButton, followersButton, followingButton,
+            latestPostSection, editProfileSection;
     private RelativeLayout submitButton;
-    private ImageView followIcon;
+    private ImageView profilePicture, followButtonIcon;
     private ProgressBar spinner;
     private CardView latestPostCard;
 
     private Post latestPost;
     private User user;
+    private Time time;
+    private String imgDecodableString;
+    private Bitmap imageToUpload;
 
     private boolean myProfile = false;
 
@@ -91,6 +110,8 @@ public class ProfileFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        time = new Time(getContext());
         requestQueue = Volley.newRequestQueue(getContext().getApplicationContext());
 
         if (MainActivity.getUid() == getArguments().getInt("profile"))
@@ -123,25 +144,42 @@ public class ProfileFragment extends Fragment {
                 new SwipeRefreshLayout.OnRefreshListener() {
                     @Override
                     public void onRefresh() {
-                        mSwipeRefreshLayout.setRefreshing(true);
                         updateProfile();
-                        mSwipeRefreshLayout.setRefreshing(false);
                     }
                 }
         );
 
         scrollView = (ScrollView) view.findViewById(R.id.scrollView);
 
+        editImageButton = (LinearLayout) view.findViewById(R.id.editImageButton);
+        if (myProfile) {
+            editImageButton.setVisibility(View.VISIBLE);
+            editImageButton.setOnClickListener(
+                    new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            Intent galleryIntent = new Intent(Intent.ACTION_PICK,
+                                    android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                            startActivityForResult(galleryIntent, RESULT_LOAD_IMAGE);
+                        }
+                    }
+            );
+        }
+        else {
+            editImageButton.setVisibility(View.GONE);
+        }
+
         username = (TextView) view.findViewById(R.id.username);
         name = (TextView) view.findViewById(R.id.name);
+        profilePicture = (ImageView) view.findViewById(R.id.profilePicture);
         //joined TextView
-        posts = (TextView) view.findViewById(R.id.posts);
-        comments = (TextView) view.findViewById(R.id.comments);
         followers = (TextView) view.findViewById(R.id.followers);
         following = (TextView) view.findViewById(R.id.following);
+        posts = (TextView) view.findViewById(R.id.posts);
+        comments = (TextView) view.findViewById(R.id.comments);
 
-        followLabel = (TextView) view.findViewById(R.id.followLabel);
-        followIcon = (ImageView) view.findViewById(R.id.followIcon);
+        followButtonLabel = (TextView) view.findViewById(R.id.followButtonLabel);
+        followButtonIcon = (ImageView) view.findViewById(R.id.followButtonIcon);
         followButton = (LinearLayout) view.findViewById(R.id.followButton);
         followButton.setOnClickListener(
                 new View.OnClickListener(){
@@ -149,7 +187,7 @@ public class ProfileFragment extends Fragment {
                     @Override
                     public void onClick(View v) {
 
-                        setFollowing(followLabel.getText().toString().equals("Follow"));
+                        setFollowing(followButtonLabel.getText().toString().equals("Follow"));
 
                         StringRequest followRequest = new StringRequest(Request.Method.POST, Database.FOLLOW_URL, new Response.Listener<String>() {
                             @Override
@@ -255,51 +293,7 @@ public class ProfileFragment extends Fragment {
                             hideSoftKeyboard();
                             setEnabled(false);
 
-                            StringRequest editProfileRequest = new StringRequest(Request.Method.POST, Database.EDIT_PROFILE_URL, new Response.Listener<String>() {
-                                @Override
-                                public void onResponse(String response) {
-                                    System.out.println("editProfile response: " + response);
-                                    try {
-                                        JSONObject jsonResponse = new JSONObject(response);
-                                        if (jsonResponse.getBoolean("success")) {
-                                            updateProfile();
-                                            MainActivity.makeSnackbar(jsonResponse.getString("message"));
-                                        } else {
-                                            MainActivity.makeSnackbar(jsonResponse.getString("message"));
-                                        }
-                                    } catch (JSONException e) {
-                                        e.printStackTrace();
-                                    }
-                                    setEnabled(true);
-                                }
-                            }, new Response.ErrorListener() {
-                                @Override
-                                public void onErrorResponse(VolleyError error) {
-                                    if (error.networkResponse == null) {
-                                        if (error.getClass().equals(TimeoutError.class)) {
-                                            setEnabled(true);
-                                            MainActivity.makeSnackbar(R.string.request_timeout);
-                                        }
-                                    }
-                                }
-                            }) {
-                                @Override
-                                protected Map<String, String> getParams() throws AuthFailureError {
-                                    if (newPassword.getText().toString().equals(passwordConfirm.getText().toString())) {
-                                        Map<String, String> parameters = new HashMap<>();
-                                        parameters.put("uid", "" + MainActivity.getUid());
-                                        parameters.put("firstName", firstName.getText().toString());
-                                        parameters.put("lastName", lastName.getText().toString());
-                                        parameters.put("email", email.getText().toString());
-                                        parameters.put("password", password.getText().toString());
-                                        parameters.put("newPassword", newPassword.getText().toString());
-                                        return parameters;
-                                    }
-                                    return null;
-                                }
-                            };
-                            editProfileRequest.setRetryPolicy(Database.getRetryPolicy());
-                            requestQueue.add(editProfileRequest);
+                            editProfile(null);
                         }
                     }
             );
@@ -370,13 +364,13 @@ public class ProfileFragment extends Fragment {
     public void setFollowing(boolean follows) {
         if (follows) {
             followButton.setBackgroundResource(R.drawable.button_red);
-            followLabel.setText("Unfollow");
-            followIcon.setImageResource(R.drawable.cancel);
+            followButtonLabel.setText("Unfollow");
+            followButtonIcon.setImageResource(R.drawable.cancel);
         }
         else {
             followButton.setBackgroundResource(R.drawable.button);
-            followLabel.setText("Follow");
-            followIcon.setImageResource(R.drawable.person_add);
+            followButtonLabel.setText("Follow");
+            followButtonIcon.setImageResource(R.drawable.person_add);
         }
     }
 
@@ -410,10 +404,42 @@ public class ProfileFragment extends Fragment {
         inputMethodManager.showSoftInput(null, 0);
     }
 
-    // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        try {
+            System.out.println("resultCode: " + resultCode);
+            if (resultCode == getActivity().RESULT_OK && requestCode == RESULT_LOAD_IMAGE && data != null) {
+
+                // Get the Image from data
+
+                Uri selectedImage = data.getData();
+                String[] filePathColumn = {MediaStore.Images.Media.DATA};
+
+                // Get the cursor
+                Cursor cursor = getActivity().getContentResolver().query(selectedImage,
+                        filePathColumn, null, null, null);
+                // Move to first row
+                cursor.moveToFirst();
+
+                int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
+                imgDecodableString = cursor.getString(columnIndex);
+                cursor.close();
+
+                // Set the Image in ImageView after decoding the String
+                imageToUpload = BitmapFactory.decodeFile(imgDecodableString);
+
+                BitmapHandler bitmapHandler = new BitmapHandler(new BitmapHandler.OnPostExecuteListener() {
+                    @Override
+                    public void onPostExecute(String encodedImage) {
+                        uploadImageToServer(encodedImage);
+                    }
+                });
+                bitmapHandler.process(imageToUpload);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            MainActivity.makeSnackbar("Something went wrong");
         }
     }
 
@@ -439,17 +465,16 @@ public class ProfileFragment extends Fragment {
      * fragment to allow an interaction in this fragment to be communicated
      * to the activity and potentially other fragments contained in that
      * activity.
-     * <p/>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
      */
     public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
     }
 
     public void updateProfile() {
+
+        setEnabled(true);
+
+        mSwipeRefreshLayout.setRefreshing(true);
 
         firstName.setText("");
         lastName.setText("");
@@ -468,11 +493,13 @@ public class ProfileFragment extends Fragment {
         StringRequest getProfileRequest = new StringRequest(Request.Method.POST, Database.GET_PROFILE_URL, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
+                mSwipeRefreshLayout.setRefreshing(false);
                 System.out.println("getProfile response: " + response);
                 try {
                     JSONObject jsonResponse = new JSONObject(response);
                     if (jsonResponse.getBoolean("success")) {
                         latestPostSection.removeAllViews();
+
                         JSONObject profile = jsonResponse.getJSONObject("profile");
                         user = new User(
                                 profile.getInt("uid"),
@@ -482,13 +509,29 @@ public class ProfileFragment extends Fragment {
                                 profile.getString("email"),
                                 profile.isNull("image") ? null : profile.getString("image")
                         );
+
+                        username.setText(user.getUsername());
+                        name.setText(user.getName());
+                        if (user.getImage() != null) {
+                            byte[] imageAsBytes = Base64.decode(user.getImage().getBytes(), Base64.DEFAULT);
+                            profilePicture.setImageBitmap(
+                                    BitmapFactory.decodeByteArray(imageAsBytes, 0, imageAsBytes.length)
+                            );
+                        }
+                        posts.setText("" + profile.getInt("posts"));
+                        comments.setText("" + profile.getInt("comments"));
+                        followers.setText("" + profile.getInt("followers"));
+                        following.setText("" + profile.getInt("following"));
+
+                        setFollowing(profile.getInt("follows") == 1);
+
                         if (!jsonResponse.isNull("post")) {
                             JSONObject post = jsonResponse.getJSONObject("post");
                             latestPost = new Post(
                                     post.getInt("pid"),
                                     user,
                                     post.getString("text"),
-                                    post.getString("posted"),
+                                    time.getPrettyTime(post.getString("posted")),
                                     post.getInt("comments"),
                                     null,
                                     post.getInt("upvotes"),
@@ -501,6 +544,19 @@ public class ProfileFragment extends Fragment {
                             ((TextView) latestPostCard.findViewById(R.id.name)).setText(user.getName());
                             ((TextView) latestPostCard.findViewById(R.id.time)).setText(latestPost.getPosted());
                             ((TextView) latestPostCard.findViewById(R.id.text)).setText(latestPost.getText());
+                            LinearLayout postImageBorder = (LinearLayout) latestPostCard.findViewById(R.id.postImageBorder);
+                            ImageView postImage = (ImageView) latestPostCard.findViewById(R.id.postImage);
+                            if (latestPost.getImage() != null) {
+                                byte[] imageAsBytes = Base64.decode(latestPost.getImage().getBytes(), Base64.DEFAULT);
+                                postImage.setImageBitmap(
+                                        BitmapFactory.decodeByteArray(imageAsBytes, 0, imageAsBytes.length)
+                                );
+                                postImageBorder.setVisibility(View.VISIBLE);
+                            }
+                            else {
+                                postImage.setImageBitmap(null);
+                                postImageBorder.setVisibility(View.GONE);
+                            }
                             ((TextView) latestPostCard.findViewById(R.id.comments)).setText("" + latestPost.getNumberOfComments());
                             ((TextView) latestPostCard.findViewById(R.id.upvotes)).setText("" + latestPost.getUpvotes());
                             ((TextView) latestPostCard.findViewById(R.id.downvotes)).setText("" + latestPost.getDownvotes());
@@ -525,14 +581,6 @@ public class ProfileFragment extends Fragment {
                         else {
                             latestPostSection.addView(nothingToShowTextView);
                         }
-                        username.setText(user.getUsername());
-                        name.setText(user.getName());
-                        posts.setText("" + profile.getInt("posts"));
-                        comments.setText("" + profile.getInt("comments"));
-                        followers.setText("" + profile.getInt("followers"));
-                        following.setText("" + profile.getInt("following"));
-
-                        setFollowing(profile.getInt("follows") == 1);
 
                         try {
                             if (!((AppCompatActivity) getActivity()).getSupportActionBar().getTitle().equals(user.getName()))
@@ -557,5 +605,100 @@ public class ProfileFragment extends Fragment {
         };
         getProfileRequest.setRetryPolicy(Database.getRetryPolicy());
         requestQueue.add(getProfileRequest);
+    }
+
+    /**
+     * Sends an edit request to the server.
+     *
+     * @param fileName The file name of the image that has just been uploaded
+     */
+    public void editProfile(final String fileName) {
+        StringRequest editProfileRequest = new StringRequest(Request.Method.POST, Database.EDIT_PROFILE_URL, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                System.out.println("editProfile response: " + response);
+                try {
+                    JSONObject jsonResponse = new JSONObject(response);
+                    if (jsonResponse.getBoolean("success")) {
+                        updateProfile();
+                        MainActivity.makeSnackbar(jsonResponse.getString("message"));
+                    } else {
+                        MainActivity.makeSnackbar(jsonResponse.getString("message"));
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                setEnabled(true);
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                if (error.networkResponse == null) {
+                    if (error.getClass().equals(TimeoutError.class)) {
+                        setEnabled(true);
+                        MainActivity.makeSnackbar(R.string.request_timeout);
+                    }
+                }
+            }
+        }) {
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                if (newPassword.getText().toString().equals(passwordConfirm.getText().toString())) {
+                    Map<String, String> parameters = new HashMap<>();
+                    parameters.put("uid", "" + MainActivity.getUid());
+                    parameters.put("firstName", firstName.getText().toString());
+                    parameters.put("lastName", lastName.getText().toString());
+                    parameters.put("email", email.getText().toString());
+                    parameters.put("password", password.getText().toString());
+                    parameters.put("newPassword", newPassword.getText().toString());
+                    parameters.put("image", fileName);
+                    return parameters;
+                }
+                return null;
+            }
+        };
+        editProfileRequest.setRetryPolicy(Database.getRetryPolicy());
+        requestQueue.add(editProfileRequest);
+    }
+
+    public void uploadImageToServer(final String encodedImage) {
+        StringRequest uploadRequest = new StringRequest(Request.Method.POST, Database.UPLOAD_URL, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                System.out.println("uploadRequest response: " + response);
+                setEnabled(true);
+                try {
+                    JSONObject jsonResponse = new JSONObject(response);
+                    if (jsonResponse.getBoolean("success")) {
+                        String fileName = jsonResponse.getString("fileName");
+                        editProfile(fileName);
+                    } else {
+                        MainActivity.makeSnackbar(jsonResponse.getString("message"));
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                setEnabled(true);
+                if (error.networkResponse == null) {
+                    if (error.getClass().equals(TimeoutError.class)) {
+                        MainActivity.makeSnackbar(R.string.request_timeout);
+                    }
+                }
+            }
+        }) {
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                Map<String, String> parameters = new HashMap<>();
+                parameters.put("uid", "" + MainActivity.getUid());
+                parameters.put("image", encodedImage);
+                return parameters;
+            }
+        };
+        uploadRequest.setRetryPolicy(Database.getRetryPolicy());
+        requestQueue.add(uploadRequest);
     }
 }

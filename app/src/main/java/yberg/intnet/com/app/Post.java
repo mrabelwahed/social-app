@@ -19,7 +19,7 @@ public class Post implements Serializable {
         this.pid = pid;
         this.user = user;
         this.text = text;
-        this.posted = (new Time()).getPrettyTime(posted);
+        this.posted = posted;
         this.numberOfComments = numberOfComments;
         this.comments = comments;
         this.upvotes = upvotes;
