@@ -1,4 +1,4 @@
-package yberg.intnet.com.app;
+package yberg.intnet.com.app.util;
 
 import android.content.Context;
 import android.support.design.widget.CoordinatorLayout;

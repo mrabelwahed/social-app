@@ -2,6 +2,8 @@ package yberg.intnet.com.app;
 
 import java.io.Serializable;
 
+import yberg.intnet.com.app.util.Time;
+
 /**
  * Created by Viktor on 2016-03-13.
  */
@@ -15,7 +17,7 @@ public class Comment implements Serializable {
         this.cid = cid;
         this.user = user;
         this.text = text;
-        this.commented = commented;
+        this.commented = (new Time()).getPrettyTime(commented);
         this.image = image;
     }
 

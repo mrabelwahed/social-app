@@ -29,13 +29,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-
-import yberg.intnet.com.app.security.HttpsTrustManager;
-
 
 /**
  * A simple {@link Fragment} subclass.

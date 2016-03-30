@@ -1,9 +1,9 @@
 package yberg.intnet.com.app;
 
-import android.support.annotation.NonNull;
-
 import java.io.Serializable;
 import java.util.ArrayList;
+
+import yberg.intnet.com.app.util.Time;
 
 /**
  * Created by Viktor on 2016-03-06.
@@ -19,7 +19,7 @@ public class Post implements Serializable {
         this.pid = pid;
         this.user = user;
         this.text = text;
-        this.posted = posted;
+        this.posted = (new Time()).getPrettyTime(posted);
         this.numberOfComments = numberOfComments;
         this.comments = comments;
         this.upvotes = upvotes;
