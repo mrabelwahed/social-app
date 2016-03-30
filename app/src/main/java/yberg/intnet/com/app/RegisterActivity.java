@@ -38,6 +38,8 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.Map;
 
+import yberg.intnet.com.app.security.HttpsTrustManager;
+
 public class RegisterActivity extends AppCompatActivity {
 
     private EditText firstName, lastName, email, username, password, passwordConfirm;
@@ -54,6 +56,9 @@ public class RegisterActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        HttpsTrustManager.allowAllSSL();
+        requestQueue = Volley.newRequestQueue(getApplicationContext());
+
         spinner = (ProgressBar) findViewById(R.id.progressBar);
         spinner.getIndeterminateDrawable().setColorFilter(
                 new LightingColorFilter(0xFF000000, Color.WHITE));
@@ -68,8 +73,6 @@ public class RegisterActivity extends AppCompatActivity {
         username = (EditText) findViewById(R.id.username);
         password = (EditText) findViewById(R.id.password);
         passwordConfirm = (EditText) findViewById(R.id.passwordConfirm);
-
-        requestQueue = Volley.newRequestQueue(getApplicationContext());
 
         registerButton = (RelativeLayout) findViewById(R.id.registerButton);
         registerButton.setOnClickListener(

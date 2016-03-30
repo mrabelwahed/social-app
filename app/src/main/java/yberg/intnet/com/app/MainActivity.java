@@ -44,6 +44,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import yberg.intnet.com.app.security.HttpsTrustManager;
+
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
         ProfileFragment.OnFragmentInteractionListener,
@@ -84,6 +86,7 @@ public class MainActivity extends AppCompatActivity
 
         coordinatorLayout = (CoordinatorLayout) findViewById(R.id.base);
 
+        HttpsTrustManager.allowAllSSL();
         requestQueue = Volley.newRequestQueue(getApplicationContext());
 
         drawer = (DrawerLayout) findViewById(R.id.drawer_layout);

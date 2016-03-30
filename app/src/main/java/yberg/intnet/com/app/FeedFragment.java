@@ -29,9 +29,12 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+
+import yberg.intnet.com.app.security.HttpsTrustManager;
 
 
 /**
@@ -75,6 +78,7 @@ public class FeedFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mPosts = new ArrayList<>();
+
         requestQueue = Volley.newRequestQueue(getContext().getApplicationContext());
 
         ((MainActivity) getActivity()).getNavigationView().setCheckedItem(R.id.nav_home);
@@ -185,80 +189,84 @@ public class FeedFragment extends Fragment {
 
     public void updateFeed() {
         mSwipeRefreshLayout.setRefreshing(true);
-        StringRequest getFeedRequest = new StringRequest(Request.Method.POST, Database.FEED_URL, new Response.Listener<String>() {
-            @Override
-            public void onResponse(String response) {
-                System.out.println("getFeedRequest response: " + response);
-                mSwipeRefreshLayout.setRefreshing(false);
-                try {
-                    JSONObject jsonResponse = new JSONObject(response);
-                    if (jsonResponse.getBoolean("success")) {
-                        mPosts.clear();
-                        if (!jsonResponse.isNull("feed")) {
-                            JSONArray feed = jsonResponse.getJSONArray("feed");
-                            for (int i = 0; i < feed.length(); i++) {
-                                // Add the contents of each json object to the posts array list
-                                JSONObject post = feed.getJSONObject(i);
-                                JSONObject user = post.getJSONObject("user");
-                                JSONArray comments = post.getJSONArray("comments");
-                                ArrayList<Comment> mComments = new ArrayList<>();
-                                for (int j = comments.length() - 1; j >= 0; j--) {
-                                    JSONObject comment = comments.getJSONObject(j);
-                                    JSONObject usr = comment.getJSONObject("user");
-                                    mComments.add(new Comment(comment.getInt("cid"),
+        try {
+            StringRequest getFeedRequest = new StringRequest(Request.Method.POST, Database.FEED_URL, new Response.Listener<String>() {
+                @Override
+                public void onResponse(String response) {
+                    System.out.println("getFeedRequest response: " + response);
+                    mSwipeRefreshLayout.setRefreshing(false);
+                    try {
+                        JSONObject jsonResponse = new JSONObject(response);
+                        if (jsonResponse.getBoolean("success")) {
+                            mPosts.clear();
+                            if (!jsonResponse.isNull("feed")) {
+                                JSONArray feed = jsonResponse.getJSONArray("feed");
+                                for (int i = 0; i < feed.length(); i++) {
+                                    // Add the contents of each json object to the posts array list
+                                    JSONObject post = feed.getJSONObject(i);
+                                    JSONObject user = post.getJSONObject("user");
+                                    JSONArray comments = post.getJSONArray("comments");
+                                    ArrayList<Comment> mComments = new ArrayList<>();
+                                    for (int j = comments.length() - 1; j >= 0; j--) {
+                                        JSONObject comment = comments.getJSONObject(j);
+                                        JSONObject usr = comment.getJSONObject("user");
+                                        mComments.add(new Comment(comment.getInt("cid"),
+                                                new User(
+                                                        usr.getInt("uid"),
+                                                        usr.getString("username"),
+                                                        usr.getString("name"),
+                                                        usr.isNull("image") ? null : usr.getString("image")
+                                                ),
+                                                comment.getString("text"),
+                                                comment.getString("commented"),
+                                                comment.isNull("image") ? null : comment.getString("image")
+                                        ));
+                                    }
+                                    mPosts.add(new Post(
+                                            post.getInt("pid"),
                                             new User(
-                                                    usr.getInt("uid"),
-                                                    usr.getString("username"),
-                                                    usr.getString("name"),
-                                                    usr.isNull("image") ? null : usr.getString("image")
+                                                    user.getInt("uid"),
+                                                    user.getString("username"),
+                                                    user.getString("name"),
+                                                    user.isNull("image") ? null : user.getString("image")
                                             ),
-                                            comment.getString("text"),
-                                            comment.getString("commented"),
-                                            comment.isNull("image") ? null : comment.getString("image")
+                                            post.getString("text"),
+                                            post.getString("posted"),
+                                            post.getInt("numberOfComments"),
+                                            mComments,
+                                            post.getInt("upvotes"),
+                                            post.getInt("downvotes"),
+                                            post.getInt("voted"),
+                                            post.isNull("image") ? null : post.getString("image")
                                     ));
                                 }
-                                mPosts.add(new Post(
-                                        post.getInt("pid"),
-                                        new User(
-                                                user.getInt("uid"),
-                                                user.getString("username"),
-                                                user.getString("name"),
-                                                user.isNull("image") ? null : user.getString("image")
-                                        ),
-                                        post.getString("text"),
-                                        post.getString("posted"),
-                                        post.getInt("numberOfComments"),
-                                        mComments,
-                                        post.getInt("upvotes"),
-                                        post.getInt("downvotes"),
-                                        post.getInt("voted"),
-                                        post.isNull("image") ? null : post.getString("image")
-                                ));
+                            } else {
+                                mRecyclerView.setBackgroundResource(R.drawable.account);
                             }
+                            mAdapter.notifyDataSetChanged();
+                        } else {
+                            Snackbar.make(coordinatorLayout, jsonResponse.getString("message"), Snackbar.LENGTH_LONG);
                         }
-                        else {
-                            mRecyclerView.setBackgroundResource(R.drawable.account);
-                        }
-                        mAdapter.notifyDataSetChanged();
+                    } catch (JSONException e) {
+                        e.printStackTrace();
                     }
-                    else {
-                        Snackbar.make(coordinatorLayout, jsonResponse.getString("message"), Snackbar.LENGTH_LONG);
-                    }
-                } catch (JSONException e) {
-                    e.printStackTrace();
                 }
-            }
-        }, Database.getErrorListener(coordinatorLayout, mSwipeRefreshLayout)
-        ) {
-            @Override
-            protected Map<String, String> getParams() throws AuthFailureError {
-                Map<String, String> parameters = new HashMap<>();
-                parameters.put("uid", "" + MainActivity.getUid());
-                return parameters;
-            }
-        };
-        getFeedRequest.setRetryPolicy(Database.getRetryPolicy());
-        requestQueue.add(getFeedRequest);
+            }, Database.getErrorListener(coordinatorLayout, mSwipeRefreshLayout)
+            ) {
+                @Override
+                protected Map<String, String> getParams() throws AuthFailureError {
+                    System.out.println("Sending uid: " + MainActivity.getUid() + " to " + Database.FEED_URL);
+                    Map<String, String> parameters = new HashMap<>();
+                    parameters.put("uid", "" + MainActivity.getUid());
+                    return parameters;
+                }
+            };
+            getFeedRequest.setRetryPolicy(Database.getRetryPolicy());
+            requestQueue.add(getFeedRequest);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public void makeSnackbar(String text) {
