@@ -2,8 +2,10 @@ package yberg.intnet.com.app;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
@@ -31,6 +33,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import yberg.intnet.com.app.util.BitmapHandler;
+
 /**
  * Created by Viktor on 2016-03-04.
  */
@@ -41,11 +45,19 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.ViewHolder> {
     private boolean mFromMainActivity;
     private OnItemClickListener mListener;
 
+    private BitmapHandler bitmapHandler;
+
     public CardAdapter(Activity activity, ArrayList<Post> posts, OnItemClickListener listener, boolean fromMainActivity) {
         mActivity = activity;
         mPosts = posts;
         mListener = listener;
         mFromMainActivity = fromMainActivity;
+        bitmapHandler = new BitmapHandler(new BitmapHandler.OnPostExecuteListener() {
+            @Override
+            public void onPostExecute(String encodedImage) {
+
+            }
+        });
     }
 
     // Create new views (invoked by the layout manager)
@@ -90,13 +102,35 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.ViewHolder> {
         holder.mCardView.setCardElevation(MainActivity.dpToPixels(1, holder.mCardView));
 
         holder.mPostImageBorder.setVisibility(View.GONE);
-        holder.mPostImage.setImageBitmap(null);
         if (post.getImage() != null) {
             byte[] imageAsBytes = Base64.decode(post.getImage().getBytes(), Base64.DEFAULT);
-            holder.mPostImage.setImageBitmap(
-                    BitmapFactory.decodeByteArray(imageAsBytes, 0, imageAsBytes.length)
-            );
+            final Bitmap bitmap = BitmapFactory.decodeByteArray(imageAsBytes, 0, imageAsBytes.length);
+            final Bitmap preview = bitmapHandler.getPreview(bitmap);
+            holder.mPostImage.setImageBitmap(preview);
             holder.mPostImageBorder.setVisibility(View.VISIBLE);
+            if (!mFromMainActivity) {
+                holder.mPostImage.setOnClickListener(
+                        new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                FragmentManager fm = ((PostActivity) mActivity).getSupportFragmentManager();
+                                ImageDialog imageDialog = ImageDialog.newInstance(bitmap);
+                                imageDialog.show(fm, "fragment_image_dialog");
+                            }
+                        }
+                );
+            }
+            else {
+                final CardView cardView = holder.mCardView;
+                holder.mPostImage.setOnClickListener(
+                        new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                cardView.performClick();
+                            }
+                        }
+                );
+            }
         }
         else {
             holder.mPostImage.setImageBitmap(null);
@@ -218,6 +252,8 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.ViewHolder> {
             mDownvote.setOnClickListener(voteListener);
             mDownvotes.setOnClickListener(voteListener);
 
+            mPostImage.setOnClickListener(this);
+
             if (mFromMainActivity) {
                 mCloseButton = (ImageView) view.findViewById(R.id.closeButton);
                 mCloseButton.setOnClickListener(closeListener);
@@ -250,9 +286,6 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.ViewHolder> {
                         current.setCardElevation(MainActivity.dpToPixels(1, current));
 
                         if (current != card) {
-                            /*ViewGroup.LayoutParams size = current.getLayoutParams();
-                            size.height = ViewGroup.LayoutParams.WRAP_CONTENT;
-                            current.setLayoutParams(size);*/
                             LinearLayout comments = (LinearLayout) current.findViewById(R.id.comments_section);
                             ViewGroup.LayoutParams size = comments.getLayoutParams();
                             size.height = 0;

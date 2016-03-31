@@ -16,7 +16,7 @@ import yberg.intnet.com.app.R;
  * Created by Viktor on 2016-03-30.
  */
 
-public class Time {
+public class PrettyTime {
 
     public ArrayList<String> months;
 
@@ -28,7 +28,7 @@ public class Time {
 
     DateFormat dateFormat;
 
-    public Time(Context context) {
+    public PrettyTime(Context context) {
         months = new ArrayList<>();
         Resources strings = context.getResources();
         months.add(strings.getString(R.string.january));

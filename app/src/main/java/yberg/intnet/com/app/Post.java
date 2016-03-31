@@ -3,8 +3,6 @@ package yberg.intnet.com.app;
 import java.io.Serializable;
 import java.util.ArrayList;
 
-import yberg.intnet.com.app.util.Time;
-
 /**
  * Created by Viktor on 2016-03-06.
  */

@@ -17,6 +17,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
@@ -28,12 +29,13 @@ import com.android.volley.toolbox.Volley;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import yberg.intnet.com.app.util.Time;
+import yberg.intnet.com.app.util.PrettyTime;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -50,13 +52,14 @@ public class FeedFragment extends Fragment {
     private RecyclerView mRecyclerView;
     private RecyclerView.Adapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
+    private SwipeRefreshLayout mSwipeRefreshLayout;
+    private CoordinatorLayout coordinatorLayout;
+    private TextView displayEmpty;
+
     private ArrayList<Post> mPosts;
     private RequestQueue requestQueue;
 
-    private SwipeRefreshLayout mSwipeRefreshLayout;
-    private CoordinatorLayout coordinatorLayout;
-
-    private Time time;
+    private PrettyTime prettyTime;
 
     public FeedFragment() {
         // Required empty public constructor
@@ -77,7 +80,7 @@ public class FeedFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mPosts = new ArrayList<>();
-        time = new Time(getContext());
+        prettyTime = new PrettyTime(getContext());
 
         requestQueue = Volley.newRequestQueue(getContext().getApplicationContext());
 
@@ -117,6 +120,9 @@ public class FeedFragment extends Fragment {
                     }
                 }
         );
+
+        displayEmpty = (TextView) view.findViewById(R.id.displayEmpty);
+        displayEmpty.setVisibility(View.GONE);
 
         // use this setting to improve performance if you know that changes
         // in content do not change the layout size of the RecyclerView
@@ -218,7 +224,7 @@ public class FeedFragment extends Fragment {
                                                         usr.isNull("image") ? null : usr.getString("image")
                                                 ),
                                                 comment.getString("text"),
-                                                time.getPrettyTime(comment.getString("commented")),
+                                                prettyTime.getPrettyTime(comment.getString("commented")),
                                                 comment.isNull("image") ? null : comment.getString("image")
                                         ));
                                     }
@@ -231,7 +237,7 @@ public class FeedFragment extends Fragment {
                                                     user.isNull("image") ? null : user.getString("image")
                                             ),
                                             post.getString("text"),
-                                            time.getPrettyTime(post.getString("posted")),
+                                            prettyTime.getPrettyTime(post.getString("posted")),
                                             post.getInt("numberOfComments"),
                                             mComments,
                                             post.getInt("upvotes"),
@@ -240,8 +246,9 @@ public class FeedFragment extends Fragment {
                                             post.isNull("image") ? null : post.getString("image")
                                     ));
                                 }
+                                displayEmpty.setVisibility(View.GONE);
                             } else {
-                                mRecyclerView.setBackgroundResource(R.drawable.account);
+                                displayEmpty.setVisibility(View.VISIBLE);
                             }
                             mAdapter.notifyDataSetChanged();
                         } else {

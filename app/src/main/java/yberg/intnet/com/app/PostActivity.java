@@ -2,7 +2,11 @@ package yberg.intnet.com.app;
 
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.media.Image;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
@@ -17,6 +21,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 import com.android.volley.AuthFailureError;
@@ -36,7 +41,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import yberg.intnet.com.app.util.Time;
+import yberg.intnet.com.app.util.PrettyTime;
 
 public class PostActivity extends AppCompatActivity implements
         PostDialog.OnFragmentInteractionListener,
@@ -53,7 +58,7 @@ public class PostActivity extends AppCompatActivity implements
     private Post receivedPost;
     private ArrayList<Post> mPost;
     private RequestQueue requestQueue;
-    private Time time;
+    private PrettyTime prettyTime;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,7 +70,7 @@ public class PostActivity extends AppCompatActivity implements
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle("Post");
 
-        time = new Time(this);
+        prettyTime = new PrettyTime(this);
         requestQueue = Volley.newRequestQueue(getApplicationContext());
 
         mPost = new ArrayList<>();
@@ -106,40 +111,37 @@ public class PostActivity extends AppCompatActivity implements
                     case R.id.deletePostButton:
                         dialogClickListener = new DialogInterface.OnClickListener() {
                             @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                switch (which){
-                                    case DialogInterface.BUTTON_POSITIVE:
-                                        StringRequest deletePostRequest = new StringRequest(Request.Method.POST, Database.DELETE_POST_URL, new Response.Listener<String>() {
-                                            @Override
-                                            public void onResponse(String response) {
-                                                System.out.println("deletePost response: " + response);
-                                                try {
-                                                    JSONObject jsonResponse = new JSONObject(response);
-                                                    if (jsonResponse.getBoolean("success")) {
-                                                        MainActivity.makeSnackbar("Deleted post");
-                                                        finish();
-                                                    }
-                                                    else {
-                                                        Snackbar.make(findViewById(R.id.base),
-                                                                jsonResponse.getString("message"), Snackbar.LENGTH_LONG).show();
-                                                    }
-                                                } catch (JSONException e) {
-                                                    e.printStackTrace();
+                            public void onClick(DialogInterface dialog, int id) {
+                                if (id == DialogInterface.BUTTON_POSITIVE) {
+                                    StringRequest deletePostRequest = new StringRequest(Request.Method.POST, Database.DELETE_POST_URL, new Response.Listener<String>() {
+                                        @Override
+                                        public void onResponse(String response) {
+                                            System.out.println("deletePost response: " + response);
+                                            try {
+                                                JSONObject jsonResponse = new JSONObject(response);
+                                                if (jsonResponse.getBoolean("success")) {
+                                                    MainActivity.makeSnackbar("Deleted post");
+                                                    finish();
+                                                } else {
+                                                    Snackbar.make(findViewById(R.id.base),
+                                                            jsonResponse.getString("message"), Snackbar.LENGTH_LONG).show();
                                                 }
+                                            } catch (JSONException e) {
+                                                e.printStackTrace();
                                             }
-                                        }, Database.getErrorListener(findViewById(R.id.base), mSwipeRefreshLayout)
-                                        ) {
-                                            @Override
-                                            protected Map<String, String> getParams() throws AuthFailureError {
-                                                Map<String, String> parameters = new HashMap<>();
-                                                parameters.put("uid", "" + MainActivity.getUid());
-                                                parameters.put("pid", "" + mPost.get(0).getPid());
-                                                return parameters;
-                                            }
-                                        };
-                                        deletePostRequest.setRetryPolicy(Database.getRetryPolicy());
-                                        requestQueue.add(deletePostRequest);
-                                        break;
+                                        }
+                                    }, Database.getErrorListener(findViewById(R.id.base), mSwipeRefreshLayout)
+                                    ) {
+                                        @Override
+                                        protected Map<String, String> getParams() throws AuthFailureError {
+                                            Map<String, String> parameters = new HashMap<>();
+                                            parameters.put("uid", "" + MainActivity.getUid());
+                                            parameters.put("pid", "" + mPost.get(0).getPid());
+                                            return parameters;
+                                        }
+                                    };
+                                    deletePostRequest.setRetryPolicy(Database.getRetryPolicy());
+                                    requestQueue.add(deletePostRequest);
                                 }
                             }
                         };
@@ -150,46 +152,44 @@ public class PostActivity extends AppCompatActivity implements
                     case R.id.deleteCommentButton:
                         dialogClickListener = new DialogInterface.OnClickListener() {
                             @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                switch (which){
-                                    case DialogInterface.BUTTON_POSITIVE:
-                                        StringRequest deleteCommentRequest = new StringRequest(Request.Method.POST, Database.DELETE_COMMENT_URL, new Response.Listener<String>() {
-                                            @Override
-                                            public void onResponse(String response) {
-                                                System.out.println("deleteComment response: " + response);
-                                                try {
-                                                    JSONObject jsonResponse = new JSONObject(response);
-                                                    if (jsonResponse.getBoolean("success")) {
-                                                        Snackbar.make(findViewById(R.id.base),
-                                                                "Deleted comment", Snackbar.LENGTH_LONG).show();
-                                                        updatePost();
-                                                    }
-                                                    else {
-                                                        Snackbar.make(findViewById(R.id.base),
-                                                                jsonResponse.getString("message"), Snackbar.LENGTH_LONG).show();
-                                                    }
-                                                } catch (JSONException e) {
-                                                    e.printStackTrace();
+                            public void onClick(DialogInterface dialog, int id) {
+                                if (id == DialogInterface.BUTTON_POSITIVE) {
+                                    StringRequest deleteCommentRequest = new StringRequest(Request.Method.POST, Database.DELETE_COMMENT_URL, new Response.Listener<String>() {
+                                        @Override
+                                        public void onResponse(String response) {
+                                            System.out.println("deleteComment response: " + response);
+                                            try {
+                                                JSONObject jsonResponse = new JSONObject(response);
+                                                if (jsonResponse.getBoolean("success")) {
+                                                    Snackbar.make(findViewById(R.id.base),
+                                                            "Deleted comment", Snackbar.LENGTH_LONG).show();
+                                                    updatePost();
                                                 }
+                                                else {
+                                                    Snackbar.make(findViewById(R.id.base),
+                                                            jsonResponse.getString("message"), Snackbar.LENGTH_LONG).show();
+                                                }
+                                            } catch (JSONException e) {
+                                                e.printStackTrace();
                                             }
-                                        }, Database.getErrorListener(findViewById(R.id.base), mSwipeRefreshLayout)
-                                        ) {
-                                            @Override
-                                            protected Map<String, String> getParams() throws AuthFailureError {
-                                                Map<String, String> parameters = new HashMap<>();
-                                                parameters.put("uid", "" + MainActivity.getUid());
-                                                parameters.put("cid", "" + mPost.get(0).getComments().get(
-                                                        ((ViewGroup) mRecyclerView.findViewById(R.id.comments_section)).indexOfChild((View) v.getParent().getParent())
-                                                ).getCid());
+                                        }
+                                    }, Database.getErrorListener(findViewById(R.id.base), mSwipeRefreshLayout)
+                                    ) {
+                                        @Override
+                                        protected Map<String, String> getParams() throws AuthFailureError {
+                                            Map<String, String> parameters = new HashMap<>();
+                                            parameters.put("uid", "" + MainActivity.getUid());
+                                            parameters.put("cid", "" + mPost.get(0).getComments().get(
+                                                    ((ViewGroup) mRecyclerView.findViewById(R.id.comments_section)).indexOfChild((View) v.getParent().getParent())
+                                            ).getCid());
 
-                                                System.out.println("index: " + ((ViewGroup) mRecyclerView.findViewById(R.id.comments_section)).indexOfChild((View)v.getParent().getParent()));
-                                                System.out.println("cid: " + parameters.get("cid"));
-                                                return parameters;
-                                            }
-                                        };
-                                        deleteCommentRequest.setRetryPolicy(Database.getRetryPolicy());
-                                        requestQueue.add(deleteCommentRequest);
-                                        break;
+                                            System.out.println("index: " + ((ViewGroup) mRecyclerView.findViewById(R.id.comments_section)).indexOfChild((View)v.getParent().getParent()));
+                                            System.out.println("cid: " + parameters.get("cid"));
+                                            return parameters;
+                                        }
+                                    };
+                                    deleteCommentRequest.setRetryPolicy(Database.getRetryPolicy());
+                                    requestQueue.add(deleteCommentRequest);
                                 }
                             }
                         };
@@ -252,7 +252,7 @@ public class PostActivity extends AppCompatActivity implements
                                             usr.isNull("image") ? null : usr.getString("image")
                                     ),
                                     comment.getString("text"),
-                                    time.getPrettyTime(comment.getString("commented")),
+                                    prettyTime.getPrettyTime(comment.getString("commented")),
                                     comment.isNull("image") ? null : comment.getString("image")
                             ));
                         }
@@ -266,7 +266,7 @@ public class PostActivity extends AppCompatActivity implements
                                         user.isNull("image") ? null : user.getString("image")
                                 ),
                                 post.getString("text"),
-                                time.getPrettyTime(post.getString("posted")),
+                                prettyTime.getPrettyTime(post.getString("posted")),
                                 post.getInt("numberOfComments"),
                                 mComments,
                                 post.getInt("upvotes"),

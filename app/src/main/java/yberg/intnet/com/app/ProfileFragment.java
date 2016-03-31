@@ -9,16 +9,13 @@ import android.graphics.Color;
 import android.graphics.LightingColorFilter;
 import android.graphics.Typeface;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
-import android.transition.TransitionManager;
 import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -44,12 +41,11 @@ import com.android.volley.toolbox.Volley;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.ByteArrayOutputStream;
 import java.util.HashMap;
 import java.util.Map;
 
 import yberg.intnet.com.app.util.BitmapHandler;
-import yberg.intnet.com.app.util.Time;
+import yberg.intnet.com.app.util.PrettyTime;
 
 
 /**
@@ -82,7 +78,7 @@ public class ProfileFragment extends Fragment {
 
     private Post latestPost;
     private User user;
-    private Time time;
+    private PrettyTime prettyTime;
     private String imgDecodableString;
     private Bitmap imageToUpload;
 
@@ -111,7 +107,7 @@ public class ProfileFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        time = new Time(getContext());
+        prettyTime = new PrettyTime(getContext());
         requestQueue = Volley.newRequestQueue(getContext().getApplicationContext());
 
         if (MainActivity.getUid() == getArguments().getInt("profile"))
@@ -531,7 +527,7 @@ public class ProfileFragment extends Fragment {
                                     post.getInt("pid"),
                                     user,
                                     post.getString("text"),
-                                    time.getPrettyTime(post.getString("posted")),
+                                    prettyTime.getPrettyTime(post.getString("posted")),
                                     post.getInt("comments"),
                                     null,
                                     post.getInt("upvotes"),
@@ -651,7 +647,8 @@ public class ProfileFragment extends Fragment {
                     parameters.put("email", email.getText().toString());
                     parameters.put("password", password.getText().toString());
                     parameters.put("newPassword", newPassword.getText().toString());
-                    parameters.put("image", fileName);
+                    if (fileName != null)
+                        parameters.put("image", fileName);
                     return parameters;
                 }
                 return null;
