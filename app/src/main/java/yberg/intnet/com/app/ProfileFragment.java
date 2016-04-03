@@ -84,6 +84,8 @@ public class ProfileFragment extends Fragment {
     private String imgDecodableString;
     private Bitmap imageToUpload;
 
+    private BitmapHandler bitmapHandler;
+
     private boolean myProfile = false;
     private String stringProfile, stringFollow, stringPasswordsDoNotMatch, stringNothingToShow,
             stringUnfollow, stringSomethingWentWrong;
@@ -120,6 +122,8 @@ public class ProfileFragment extends Fragment {
 
         prettyTime = new PrettyTime(getContext());
         requestQueue = Volley.newRequestQueue(getContext().getApplicationContext());
+
+        bitmapHandler = new BitmapHandler();
 
         if (MainActivity.getUid() == getArguments().getInt("profile"))
             myProfile = true;
@@ -392,7 +396,7 @@ public class ProfileFragment extends Fragment {
      * Sets the border of an edittext to red if it is empty.
      *
      * @param editText The edittext to set the border on
-     * @return
+     * @return Whether the edittext was empty or not
      */
     public boolean setBorderIfEmpty(EditText editText) {
         if (editText.getText().toString().equals("")) {
@@ -573,6 +577,13 @@ public class ProfileFragment extends Fragment {
 
 
                             //Populate post card
+                            if (user.getImage() != null) {
+                                byte[] imageAsBytes = Base64.decode(user.getImage().getBytes(), Base64.DEFAULT);
+                                Bitmap thumbnail = bitmapHandler.getThumbnail(
+                                        BitmapFactory.decodeByteArray(imageAsBytes, 0, imageAsBytes.length)
+                                );
+                                ((ImageView) latestPostCard.findViewById(R.id.postProfilePicture)).setImageBitmap(thumbnail);
+                            }
                             ((TextView) latestPostCard.findViewById(R.id.username)).setText(user.getUsername());
                             ((TextView) latestPostCard.findViewById(R.id.name)).setText(user.getName());
                             ((TextView) latestPostCard.findViewById(R.id.time)).setText(latestPost.getPosted());

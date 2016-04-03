@@ -94,7 +94,7 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.ViewHolder> {
         }
         else {
             holder.mPostProfilePicture.setImageBitmap(null);
-            holder.mPostProfilePicture.setImageResource(R.drawable.person);
+            holder.mPostProfilePicture.setImageResource(R.drawable.default_pic);
         }
         holder.mPosted.setText(post.getPosted());
         holder.mText.setText(post.getText());
@@ -187,7 +187,7 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.ViewHolder> {
                 }
                 else {
                     commentProfilePicture.setImageBitmap(null);
-                    commentProfilePicture.setImageResource(R.drawable.person);
+                    commentProfilePicture.setImageResource(R.drawable.default_pic);
                 }
                 ImageView commentImage = (ImageView) container.findViewById(R.id.commentImage);
                 if (c.getImage() != null) {

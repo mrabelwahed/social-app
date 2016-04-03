@@ -96,7 +96,7 @@
                         android:src="@drawable/account"
                         android:scaleType="fitXY"
                         android:adjustViewBounds="true"
-                        android:layout_margin="2dp" />
+                        android:layout_margin="1dp" />
                 </LinearLayout>
 
                 <LinearLayout

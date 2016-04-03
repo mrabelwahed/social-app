@@ -70,7 +70,7 @@ public class SearchAdapter extends ArrayAdapter<SearchItem> {
         }
         else {
             holder.image.setImageBitmap(null);
-            holder.image.setImageResource(R.drawable.person);
+            holder.image.setImageResource(R.drawable.default_pic);
         }
 
         return view;

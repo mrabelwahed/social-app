@@ -59,7 +59,7 @@
                                 <ImageView
                                     android:layout_width="match_parent"
                                     android:layout_height="match_parent"
-                                    android:src="@drawable/person"
+                                    android:src="@drawable/default_pic"
                                     android:id="@+id/profilePicture" />
 
                                 <LinearLayout
@@ -106,7 +106,7 @@
                                 android:id="@+id/username"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="yberg"
+                                android:text="jdoe"
                                 android:textStyle="italic"
                                 android:textColor="@color/blue"
                                 android:textSize="26dp"
