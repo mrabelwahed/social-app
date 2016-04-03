@@ -52,12 +52,7 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.ViewHolder> {
         mPosts = posts;
         mListener = listener;
         mFromMainActivity = fromMainActivity;
-        bitmapHandler = new BitmapHandler(new BitmapHandler.OnPostExecuteListener() {
-            @Override
-            public void onPostExecute(String encodedImage) {
-
-            }
-        });
+        bitmapHandler = new BitmapHandler();
     }
 
     // Create new views (invoked by the layout manager)
@@ -105,8 +100,7 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.ViewHolder> {
         if (post.getImage() != null) {
             byte[] imageAsBytes = Base64.decode(post.getImage().getBytes(), Base64.DEFAULT);
             final Bitmap bitmap = BitmapFactory.decodeByteArray(imageAsBytes, 0, imageAsBytes.length);
-            final Bitmap preview = bitmapHandler.getPreview(bitmap);
-            holder.mPostImage.setImageBitmap(preview);
+            holder.mPostImage.setImageBitmap(bitmap);
             holder.mPostImageBorder.setVisibility(View.VISIBLE);
             if (!mFromMainActivity) {
                 holder.mPostImage.setOnClickListener(
@@ -114,7 +108,7 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.ViewHolder> {
                             @Override
                             public void onClick(View v) {
                                 FragmentManager fm = ((PostActivity) mActivity).getSupportFragmentManager();
-                                ImageDialog imageDialog = ImageDialog.newInstance(bitmap);
+                                ImageDialog imageDialog = ImageDialog.newInstance(bitmapHandler.getLarger(bitmap));
                                 imageDialog.show(fm, "fragment_image_dialog");
                             }
                         }
@@ -175,12 +169,39 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.ViewHolder> {
                 ((TextView) container.findViewById(R.id.time)).setText(c.getCommented());
                 LinearLayout commentImageBorder = (LinearLayout) container.findViewById(R.id.commentImageBorder);
                 commentImageBorder.setVisibility(View.GONE);
-                if (c.getImage() != null) {
-                    byte[] imageAsBytes = Base64.decode(c.getImage().getBytes(), Base64.DEFAULT);
-                    ((ImageView) container.findViewById(R.id.commentImage)).setImageBitmap(
+                ImageView commentProfilePicture = (ImageView) container.findViewById(R.id.commentProfilePicture);
+                if (c.getUser().getImage() != null) {
+                    byte[] imageAsBytes = Base64.decode(c.getUser().getImage().getBytes(), Base64.DEFAULT);
+                    commentProfilePicture.setImageBitmap(
                             BitmapFactory.decodeByteArray(imageAsBytes, 0, imageAsBytes.length)
                     );
+                }
+                else {
+                    commentProfilePicture.setImageBitmap(null);
+                    commentProfilePicture.setImageResource(R.drawable.person);
+                }
+                ImageView commentImage = (ImageView) container.findViewById(R.id.commentImage);
+                if (c.getImage() != null) {
+                    byte[] imageAsBytes = Base64.decode(c.getImage().getBytes(), Base64.DEFAULT);
+                    final Bitmap bitmap = BitmapFactory.decodeByteArray(imageAsBytes, 0, imageAsBytes.length);
+                    commentImage.setImageBitmap(bitmap);
                     commentImageBorder.setVisibility(View.VISIBLE);
+                    if (!mFromMainActivity) {
+                        commentImage.setOnClickListener(
+                                new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View v) {
+                                        FragmentManager fm = ((PostActivity) mActivity).getSupportFragmentManager();
+                                        ImageDialog imageDialog = ImageDialog.newInstance(bitmapHandler.getLarger(bitmap));
+                                        imageDialog.show(fm, "fragment_image_dialog");
+                                    }
+                                }
+                        );
+                    }
+                }
+                else {
+                    commentImage.setImageBitmap(null);
+                    commentImageBorder.setVisibility(View.GONE);
                 }
                 holder.mCommentsSection.removeView(holder.mCommentsSection.findViewById(R.id.progress));
                 holder.mCommentsSection.addView(container);
@@ -239,7 +260,7 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.ViewHolder> {
             mUpvotes = (TextView) view.findViewById(R.id.upvotes);
             mDownvote = (ImageView) view.findViewById(R.id.downvote);
             mDownvotes = (TextView) view.findViewById(R.id.downvotes);
-            mCommentsSection = (LinearLayout) view.findViewById(R.id.comments_section);
+            mCommentsSection = (LinearLayout) view.findViewById(R.id.commentsSection);
 
             mPostImageBorder.setVisibility(View.GONE);
 
@@ -286,7 +307,7 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.ViewHolder> {
                         current.setCardElevation(MainActivity.dpToPixels(1, current));
 
                         if (current != card) {
-                            LinearLayout comments = (LinearLayout) current.findViewById(R.id.comments_section);
+                            LinearLayout comments = (LinearLayout) current.findViewById(R.id.commentsSection);
                             ViewGroup.LayoutParams size = comments.getLayoutParams();
                             size.height = 0;
                             comments.setLayoutParams(size);
@@ -296,7 +317,7 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.ViewHolder> {
                     }
 
                     CardView cardView = (CardView) card;
-                    LinearLayout commentsSection = (LinearLayout) card.findViewById(R.id.comments_section);
+                    LinearLayout commentsSection = (LinearLayout) card.findViewById(R.id.commentsSection);
                     ImageView closeButton = (ImageView) card.findViewById(R.id.closeButton);
 
                     ViewGroup.LayoutParams cardSize = card.getLayoutParams();
@@ -308,18 +329,17 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.ViewHolder> {
                     if (card.getTag().equals("closed")) {
                         closeButton.setVisibility(View.VISIBLE);
                         commentsSectionSize.height = ViewGroup.LayoutParams.WRAP_CONTENT;
-                        //cardSize.height = ViewGroup.LayoutParams.MATCH_PARENT;
                         card.setTag("open");
                         cardView.setCardElevation(MainActivity.dpToPixels(5, card));
-                    } else { // if size.height == ViewGroup.LayoutParams.MATCH_PARENT)
+                    } else { // if (card.getTag().equals("open"))
+                        System.out.println("HEJEHHEJHEJHEJHEJHEJHEJHEJHEJHEJHEHJEHEJHEJHEJHEJEHJEHJEHJEHJEHJEHJEHEJHEJEH");
                         closeButton.setVisibility(View.INVISIBLE);
                         commentsSectionSize.height = 0;
-                        //cardSize.height = ViewGroup.LayoutParams.WRAP_CONTENT;
                         card.setTag("closed");
                         commentsSection.setLayoutParams(commentsSectionSize);
                         Intent intent = new Intent(mActivity, PostActivity.class);
                         intent.putExtra("post", mPosts.get(getAdapterPosition()));
-                        System.out.println("post: " + mPosts.get(getAdapterPosition()).getText());
+                        //System.out.println("post: " + mPosts.get(getAdapterPosition()).getText());
                         mActivity.startActivity(intent);
                     }
 
@@ -338,7 +358,7 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.ViewHolder> {
                     public void onClick(View closeButton) {
 
                         RecyclerView recyclerView = (RecyclerView) mCardView.getParent();
-                        LinearLayout commentsSection = (LinearLayout) mCardView.findViewById(R.id.comments_section);
+                        LinearLayout commentsSection = (LinearLayout) mCardView.findViewById(R.id.commentsSection);
 
                         TransitionManager.endTransitions(recyclerView);
                         TransitionManager.beginDelayedTransition(recyclerView);

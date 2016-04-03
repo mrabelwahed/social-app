@@ -194,7 +194,14 @@ public class FeedFragment extends Fragment {
     }
 
     public void updateFeed() {
-        mSwipeRefreshLayout.setRefreshing(true);
+
+        mSwipeRefreshLayout.post(new Runnable() {
+            @Override
+            public void run() {
+                mSwipeRefreshLayout.setRefreshing(true);
+            }
+        });
+
         try {
             StringRequest getFeedRequest = new StringRequest(Request.Method.POST, Database.FEED_URL, new Response.Listener<String>() {
                 @Override

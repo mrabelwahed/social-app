@@ -2,11 +2,7 @@ package yberg.intnet.com.app;
 
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
-import android.media.Image;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
@@ -21,7 +17,6 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 import com.android.volley.AuthFailureError;
@@ -83,9 +78,7 @@ public class PostActivity extends AppCompatActivity implements
                 new SwipeRefreshLayout.OnRefreshListener() {
                     @Override
                     public void onRefresh() {
-                        mSwipeRefreshLayout.setRefreshing(true);
                         updatePost();
-                        mSwipeRefreshLayout.setRefreshing(false);
                     }
                 }
         );
@@ -180,10 +173,10 @@ public class PostActivity extends AppCompatActivity implements
                                             Map<String, String> parameters = new HashMap<>();
                                             parameters.put("uid", "" + MainActivity.getUid());
                                             parameters.put("cid", "" + mPost.get(0).getComments().get(
-                                                    ((ViewGroup) mRecyclerView.findViewById(R.id.comments_section)).indexOfChild((View) v.getParent().getParent())
+                                                    ((ViewGroup) mRecyclerView.findViewById(R.id.commentsSection)).indexOfChild((View) v.getParent().getParent())
                                             ).getCid());
 
-                                            System.out.println("index: " + ((ViewGroup) mRecyclerView.findViewById(R.id.comments_section)).indexOfChild((View)v.getParent().getParent()));
+                                            System.out.println("index: " + ((ViewGroup) mRecyclerView.findViewById(R.id.commentsSection)).indexOfChild((View)v.getParent().getParent()));
                                             System.out.println("cid: " + parameters.get("cid"));
                                             return parameters;
                                         }
@@ -207,7 +200,15 @@ public class PostActivity extends AppCompatActivity implements
                 }
             }
         }, false);
+
         mRecyclerView.setAdapter(mAdapter);
+
+        mSwipeRefreshLayout.post(new Runnable() {
+            @Override
+            public void run() {
+                mSwipeRefreshLayout.setRefreshing(true);
+            }
+        });
 
         updatePost();
     }
@@ -228,9 +229,18 @@ public class PostActivity extends AppCompatActivity implements
     }
 
     public void updatePost() {
+
+        mSwipeRefreshLayout.post(new Runnable() {
+            @Override
+            public void run() {
+                mSwipeRefreshLayout.setRefreshing(true);
+            }
+        });
+
         StringRequest getPostRequest = new StringRequest(Request.Method.POST, Database.GET_POST_URL, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
+                mSwipeRefreshLayout.setRefreshing(false);
                 System.out.println("getPost response: " + response);
                 try {
                     JSONObject jsonResponse = new JSONObject(response);
@@ -287,6 +297,7 @@ public class PostActivity extends AppCompatActivity implements
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
+                mSwipeRefreshLayout.setRefreshing(false);
                 if (error.networkResponse == null) {
                     if (error.getClass().equals(TimeoutError.class)) {
                         MainActivity.makeSnackbar(R.string.request_timeout);

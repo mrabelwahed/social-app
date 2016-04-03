@@ -470,7 +470,12 @@ public class ProfileFragment extends Fragment {
 
         setEnabled(true);
 
-        mSwipeRefreshLayout.setRefreshing(true);
+        mSwipeRefreshLayout.post(new Runnable() {
+            @Override
+            public void run() {
+                mSwipeRefreshLayout.setRefreshing(true);
+            }
+        });
 
         firstName.setText("");
         lastName.setText("");

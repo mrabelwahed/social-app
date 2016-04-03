@@ -165,7 +165,7 @@ public class MainActivity extends AppCompatActivity
             @Override
             public boolean onQueryTextChange(final String s) {
                 if (!s.equals("")) {
-                    StringRequest editProfileRequest = new StringRequest(Request.Method.POST, Database.SEARCH_PROFILE_URL, new Response.Listener<String>() {
+                    StringRequest searchProfileRequest = new StringRequest(Request.Method.POST, Database.SEARCH_PROFILE_URL, new Response.Listener<String>() {
                         @Override
                         public void onResponse(String response) {
                             System.out.println("searchProfile response: " + response);
@@ -182,7 +182,7 @@ public class MainActivity extends AppCompatActivity
                                                             profile.getInt("uid"),
                                                             profile.getString("username"),
                                                             profile.getString("name"),
-                                                            profile.getString("image")
+                                                            profile.isNull("image") ? null : profile.getString("image")
                                                     )
                                             );
                                         }
@@ -212,8 +212,8 @@ public class MainActivity extends AppCompatActivity
                             return parameters;
                         }
                     };
-                    editProfileRequest.setRetryPolicy(Database.getRetryPolicy());
-                    requestQueue.add(editProfileRequest);
+                    searchProfileRequest.setRetryPolicy(Database.getRetryPolicy());
+                    requestQueue.add(searchProfileRequest);
 
                 } else {
                     listPopupWindow.dismiss();

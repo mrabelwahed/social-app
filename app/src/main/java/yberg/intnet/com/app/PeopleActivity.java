@@ -115,7 +115,7 @@ public class PeopleActivity extends AppCompatActivity {
                                                 follower.getInt("uid"),
                                                 follower.getString("username"),
                                                 follower.getString("name"),
-                                                follower.getString("image")
+                                                follower.isNull("image") ? null : follower.getString("image")
                                         )
                                 );
                             }

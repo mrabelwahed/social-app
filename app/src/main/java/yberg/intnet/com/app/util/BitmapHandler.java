@@ -15,16 +15,19 @@ import java.io.ByteArrayOutputStream;
 
 public class BitmapHandler extends AsyncTask<Void, Void, Void> {
 
-    public static int THUMB_HEIGHT      = 128;
-    public static int IMAGE_QUALITY     = 80;  // 0 - 100
-    public static int PREVIEW_HEIGHT    = 540;
-    public static int MAX_WIDTH         = 1920;
-    public static int MAX_HEIGHT        = 1080;
+    public static int THUMB_SIZE        = 128;
+    public static int IMAGE_QUALITY     = 75;  // 0 - 100
+    public static int MAX_WIDTH         = 960;
+    public static int MAX_HEIGHT        = 540;
 
     private OnPostExecuteListener mListener;
 
     private Bitmap bitmap;
     private String encodedImage;
+
+    public BitmapHandler() {
+        // Emtpy constructor
+    }
 
     public BitmapHandler(OnPostExecuteListener listener) {
         mListener = listener;
@@ -36,13 +39,11 @@ public class BitmapHandler extends AsyncTask<Void, Void, Void> {
     }
 
     public Bitmap getThumbnail(Bitmap bitmap) {
-        return ThumbnailUtils.extractThumbnail(bitmap,
-                (int) ((bitmap.getWidth() / (double) bitmap.getHeight()) * THUMB_HEIGHT), THUMB_HEIGHT);
+        return ThumbnailUtils.extractThumbnail(bitmap, THUMB_SIZE, THUMB_SIZE);
     }
 
-    public Bitmap getPreview(Bitmap bitmap) {
-        return ThumbnailUtils.extractThumbnail(bitmap,
-                (int) ((bitmap.getWidth() / (double) bitmap.getHeight()) * PREVIEW_HEIGHT), PREVIEW_HEIGHT);
+    public Bitmap getLarger(Bitmap bitmap) {
+        return Bitmap.createScaledBitmap(bitmap, bitmap.getWidth(), bitmap.getHeight(), false);
     }
 
     public Bitmap getCompressedBitmap(Bitmap bitmap) {

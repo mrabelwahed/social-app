@@ -26,15 +26,15 @@
                 android:layout_width="36dp"
                 android:layout_height="36dp"
                 android:src="@drawable/person"
-                android:id="@+id/commentUser" />
+                android:id="@+id/commentProfilePicture" />
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:layout_marginLeft="16dp"
-                android:layout_alignBottom="@+id/commentUser"
-                android:layout_toEndOf="@+id/commentUser">
+                android:layout_alignBottom="@+id/commentProfilePicture"
+                android:layout_toEndOf="@+id/commentProfilePicture">
 
                 <LinearLayout
                     android:orientation="horizontal"
