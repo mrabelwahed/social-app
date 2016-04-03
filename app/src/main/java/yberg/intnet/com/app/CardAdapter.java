@@ -37,6 +37,8 @@ import yberg.intnet.com.app.util.BitmapHandler;
 
 /**
  * Created by Viktor on 2016-03-04.
+ *
+ * Custom adapter for the recycler view with posts.
  */
 public class CardAdapter extends RecyclerView.Adapter<CardAdapter.ViewHolder> {
 
@@ -44,6 +46,8 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.ViewHolder> {
     private static Activity mActivity;
     private boolean mFromMainActivity;
     private OnItemClickListener mListener;
+
+    private String stringComment;
 
     private BitmapHandler bitmapHandler;
 
@@ -53,6 +57,8 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.ViewHolder> {
         mListener = listener;
         mFromMainActivity = fromMainActivity;
         bitmapHandler = new BitmapHandler();
+
+        stringComment = activity.getResources().getString(R.string.comment);
     }
 
     // Create new views (invoked by the layout manager)
@@ -71,8 +77,9 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.ViewHolder> {
     // Replace the contents of a view (invoked by the layout manager)
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        // - get element from your dataset at this position
-        // - replace the contents of the view with that element
+
+        // Gets an object at the given position in the posts array and populates
+        // text and image views.
 
         Post post = mPosts.get(position);
 
@@ -80,9 +87,10 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.ViewHolder> {
         holder.mName.setText(post.getUser().getName());
         if (post.getUser().getImage() != null) {
             byte[] imageAsBytes = Base64.decode(post.getUser().getImage().getBytes(), Base64.DEFAULT);
-            holder.mPostProfilePicture.setImageBitmap(
+            Bitmap thumbnail = bitmapHandler.getThumbnail(
                     BitmapFactory.decodeByteArray(imageAsBytes, 0, imageAsBytes.length)
             );
+            holder.mPostProfilePicture.setImageBitmap(thumbnail);
         }
         else {
             holder.mPostProfilePicture.setImageBitmap(null);
@@ -172,9 +180,10 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.ViewHolder> {
                 ImageView commentProfilePicture = (ImageView) container.findViewById(R.id.commentProfilePicture);
                 if (c.getUser().getImage() != null) {
                     byte[] imageAsBytes = Base64.decode(c.getUser().getImage().getBytes(), Base64.DEFAULT);
-                    commentProfilePicture.setImageBitmap(
+                    Bitmap thumbnail = bitmapHandler.getThumbnail(
                             BitmapFactory.decodeByteArray(imageAsBytes, 0, imageAsBytes.length)
                     );
+                    commentProfilePicture.setImageBitmap(thumbnail);
                 }
                 else {
                     commentProfilePicture.setImageBitmap(null);
@@ -215,7 +224,7 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.ViewHolder> {
 
         if (!mFromMainActivity) {
             ViewGroup container = (ViewGroup) mActivity.getLayoutInflater().inflate(R.layout.addcomment, null);
-            ((TextView) container.findViewById(R.id.comment)).setText("Comment");
+            ((TextView) container.findViewById(R.id.comment)).setText(stringComment);
             holder.mCommentsSection.addView(container);
         }
     }
@@ -290,6 +299,9 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.ViewHolder> {
             }
         }
 
+        /**
+         * Sets up listeners for the card, the close button and the vote buttons.
+         */
         public void setUpListeners() {
 
             cardListener = new View.OnClickListener() {
@@ -332,14 +344,12 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.ViewHolder> {
                         card.setTag("open");
                         cardView.setCardElevation(MainActivity.dpToPixels(5, card));
                     } else { // if (card.getTag().equals("open"))
-                        System.out.println("HEJEHHEJHEJHEJHEJHEJHEJHEJHEJHEJHEHJEHEJHEJHEJHEJEHJEHJEHJEHJEHJEHJEHEJHEJEH");
                         closeButton.setVisibility(View.INVISIBLE);
                         commentsSectionSize.height = 0;
                         card.setTag("closed");
                         commentsSection.setLayoutParams(commentsSectionSize);
                         Intent intent = new Intent(mActivity, PostActivity.class);
                         intent.putExtra("post", mPosts.get(getAdapterPosition()));
-                        //System.out.println("post: " + mPosts.get(getAdapterPosition()).getText());
                         mActivity.startActivity(intent);
                     }
 
@@ -474,7 +484,7 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.ViewHolder> {
         }
 
         /**
-         * OnClick interface for custom behavior.
+         * Onclick interface for custom behavior.
          */
         public interface OnItemClickListener {
             void onClick(View caller);
@@ -488,7 +498,7 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.ViewHolder> {
     }
 
     /**
-     * OnClick interface for custom behavior.
+     * Onclick interface for custom behavior.
      */
     public interface OnItemClickListener {
         void onClick(View caller);

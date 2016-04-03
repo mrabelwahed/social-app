@@ -14,6 +14,8 @@ import javax.net.ssl.X509TrustManager;
 
 /**
  * Created by Viktor on 2016-03-30.
+ *
+ * Fix for accepting server SSL certificates.
  */
 public class HttpsTrustManager implements X509TrustManager {
 

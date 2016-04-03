@@ -9,6 +9,9 @@ import android.view.View;
 
 /**
  * Created by Viktor on 2016-03-27.
+ *
+ * Custom Floating Action Button scroll behavior.
+ * The fab disappears if scroll down.
  */
 public class ScrollAwareFABBehavior extends FloatingActionButton.Behavior {
 

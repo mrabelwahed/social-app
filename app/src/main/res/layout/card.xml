@@ -195,12 +195,13 @@
                         android:layout_height="wrap_content"
                         android:text="2"
                         android:layout_centerVertical="true"
-                        android:layout_alignParentStart="true" />
+                        android:layout_alignParentStart="true"
+                        android:layout_marginRight="4dp" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text=" comments"
+                        android:text="@string/comments"
                         android:layout_centerVertical="true"
                         android:layout_toEndOf="@+id/comments" />
 

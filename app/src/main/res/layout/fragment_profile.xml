@@ -79,7 +79,7 @@
                                     <TextView
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
-                                        android:text="Update picture"
+                                        android:text="@string/update_picture"
                                         android:textColor="#fff" />
                                 </LinearLayout>
 
@@ -95,22 +95,22 @@
                             android:layout_weight="1">
 
                             <TextView
-                                android:id="@+id/username"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="yberg"
-                                android:textStyle="italic"
-                                android:textColor="@color/blue"
-                                android:textSize="32dp"
-                                android:clipToPadding="false" />
-
-                            <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="John Doe"
                                 android:id="@+id/name"
                                 android:textSize="26dp"
                                 android:textColor="@color/blue" />
+
+                            <TextView
+                                android:id="@+id/username"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="yberg"
+                                android:textStyle="italic"
+                                android:textColor="@color/blue"
+                                android:textSize="26dp"
+                                android:clipToPadding="false" />
 
                             <LinearLayout
                                 android:layout_width="wrap_content"
@@ -119,7 +119,7 @@
                                 android:id="@+id/followButton"
                                 android:background="@drawable/button"
                                 android:elevation="1dp"
-                                android:layout_marginTop="4dp"
+                                android:layout_marginTop="8dp"
                                 android:paddingLeft="8dp"
                                 android:paddingRight="8dp">
 
@@ -133,7 +133,7 @@
                                 <TextView
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:text="Follow"
+                                    android:text="@string/follow"
                                     android:textColor="#fff"
                                     android:id="@+id/followButtonLabel"
                                     android:layout_marginLeft="4dp" />
@@ -179,7 +179,7 @@
                                 <TextView
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:text="followers"
+                                    android:text="@string/followers"
                                     android:textSize="16dp"
                                     android:textColor="@color/colorTextSecondary" />
                             </LinearLayout>
@@ -204,7 +204,7 @@
                                 <TextView
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:text="following"
+                                    android:text="@string/following"
                                     android:textSize="16dp"
                                     android:textColor="@color/colorTextSecondary" />
                             </LinearLayout>
@@ -237,7 +237,7 @@
                                 <TextView
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:text="posts"
+                                    android:text="@string/posts"
                                     android:textSize="16dp"
                                     android:textColor="@color/colorTextSecondary" />
                             </LinearLayout>
@@ -261,7 +261,7 @@
                                 <TextView
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:text="comments"
+                                    android:text="@string/comments"
                                     android:textSize="16dp"
                                     android:textColor="@color/colorTextSecondary" />
                             </LinearLayout>
@@ -296,7 +296,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Latest post"
+                        android:text="@string/latest_post"
                         android:textSize="16dp"
                         android:textColor="@color/colorTextSecondary" />
                 </LinearLayout>
@@ -364,7 +364,7 @@
                             <EditText
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:hint="First name"
+                                android:hint="@string/first_name"
                                 android:textColor="@color/colorText"
                                 android:paddingLeft="44dp"
                                 android:paddingTop="16dp"
@@ -401,7 +401,7 @@
                             <EditText
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:hint="Last name"
+                                android:hint="@string/last_name"
                                 android:textColor="@color/colorText"
                                 android:paddingLeft="44dp"
                                 android:paddingTop="16dp"
@@ -438,7 +438,7 @@
                             <EditText
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:hint="E-mail address"
+                                android:hint="@string/email"
                                 android:textColor="@color/colorText"
                                 android:paddingLeft="44dp"
                                 android:paddingTop="16dp"
@@ -475,7 +475,7 @@
                             <EditText
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:hint="Current password"
+                                android:hint="@string/current_password"
                                 android:textColor="@color/colorText"
                                 android:paddingLeft="44dp"
                                 android:paddingTop="16dp"
@@ -513,7 +513,7 @@
                             <EditText
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:hint="New password"
+                                android:hint="@string/new_password"
                                 android:textColor="@color/colorText"
                                 android:paddingLeft="44dp"
                                 android:paddingTop="16dp"
@@ -551,7 +551,7 @@
                             <EditText
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:hint="Re-enter password"
+                                android:hint="@string/reenter_password"
                                 android:textColor="@color/colorText"
                                 android:paddingLeft="44dp"
                                 android:paddingTop="16dp"
@@ -601,7 +601,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="match_parent"
                             android:gravity="center"
-                            android:text="Submit"
+                            android:text="@string/submit"
                             android:layout_centerHorizontal="true"
                             android:textColor="#fff"
                             android:textSize="16dp" />

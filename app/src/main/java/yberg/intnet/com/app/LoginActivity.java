@@ -37,6 +37,10 @@ import java.util.Map;
 
 import yberg.intnet.com.app.security.HttpsTrustManager;
 
+/**
+ * The login activity.
+ * Checks if the input is valid and sends a login request to the server.
+ */
 public class LoginActivity extends AppCompatActivity {
 
     private EditText username, password;
@@ -180,13 +184,11 @@ public class LoginActivity extends AppCompatActivity {
         );
 
         setEnabled(true);
-
-        //password.setText("123");
-        //loginButton.performClick();
     }
 
     /**
-     * Enables or disables click on the login button and shows or hides a loading spinner.
+     * Enables or disables login button clicks and shows or hides a loading spinner.
+     *
      * @param enabled enable or disable
      */
     public void setEnabled(boolean enabled) {
@@ -204,6 +206,7 @@ public class LoginActivity extends AppCompatActivity {
 
     /**
      * Sets the border color of an edittext to red if it is empty.
+     *
      * @param editText the edittext to be checked
      * @return true if the edittext is empty
      */
@@ -218,6 +221,9 @@ public class LoginActivity extends AppCompatActivity {
         return false;
     }
 
+    /**
+     * Custom TextWatcher for resetting edittext borde
+     */
     public static class GenericTextWatcher implements TextWatcher {
 
         public EditText editText;

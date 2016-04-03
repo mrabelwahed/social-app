@@ -17,7 +17,6 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.LinearLayout;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
@@ -38,6 +37,9 @@ import java.util.Map;
 
 import yberg.intnet.com.app.util.PrettyTime;
 
+/**
+ * An activity for displaying a post and its comments.
+ */
 public class PostActivity extends AppCompatActivity implements
         PostDialog.OnFragmentInteractionListener,
         ProfileFragment.OnFragmentInteractionListener,
@@ -48,13 +50,15 @@ public class PostActivity extends AppCompatActivity implements
     private RecyclerView.LayoutManager mLayoutManager;
 
     private SwipeRefreshLayout mSwipeRefreshLayout;
-    private LinearLayout postInfo;
 
     private Post receivedPost;
     private ArrayList<Post> mPost;
     private RequestQueue requestQueue;
     private PrettyTime prettyTime;
 
+    private String stringPost, stringDeletedPost, stringComment, stringCommentingAs,
+            stringDeletePost, stringYes, stringCancel, stringDeletedComment,
+            stringDeleteComment, stringSentComment;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -62,8 +66,19 @@ public class PostActivity extends AppCompatActivity implements
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        stringPost = getResources().getString(R.string.post);
+        stringDeletedPost = getResources().getString(R.string.deleted_post);
+        stringComment = getResources().getString(R.string.comment);
+        stringCommentingAs = getResources().getString(R.string.commenting_as);
+        stringDeletePost = getResources().getString(R.string.delete_post);
+        stringYes = getResources().getString(R.string.yes);
+        stringCancel = getResources().getString(R.string.cancel);
+        stringDeletedComment = getResources().getString(R.string.deleted_comment);
+        stringDeleteComment = getResources().getString(R.string.delete_comment);
+        stringSentComment = getResources().getString(R.string.sent_comment);
+
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setTitle("Post");
+        getSupportActionBar().setTitle(stringPost);
 
         prettyTime = new PrettyTime(this);
         requestQueue = Volley.newRequestQueue(getApplicationContext());
@@ -100,6 +115,7 @@ public class PostActivity extends AppCompatActivity implements
                 AlertDialog.Builder builder = new AlertDialog.Builder(PostActivity.this);
                 DialogInterface.OnClickListener dialogClickListener;
 
+                // Handle delete post, delete comment and user link buttons
                 switch (v.getId()) {
                     case R.id.deletePostButton:
                         dialogClickListener = new DialogInterface.OnClickListener() {
@@ -113,7 +129,7 @@ public class PostActivity extends AppCompatActivity implements
                                             try {
                                                 JSONObject jsonResponse = new JSONObject(response);
                                                 if (jsonResponse.getBoolean("success")) {
-                                                    MainActivity.makeSnackbar("Deleted post");
+                                                    MainActivity.makeSnackbar(stringDeletedPost);
                                                     finish();
                                                 } else {
                                                     Snackbar.make(findViewById(R.id.base),
@@ -138,9 +154,9 @@ public class PostActivity extends AppCompatActivity implements
                                 }
                             }
                         };
-                        builder.setMessage("Do you really want to delete this post?")
-                                .setPositiveButton("Yes", dialogClickListener)
-                                .setNegativeButton("Cancel", dialogClickListener).show();
+                        builder.setMessage(stringDeletePost)
+                                .setPositiveButton(stringYes, dialogClickListener)
+                                .setNegativeButton(stringCancel, dialogClickListener).show();
                         break;
                     case R.id.deleteCommentButton:
                         dialogClickListener = new DialogInterface.OnClickListener() {
@@ -155,7 +171,7 @@ public class PostActivity extends AppCompatActivity implements
                                                 JSONObject jsonResponse = new JSONObject(response);
                                                 if (jsonResponse.getBoolean("success")) {
                                                     Snackbar.make(findViewById(R.id.base),
-                                                            "Deleted comment", Snackbar.LENGTH_LONG).show();
+                                                            stringDeletedComment, Snackbar.LENGTH_LONG).show();
                                                     updatePost();
                                                 }
                                                 else {
@@ -187,9 +203,9 @@ public class PostActivity extends AppCompatActivity implements
                             }
                         };
                         builder = new AlertDialog.Builder(PostActivity.this);
-                        builder.setMessage("Do you really want to delete this comment?")
-                                .setPositiveButton("Yes", dialogClickListener)
-                                .setNegativeButton("Cancel", dialogClickListener).show();
+                        builder.setMessage(stringDeleteComment)
+                                .setPositiveButton(stringYes, dialogClickListener)
+                                .setNegativeButton(stringCancel, dialogClickListener).show();
                         break;
                     case R.id.postInfo:
                         MainActivity.profileFragment = ProfileFragment.newInstance(mPost.get(0).getUser().getUid());
@@ -213,11 +229,14 @@ public class PostActivity extends AppCompatActivity implements
         updatePost();
     }
 
+    /**
+     * Displays the comment dialog for submitting a comment.
+     */
     public void showCommentDialog(View v) {
         FragmentManager fm = getSupportFragmentManager();
         System.out.println("fm: " + fm);
         SharedPreferences prefs = getSharedPreferences("com.intnet.yberg", Context.MODE_PRIVATE);
-        PostDialog postDialog = PostDialog.newInstance("Comment", "Commenting as",
+        PostDialog postDialog = PostDialog.newInstance(stringComment, stringCommentingAs,
                 prefs.getString("username", ""), prefs.getString("name", ""));
         postDialog.show(fm, "fragment_post_dialog");
     }
@@ -228,6 +247,9 @@ public class PostActivity extends AppCompatActivity implements
         return true;
     }
 
+    /**
+     * Sends an update request to the server and populates the post card.
+     */
     public void updatePost() {
 
         mSwipeRefreshLayout.post(new Runnable() {
@@ -333,7 +355,7 @@ public class PostActivity extends AppCompatActivity implements
                     JSONObject jsonResponse = new JSONObject(response);
                     if (jsonResponse.getBoolean("success")) {
                         Snackbar.make(findViewById(R.id.base),
-                                "Sent comment", Snackbar.LENGTH_LONG).show();
+                                stringSentComment, Snackbar.LENGTH_LONG).show();
                         dialog.dismiss();
                         updatePost();
                     }

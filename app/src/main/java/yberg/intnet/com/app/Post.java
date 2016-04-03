@@ -5,6 +5,8 @@ import java.util.ArrayList;
 
 /**
  * Created by Viktor on 2016-03-06.
+ *
+ * A user submitted post.
  */
 public class Post implements Serializable {
 

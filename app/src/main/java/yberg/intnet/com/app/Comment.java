@@ -4,6 +4,8 @@ import java.io.Serializable;
 
 /**
  * Created by Viktor on 2016-03-13.
+ *
+ * A user submitted comment.
  */
 public class Comment implements Serializable {
 

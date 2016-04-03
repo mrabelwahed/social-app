@@ -46,6 +46,10 @@ import java.util.Map;
 
 import yberg.intnet.com.app.security.HttpsTrustManager;
 
+/**
+ * The main activity and the container for the feed and profile fragments.
+ * Handles the navigation view and the search view.
+ */
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
         ProfileFragment.OnFragmentInteractionListener,
@@ -104,7 +108,7 @@ public class MainActivity extends AppCompatActivity
         prefs = getSharedPreferences("com.intnet.yberg", Context.MODE_PRIVATE);
         headerUsername = (TextView) header.findViewById(R.id.username);
         headerName = (TextView) header.findViewById(R.id.name);
-        headerUsername.setText("@" + prefs.getString("username", ""));
+        headerUsername.setText(prefs.getString("username", ""));
         headerName.setText(prefs.getString("name", ""));
 
         uid = prefs.getInt("uid", -1);
@@ -162,6 +166,13 @@ public class MainActivity extends AppCompatActivity
                 return false;
             }
 
+            /**
+             * Sends a search request to the server on text change. The result is displayed
+             * in a popup below the search view.
+             *
+             * @param s The entered string
+             * @return
+             */
             @Override
             public boolean onQueryTextChange(final String s) {
                 if (!s.equals("")) {
@@ -243,6 +254,9 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
+    /**
+     * Displays the profile fragment when the user clicks on an item in the search view popup.
+     */
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         profileFragment = ProfileFragment.newInstance(
@@ -300,6 +314,13 @@ public class MainActivity extends AppCompatActivity
 
     }
 
+    /**
+     * Sends a post request to the server and update the feed when the user submits a post.
+     *
+     * @param dialog The dialog that's been submitted
+     * @param text The post text
+     * @param fileName The name of the uploaded image
+     */
     @Override
     public void onDialogSubmit(final PostDialog dialog, final String text, final String fileName) {
         StringRequest addPostRequest = new StringRequest(Request.Method.POST, Database.ADD_POST_URL, new Response.Listener<String>() {
@@ -339,6 +360,9 @@ public class MainActivity extends AppCompatActivity
         requestQueue.add(addPostRequest);
     }
 
+    /**
+     * @return The navigation view
+     */
     public NavigationView getNavigationView() {
         return navigationView;
     }
@@ -363,18 +387,35 @@ public class MainActivity extends AppCompatActivity
         return null;
     }
 
+    /**
+     * @return The uid of the signed in user.
+     */
     public static int getUid() {
         return uid;
     }
 
+    /**
+     * Converts density pixels to pixels.
+     * @param dp Density pixels
+     * @param view The view
+     * @return Density pixels
+     */
     public static float dpToPixels(int dp, View view) {
         return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, view.getResources().getDisplayMetrics());
     }
 
+    /**
+     * @return The fragment manager of MainActivity
+     */
     public static FragmentManager getMainFragmentManager() {
         return fragmentManager;
     }
 
+    /**
+     * Static method for displaying a snackbar.
+     *
+     * @param text Text to be displayed in the snackbar
+     */
     public static void makeSnackbar(String text) {
         if (feedFragment.isAdded())
             feedFragment.makeSnackbar(text);
@@ -382,6 +423,11 @@ public class MainActivity extends AppCompatActivity
             Snackbar.make(coordinatorLayout, text, Snackbar.LENGTH_LONG).show();
     }
 
+    /**
+     * Static method for displaying a snackbar.
+     *
+     * @param resId The resource id of the text to be displayed in the snackbar
+     */
     public static void makeSnackbar(int resId) {
         makeSnackbar(coordinatorLayout.getResources().getText(resId).toString());
     }

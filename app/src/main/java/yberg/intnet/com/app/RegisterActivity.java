@@ -37,6 +37,10 @@ import java.util.Map;
 
 import yberg.intnet.com.app.security.HttpsTrustManager;
 
+/**
+ * The activity for registering a new user.
+ * Validates all the fields and sends a request to the server.
+ */
 public class RegisterActivity extends AppCompatActivity {
 
     private EditText firstName, lastName, email, username, password, passwordConfirm;
@@ -46,12 +50,16 @@ public class RegisterActivity extends AppCompatActivity {
     private RequestQueue requestQueue;
     private ImageView check;
 
+    private String stringPasswordsDoNotMatch;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        stringPasswordsDoNotMatch = getResources().getString(R.string.passwords_do_not_match);
 
         HttpsTrustManager.allowAllSSL();
         requestQueue = Volley.newRequestQueue(getApplicationContext());
@@ -92,7 +100,7 @@ public class RegisterActivity extends AppCompatActivity {
                             passwordConfirm.requestFocus();
                             ((ImageView) parent.getChildAt(parent.indexOfChild(passwordConfirm) + 1))
                                     .setColorFilter(ContextCompat.getColor(RegisterActivity.this, R.color.red));
-                            Snackbar.make(coordinatorLayout, "Passwords do not match", Snackbar.LENGTH_LONG).show();
+                            Snackbar.make(coordinatorLayout, stringPasswordsDoNotMatch, Snackbar.LENGTH_LONG).show();
                             shouldReturn = true;
                         }
                         // Return if some input is empty
@@ -206,7 +214,8 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
     /**
-     * Enables or disables click on the login button and shows or hides a loading spinner.
+     * Enables or disables login button clicks and shows or hides a loading spinner.
+     *
      * @param enabled Whether the button should be enabled or disabled
      */
     public void setEnabled(boolean enabled) {
@@ -224,6 +233,7 @@ public class RegisterActivity extends AppCompatActivity {
 
     /**
      * Sets the border color of an edittext to red if it is empty.
+     *
      * @param editText the edittext to be checked
      * @return true if the edittext is empty
      */
@@ -235,10 +245,16 @@ public class RegisterActivity extends AppCompatActivity {
         return false;
     }
 
-    public void setBorder(EditText editText, int drawable, int colorId) {
+    /**
+     * Set the border color of an EditText.
+     * @param editText The EditText to be modified
+     * @param drawableId The drawable resource id
+     * @param colorId The color resource id
+     */
+    public void setBorder(EditText editText, int drawableId, int colorId) {
         ViewGroup parent;
         parent = (ViewGroup) editText.getParent();
-        editText.setBackgroundResource(drawable);
+        editText.setBackgroundResource(drawableId);
         ((ImageView) parent.getChildAt(parent.indexOfChild(editText) + 1)).setColorFilter(
                 ContextCompat.getColor(RegisterActivity.this, colorId));
     }

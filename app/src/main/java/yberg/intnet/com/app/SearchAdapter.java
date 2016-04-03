@@ -18,18 +18,18 @@ import yberg.intnet.com.app.util.BitmapHandler;
 
 /**
  * Created by Viktor on 2016-03-24.
+ *
+ * Custom adapter for search results in the search view and in PeopleActivity.
  */
 public class SearchAdapter extends ArrayAdapter<SearchItem> {
 
     private BitmapHandler bitmapHandler;
 
     private Activity context;
-    private ArrayList<SearchItem> items;
 
     public SearchAdapter(Activity context, int textViewResourceId, ArrayList<SearchItem> items) {
         super(context, textViewResourceId, items);
         this.context = context;
-        this.items = items;
 
         bitmapHandler = new BitmapHandler(null);
     }

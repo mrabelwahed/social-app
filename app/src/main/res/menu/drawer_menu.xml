@@ -5,23 +5,23 @@
         <item
             android:id="@+id/nav_home"
             android:icon="@drawable/home"
-            android:title="Start" />
+            android:title="@string/start" />
         <item
             android:id="@+id/nav_profile"
             android:icon="@drawable/account"
-            android:title="My profile" />
+            android:title="@string/my_profile" />
         <item
             android:id="@+id/nav_search"
             android:icon="@drawable/search"
-            android:title="Search user" />
+            android:title="@string/search_user" />
     </group>
 
-    <item android:title="Settings">
+    <item android:title="@string/settings">
         <menu>
             <item
                 android:id="@+id/nav_sign_out"
                 android:icon="@drawable/exit"
-                android:title="Sign out" />
+                android:title="@string/sign_out" />
         </menu>
     </item>
 

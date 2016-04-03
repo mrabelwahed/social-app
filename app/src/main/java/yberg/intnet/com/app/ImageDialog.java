@@ -11,12 +11,13 @@ import android.widget.ImageView;
 
 /**
  * Created by Viktor on 2016-03-31.
+ *
+ * A dialog for displaying larger popup images from posts and comments.
  */
 public class ImageDialog extends DialogFragment {
 
     private ImageView image, closeButton;
     private View view;
-    private Bitmap bitmap;
 
     public ImageDialog() {
         // Empty constructor required for DialogFragment

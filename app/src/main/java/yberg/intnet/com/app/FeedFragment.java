@@ -44,6 +44,8 @@ import yberg.intnet.com.app.util.PrettyTime;
  * to handle interaction events.
  * Use the {@link FeedFragment#newInstance} factory method to
  * create an instance of this fragment.
+ *
+ * The feed fragment. Fetches the user's feed from the server and displays it on cards.
  */
 public class FeedFragment extends Fragment {
 
@@ -60,6 +62,8 @@ public class FeedFragment extends Fragment {
     private RequestQueue requestQueue;
 
     private PrettyTime prettyTime;
+
+    private String stringStart, stringNewPost, stringPostingAs;
 
     public FeedFragment() {
         // Required empty public constructor
@@ -82,10 +86,14 @@ public class FeedFragment extends Fragment {
         mPosts = new ArrayList<>();
         prettyTime = new PrettyTime(getContext());
 
+        stringStart = getResources().getString(R.string.start);
+        stringNewPost = getResources().getString(R.string.new_post);
+        stringPostingAs = getResources().getString(R.string.posting_as);
+
         requestQueue = Volley.newRequestQueue(getContext().getApplicationContext());
 
         ((MainActivity) getActivity()).getNavigationView().setCheckedItem(R.id.nav_home);
-        ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle("Start");
+        ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle(stringStart);
     }
 
     @Override
@@ -145,11 +153,14 @@ public class FeedFragment extends Fragment {
         return view;
     }
 
+    /**
+     * Shows a dialog for writing a new post.
+     */
     public void showPostDialog() {
         FragmentManager fm = getActivity().getSupportFragmentManager();
         System.out.println("fm: " + fm);
         SharedPreferences prefs = getActivity().getSharedPreferences("com.intnet.yberg", Context.MODE_PRIVATE);
-        PostDialog postDialog = PostDialog.newInstance("New post", "Posting as",
+        PostDialog postDialog = PostDialog.newInstance(stringNewPost, stringPostingAs,
                 prefs.getString("username", ""), prefs.getString("name", ""));
         postDialog.show(fm, "fragment_post_dialog");
     }
@@ -193,8 +204,11 @@ public class FeedFragment extends Fragment {
         void onFragmentInteraction(Uri uri);
     }
 
-    public void updateFeed() {
 
+    /**
+     * Updates the user's feed and populates the cards.
+     */
+    public void updateFeed() {
         mSwipeRefreshLayout.post(new Runnable() {
             @Override
             public void run() {
@@ -283,6 +297,10 @@ public class FeedFragment extends Fragment {
         }
     }
 
+    /**
+     * Displays a snackbar.
+     * @param text Text to display on the snackbar
+     */
     public void makeSnackbar(String text) {
         Snackbar.make(coordinatorLayout, text, Snackbar.LENGTH_LONG).show();
     }

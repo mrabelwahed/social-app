@@ -2,6 +2,8 @@ package yberg.intnet.com.app;
 
 /**
  * Created by Viktor on 2016-03-24.
+ *
+ * An item to be displayed in the search view or in PeopleActivity.
  */
 public class SearchItem {
 

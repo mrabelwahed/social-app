@@ -70,6 +70,8 @@ public class PostDialog extends DialogFragment {
     private Bitmap imageToUpload;
     private BitmapHandler bitmapHandler;
 
+    private String stringCameraImage, stringSomethingWentWrong;
+
     public PostDialog() {
         // Empty constructor required for DialogFragment
     }
@@ -98,6 +100,9 @@ public class PostDialog extends DialogFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        stringCameraImage = getResources().getString(R.string.camera_image);
+        stringSomethingWentWrong = getResources().getString(R.string.something_went_wrong);
 
         bitmapHandler = new BitmapHandler(new BitmapHandler.OnPostExecuteListener() {
             @Override
@@ -259,11 +264,12 @@ public class PostDialog extends DialogFragment {
                     imageToUpload = BitmapFactory.decodeFile(fileUri.getPath());
                     Bitmap thumbnail = bitmapHandler.getThumbnail(imageToUpload);
                     attachedImage.setImageBitmap(thumbnail);
+                    attachedImageName.setText(stringCameraImage);
                 }
             }
         } catch (Exception e) {
             e.printStackTrace();
-            Snackbar.make(view, "Something went wrong", Snackbar.LENGTH_LONG).show();
+            Snackbar.make(view, stringSomethingWentWrong, Snackbar.LENGTH_LONG).show();
             attachment.setVisibility(View.INVISIBLE);
         }
     }

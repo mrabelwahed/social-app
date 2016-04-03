@@ -6,5 +6,5 @@
         android:icon="@drawable/search"
         app:showAsAction="ifRoom|collapseActionView"
         app:actionViewClass="android.support.v7.widget.SearchView"
-        android:title="Search"/>
+        android:title="@string/search"/>
 </menu>

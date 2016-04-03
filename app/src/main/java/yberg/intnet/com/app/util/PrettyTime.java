@@ -14,6 +14,8 @@ import yberg.intnet.com.app.R;
 
 /**
  * Created by Viktor on 2016-03-30.
+ *
+ * Custom time formatter to print pretty time strings.
  */
 
 public class PrettyTime {
@@ -47,6 +49,12 @@ public class PrettyTime {
         dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     }
 
+    /**
+     * Formats a time string.
+     *
+     * @param dateTime The time string
+     * @return A pretty time string
+     */
     public String getPrettyTime(String dateTime) {
 
         StringBuilder time = new StringBuilder();
@@ -97,6 +105,13 @@ public class PrettyTime {
         return time.toString();
     }
 
+    /**
+     * Checks if the given date was yesterday.
+     *
+     * @param now The current date
+     * @param then The given date
+     * @return Whether the given date was yesterday
+     */
     private boolean wasYesterday(Calendar now, Calendar then) {
         Calendar nextDay = then;
         nextDay.add(Calendar.DAY_OF_YEAR, 1);
@@ -110,6 +125,12 @@ public class PrettyTime {
         return false;
     }
 
+    /**
+     * Formats the date.
+     *
+     * @param cal The calendar object
+     * @return A pretty date string
+     */
     private String getDate(Calendar cal) {
         StringBuilder date = new StringBuilder();
         date.append(cal.get(DATE)).append(" ");
@@ -117,6 +138,12 @@ public class PrettyTime {
         return date.toString();
     }
 
+    /**
+     * Formats the time.
+     *
+     * @param cal The calendar object
+     * @return A pretty time string
+     */
     private String getTime(Calendar cal) {
         StringBuilder time = new StringBuilder();
         time.append(cal.get(HOUR) > 9 ? cal.get(HOUR) : "0" + cal.get(HOUR));

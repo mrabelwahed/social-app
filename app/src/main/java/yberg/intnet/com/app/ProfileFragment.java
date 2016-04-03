@@ -55,6 +55,9 @@ import yberg.intnet.com.app.util.PrettyTime;
  * to handle interaction events.
  * Use the {@link ProfileFragment#newInstance} factory method to
  * create an instance of this fragment.
+ *
+ * The profile fragment. Gets profile information and sends update requests when users
+ * change their information.
  */
 public class ProfileFragment extends Fragment {
 
@@ -64,9 +67,8 @@ public class ProfileFragment extends Fragment {
     private RequestQueue requestQueue;
 
     private SwipeRefreshLayout mSwipeRefreshLayout;
-    private ScrollView scrollView;
 
-    private TextView username, name, joined, posts, comments, followers, following,
+    private TextView username, name, posts, comments, followers, following,
             followButtonLabel, nothingToShowTextView;
     private EditText firstName, lastName, email, password, newPassword, passwordConfirm;
     private LinearLayout editImageButton, followButton, followersButton, followingButton,
@@ -83,6 +85,8 @@ public class ProfileFragment extends Fragment {
     private Bitmap imageToUpload;
 
     private boolean myProfile = false;
+    private String stringProfile, stringFollow, stringPasswordsDoNotMatch, stringNothingToShow,
+            stringUnfollow, stringSomethingWentWrong;
 
     public ProfileFragment() {
         // Required empty public constructor
@@ -107,6 +111,13 @@ public class ProfileFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        stringProfile = getResources().getString(R.string.profile);
+        stringFollow = getResources().getString(R.string.follow);
+        stringPasswordsDoNotMatch = getResources().getString(R.string.passwords_do_not_match);
+        stringNothingToShow = getResources().getString(R.string.nothing_to_show);
+        stringUnfollow = getResources().getString(R.string.unfollow);
+        stringSomethingWentWrong = getResources().getString(R.string.something_went_wrong);
+
         prettyTime = new PrettyTime(getContext());
         requestQueue = Volley.newRequestQueue(getContext().getApplicationContext());
 
@@ -129,7 +140,7 @@ public class ProfileFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle("Profile");
+        ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle(stringProfile);
 
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_profile, container, false);
@@ -144,8 +155,6 @@ public class ProfileFragment extends Fragment {
                     }
                 }
         );
-
-        scrollView = (ScrollView) view.findViewById(R.id.scrollView);
 
         editImageButton = (LinearLayout) view.findViewById(R.id.editImageButton);
         if (myProfile) {
@@ -174,6 +183,14 @@ public class ProfileFragment extends Fragment {
         posts = (TextView) view.findViewById(R.id.posts);
         comments = (TextView) view.findViewById(R.id.comments);
 
+        // Set default
+        username.setText("");
+        name.setText("");
+        followers.setText("0");
+        following.setText("0");
+        posts.setText("0");
+        comments.setText("0");
+
         followButtonLabel = (TextView) view.findViewById(R.id.followButtonLabel);
         followButtonIcon = (ImageView) view.findViewById(R.id.followButtonIcon);
         followButton = (LinearLayout) view.findViewById(R.id.followButton);
@@ -183,7 +200,7 @@ public class ProfileFragment extends Fragment {
                     @Override
                     public void onClick(View v) {
 
-                        setFollowing(followButtonLabel.getText().toString().equals("Follow"));
+                        setFollowing(followButtonLabel.getText().toString().equals(stringFollow));
 
                         StringRequest followRequest = new StringRequest(Request.Method.POST, Database.FOLLOW_URL, new Response.Listener<String>() {
                             @Override
@@ -279,7 +296,7 @@ public class ProfileFragment extends Fragment {
                                 passwordConfirm.requestFocus();
                                 ((ImageView) parent.getChildAt(parent.indexOfChild(passwordConfirm) + 1))
                                         .setColorFilter(ContextCompat.getColor(getActivity(), R.color.red));
-                                MainActivity.makeSnackbar("Passwords do not match");
+                                MainActivity.makeSnackbar(stringPasswordsDoNotMatch);
                                 shouldReturn = true;
                             }
                             // Return if some input is empty
@@ -289,7 +306,7 @@ public class ProfileFragment extends Fragment {
                             hideSoftKeyboard();
                             setEnabled(false);
 
-                            editProfile(null);
+                            editProfile();
                         }
                     }
             );
@@ -340,7 +357,7 @@ public class ProfileFragment extends Fragment {
         );
         nothingToShowTextView.setLayoutParams(params);
         nothingToShowTextView.setTypeface(null, Typeface.ITALIC);
-        nothingToShowTextView.setText("Nothing to show");
+        nothingToShowTextView.setText(stringNothingToShow);
 
         updateProfile();
         setEnabled(true);
@@ -350,6 +367,7 @@ public class ProfileFragment extends Fragment {
 
     /**
      * Enables or disables click on the login button and shows or hides a loading spinner.
+     *
      * @param enabled Whether the button should be enabled or disabled
      */
     public void setEnabled(boolean enabled) {
@@ -360,16 +378,22 @@ public class ProfileFragment extends Fragment {
     public void setFollowing(boolean follows) {
         if (follows) {
             followButton.setBackgroundResource(R.drawable.button_red);
-            followButtonLabel.setText("Unfollow");
+            followButtonLabel.setText(stringUnfollow);
             followButtonIcon.setImageResource(R.drawable.cancel);
         }
         else {
             followButton.setBackgroundResource(R.drawable.button);
-            followButtonLabel.setText("Follow");
+            followButtonLabel.setText(stringFollow);
             followButtonIcon.setImageResource(R.drawable.person_add);
         }
     }
 
+    /**
+     * Sets the border of an edittext to red if it is empty.
+     *
+     * @param editText The edittext to set the border on
+     * @return
+     */
     public boolean setBorderIfEmpty(EditText editText) {
         if (editText.getText().toString().equals("")) {
             ViewGroup parent;
@@ -408,7 +432,6 @@ public class ProfileFragment extends Fragment {
             if (resultCode == getActivity().RESULT_OK && requestCode == RESULT_LOAD_IMAGE && data != null) {
 
                 // Get the Image from data
-
                 Uri selectedImage = data.getData();
                 String[] filePathColumn = {MediaStore.Images.Media.DATA};
 
@@ -425,6 +448,7 @@ public class ProfileFragment extends Fragment {
                 // Set the Image in ImageView after decoding the String
                 imageToUpload = BitmapFactory.decodeFile(imgDecodableString);
 
+                // Compress and encode the image, then upload it to the server
                 BitmapHandler bitmapHandler = new BitmapHandler(new BitmapHandler.OnPostExecuteListener() {
                     @Override
                     public void onPostExecute(String encodedImage) {
@@ -435,7 +459,7 @@ public class ProfileFragment extends Fragment {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            MainActivity.makeSnackbar("Something went wrong");
+            MainActivity.makeSnackbar(stringSomethingWentWrong);
         }
     }
 
@@ -466,8 +490,12 @@ public class ProfileFragment extends Fragment {
         void onFragmentInteraction(Uri uri);
     }
 
-    public void updateProfile() {
 
+    /**
+     * Updates the profile.
+     * Requests profile information from the server and updates all fields.
+     */
+    public void updateProfile() {
         setEnabled(true);
 
         mSwipeRefreshLayout.post(new Runnable() {
@@ -477,6 +505,7 @@ public class ProfileFragment extends Fragment {
             }
         });
 
+        // Clear all fields and focuses
         firstName.setText("");
         lastName.setText("");
         email.setText("");
@@ -491,6 +520,7 @@ public class ProfileFragment extends Fragment {
         newPassword.clearFocus();
         passwordConfirm.clearFocus();
 
+        // Send a profile request to the server
         StringRequest getProfileRequest = new StringRequest(Request.Method.POST, Database.GET_PROFILE_URL, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
@@ -540,6 +570,8 @@ public class ProfileFragment extends Fragment {
                                     post.getInt("voted"),
                                     post.isNull("image") ? null : post.getString("image")
                             );
+
+
                             //Populate post card
                             ((TextView) latestPostCard.findViewById(R.id.username)).setText(user.getUsername());
                             ((TextView) latestPostCard.findViewById(R.id.name)).setText(user.getName());
@@ -609,6 +641,13 @@ public class ProfileFragment extends Fragment {
     }
 
     /**
+     * Sends an edit request to the server without an image.
+     */
+    public void editProfile() {
+        editProfile(null);
+    }
+
+    /**
      * Sends an edit request to the server.
      *
      * @param fileName The file name of the image that has just been uploaded
@@ -663,6 +702,12 @@ public class ProfileFragment extends Fragment {
         requestQueue.add(editProfileRequest);
     }
 
+
+    /**
+     * Uploads a base64 encoded image to the server.
+     *
+     * @param encodedImage The base64 encoded image
+     */
     public void uploadImageToServer(final String encodedImage) {
         StringRequest uploadRequest = new StringRequest(Request.Method.POST, Database.UPLOAD_URL, new Response.Listener<String>() {
             @Override

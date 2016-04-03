@@ -4,6 +4,8 @@ import java.io.Serializable;
 
 /**
  * Created by Viktor on 2016-03-10.
+ *
+ *
  */
 public class User implements Serializable {
 
@@ -30,7 +32,7 @@ public class User implements Serializable {
     }
 
     public void setUsername(String username) {
-        this.username = "@" + username;
+        this.username = username;
     }
 
     public void setFirstName(String firstName) {

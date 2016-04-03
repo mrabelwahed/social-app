@@ -28,6 +28,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Displays followers or the people a specific user is following.
+ */
 public class PeopleActivity extends AppCompatActivity {
 
     private ListView listView;
@@ -37,8 +40,10 @@ public class PeopleActivity extends AppCompatActivity {
     private ArrayList<SearchItem> people;
     private SearchAdapter adapter;
 
+    private String stringSFollowers, stringIsFollowing;
+
     private int uid;
-    private boolean showFollowers = false, showFollowing = false;
+    private boolean showFollowers = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,17 +52,19 @@ public class PeopleActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        stringSFollowers = getResources().getString(R.string.s_followers);
+        stringIsFollowing = getResources().getString(R.string.is_following);
+
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         Intent intent = getIntent();
         uid = intent.getIntExtra("uid", -1);
         if (intent.getStringExtra("show").equals("followers")) {
             showFollowers = true;
-            getSupportActionBar().setTitle(intent.getStringExtra("firstName") + "'s followers");
+            getSupportActionBar().setTitle(intent.getStringExtra("firstName") + stringSFollowers);
         }
         else {
-            showFollowing = true;
-            getSupportActionBar().setTitle(intent.getStringExtra("firstName") + " is following");
+            getSupportActionBar().setTitle(intent.getStringExtra("firstName") + " " + stringIsFollowing);
         }
 
         requestQueue = Volley.newRequestQueue(getApplicationContext());
@@ -95,6 +102,10 @@ public class PeopleActivity extends AppCompatActivity {
         updatePeople();
     }
 
+    /**
+     * Sends a request to the server to get either the followers of the user or the people
+     * that the user is following, depending on which link was clicked in the earlier activity.
+     */
     public void updatePeople() {
         StringRequest getFollowersRequest = new StringRequest(Request.Method.POST,
                 showFollowers ? Database.GET_FOLLOWERS_URL : Database.GET_FOLLOWING_URL,
