@@ -78,7 +78,7 @@
     <string name="my_profile">My profile</string>
     <string name="search_user">Search user</string>
     <string name="search">Search</string>
-    <string name="nothing_to_display">There is nothing to display\n\nFollow another user and their posts will show here</string>
+    <string name="nothing_to_display">There is nothing to display\n\nFollow another user and their posts will be displayed here</string>
     <string name="write_something">Write something...</string>
 
 </resources>
