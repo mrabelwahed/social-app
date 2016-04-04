@@ -65,4 +65,6 @@
     <string name="update_picture">Uppdatera bild</string>
     <string name="username">Användarnamn</string>
     <string name="yes">Ja</string>
+    <string name="nothing_to_display">Det finns inget att visa\n\nFölj en annan användare så visas deras inlägg här</string>
+    <string name="write_something">Skriv någonting...</string>
 </resources>
